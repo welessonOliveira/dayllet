@@ -1,80 +1,90 @@
 # Finanças
 
-App web de gestão financeira pessoal, em português do Brasil. Registra receitas e despesas, organiza por categorias, acompanha orçamentos mensais e mostra um resumo do mês.
+App web de gestão financeira pessoal, em português do Brasil. Registra receitas e despesas em várias contas, organiza por categorias, acompanha orçamentos mensais e mostra o resumo do mês e o saldo de cada conta. É multiusuário, com login, e tem uma **conta de demonstração** que entra em 1 clique.
 
-> Especificação completa em [`docs/PROMPT.md`](docs/PROMPT.md). Funções e actions disponíveis pras telas em [`docs/CONTRATO.md`](docs/CONTRATO.md).
+> Especificação e decisões: [`docs/PROMPT.md`](docs/PROMPT.md) (veja as "Decisões da v2"). Funções e actions disponíveis pras telas: [`docs/CONTRATO.md`](docs/CONTRATO.md).
 
 ## Pré-requisitos
 
 - Node.js 22 (ou mais novo) e npm.
-- Nada mais: o banco é SQLite, um arquivo dentro de `prisma/`.
+- PostgreSQL 17 rodando localmente (veja abaixo).
+
+### Banco de dados local
+
+Qualquer Postgres serve (instalador oficial, Docker ou um banco no Neon). Crie dois bancos: `financas_dev` e `financas_test`.
+
+Neste PC o Postgres foi instalado **sem serviço do Windows** (binários em `D:\Claude\Ferramentas\postgresql-17`), então ele precisa ser ligado depois de reiniciar:
+
+```bash
+npm run db:start    # liga o Postgres local
+npm run db:status   # confere se está no ar
+npm run db:stop     # desliga
+```
+
+Se o Postgres estiver em outra pasta, defina `PG_HOME` antes de usar esses comandos.
 
 ## Instalação
 
 ```bash
-npm install                          # também roda o `prisma generate`
-cp .env.example .env                 # no Windows: copy .env.example .env
-npx prisma migrate dev --name init   # cria o banco prisma/dev.db
-npm run db:seed                      # popula com dados de exemplo
+npm install                     # também roda o `prisma generate`
+cp .env.example .env            # no Windows: copy .env.example .env
+# edite o .env: senha do Postgres e AUTH_SECRET (gere com: npx auth secret)
+npx prisma migrate deploy       # cria as tabelas
+npm run db:seed                 # cria a conta demo com dados de exemplo
+npm run dev                     # http://localhost:3000
 ```
 
-## Rodando
+### Login
 
-```bash
-npm run dev       # http://localhost:3000
-npm run build     # build de produção
-npm run start     # roda o build
-```
+- **Conta demo:** botão "Entrar como visitante (demo)" no `/login`. Os dados dela são recriados do zero a cada 1 hora (no login seguinte).
+- **GitHub (opcional):** crie um OAuth App em https://github.com/settings/developers com callback `http://localhost:3000/api/auth/callback/github` e preencha `AUTH_GITHUB_ID` e `AUTH_GITHUB_SECRET` no `.env`. Sem isso, o botão do GitHub não aparece.
+- Usuário novo ganha as categorias padrão e uma conta ("Conta principal").
 
-## Banco de dados
+## Comandos
 
 | Comando | O que faz |
 |---|---|
-| `npm run db:migrate` | Cria/aplica migrations depois de mudar o `prisma/schema.prisma` (`prisma migrate dev`) |
-| `npm run db:seed` | Popula com categorias, ~20 transações dos últimos 3 meses e 3 orçamentos. Pode rodar de novo: não duplica. |
-| `npm run db:studio` | Abre o Prisma Studio pra ver os dados |
-
-O seed usa IDs fixos (`seed-cat-moradia`, `seed-tx-01`...) com `upsert`. As datas são relativas ao dia em que ele roda, então mudam se rodar em outro dia.
-
-## Testes e qualidade
-
-```bash
-npm run test        # Vitest (unitários + integração)
-npm run test:watch  # Vitest em modo watch
-npm run lint        # ESLint (next lint)
-npx tsc --noEmit    # checagem de tipos
-```
-
-O teste de integração usa um banco separado, `prisma/test.db`, que é apagado e recriado (`prisma migrate deploy`) antes da suíte. O `dev.db` nunca é tocado.
+| `npm run dev` | Sobe o app em modo desenvolvimento |
+| `npm run build` / `npm run start` | Build de produção e roda o build |
+| `npm run lint` | ESLint (`next lint`) |
+| `npm run test` | Vitest: testes unitários + integração (usa o banco `financas_test`, que é apagado e recriado) |
+| `npx tsc --noEmit` | Checagem de tipos |
+| `npm run db:migrate` | `prisma migrate dev` (cria migration depois de mudar o schema) |
+| `npm run db:seed` | Recria a conta demo. Pode rodar quantas vezes quiser: não duplica e não mexe em outros usuários. |
+| `npm run db:studio` | Prisma Studio pra ver os dados |
 
 ## Arquitetura
 
+Monolito modular em Next.js 15 (App Router), com regras de negócio separadas da tela e do banco:
+
 ```
 prisma/              schema, migrations e seed
-src/app/             rotas e telas (App Router)
+src/middleware.ts    manda pro /login quem não tem sessão
+src/app/             rotas e telas (App Router) + /api/auth (Auth.js)
 src/components/      componentes reutilizáveis
-src/lib/             helpers e regras puras (sem banco)
+src/lib/             regras PURAS, sem banco (fáceis de testar)
   money.ts           centavos <-> "R$ 1.234,56"
   dates.ts           mês/fuso America/Sao_Paulo <-> UTC
   validations.ts     schemas Zod (cliente e servidor)
-  rules.ts           saldo do mês, progresso do orçamento, checagem de tipo
-  constants.ts       tipos, status e rótulos em PT-BR
-  errors.ts          DomainError e ActionResult
-src/server/          acesso ao banco
-  db.ts              Prisma Client único
-  transactions.ts    queries e mutations (recebem o Prisma Client)
-  categories.ts
-  budgets.ts
-  dashboard.ts
-  actions/           Server Actions finas: validam, chamam src/server, revalidam
+  rules.ts           saldo do mês, saldo da conta, progresso do orçamento...
+src/server/          acesso ao banco, sempre com o contexto { db, userId }
+  auth.ts            Auth.js v5 (demo + GitHub)
+  session.ts         getPageCtx() / getActionCtx(): usuário logado -> contexto
+  wallets.ts         contas e saldos
+  transactions.ts, categories.ts, budgets.ts, dashboard.ts
+  defaults.ts        categorias e conta de todo usuário novo
+  demo.ts            conta demo e reset dos dados dela
+  actions/           Server Actions finas: conferem a sessão, validam, chamam src/server
 tests/               Vitest (unit/ e integration/)
 ```
 
-Convenções principais:
+Decisões principais:
 
-- **Dinheiro em centavos** (inteiro) no banco. Formatação só na tela, com `formatBRL`.
-- **Datas em UTC** no banco, mostradas no fuso `America/Sao_Paulo`. Data sem hora é gravada às 12:00 UTC.
-- **Saldo do mês** conta só o que está pago. **Orçamento** conta despesas pagas e pendentes.
-- Leitura em Server Components, escrita por Server Actions.
-- Regras validadas no servidor: receita só em categoria de receita, despesa só em categoria de despesa, orçamento só em categoria de despesa e sem duplicar por mês, categoria com transações não pode ser excluída.
-- Sem autenticação (app de uma pessoa só).
+- **Dinheiro em centavos** (inteiro). Nada de float. A formatação acontece só na tela.
+- **Datas em UTC** no banco, exibidas no fuso `America/Sao_Paulo`. Data sem hora é gravada às 12:00 UTC.
+- **Isolamento entre usuários:** toda função de `src/server` recebe `{ db, userId }` e toda consulta filtra pelo `userId` **da sessão**, nunca por um id vindo do navegador. Há testes que tentam ler, editar e apagar dados de outro usuário (IDOR) e precisam falhar.
+- **Server Actions conferem a sessão** antes de qualquer coisa, porque são endpoints públicos.
+- **Saldo do mês** conta só o que está pago. **Orçamento** conta despesas pagas e pendentes. **Saldo da conta** = saldo inicial + recebido − pago.
+- Regras validadas no servidor: receita só em categoria de receita, orçamento só de despesa e sem duplicar por mês, categoria com transações não pode ser excluída, conta com lançamentos também não.
+
+Próximos passos (veja a Decisão 24): lançamentos recorrentes e parcelados, projeção de saldo (previsto vs. realizado), importação de extrato OFX/CSV, categorização automática, metas, relatórios e IPCA.

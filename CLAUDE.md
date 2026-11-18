@@ -4,6 +4,7 @@ Especificação completa: `docs/PROMPT.md`. A seção **Decisões** de lá vale 
 
 ## Time (leia antes de tudo)
 - **Claude no chat (conversasComuns) é o líder.** Ele divide o trabalho, revisa e documenta no Obsidian.
+  - **Atualização (2026-11-18, do Welesson):** é o mesmo Claude, então o Claude daqui do terminal **também lidera**. Ele pode decidir, despachar o Gemini pelo Orca (`orca orchestration worker-start --agent antigravity --worktree current --keep-open`), revisar as entregas e documentar no Obsidian. Só pergunta ao Welesson o que for decisão dele (visual, escopo, push, instalar programa).
 - **Claude aqui no terminal (este projeto):** cuida da base e da qualidade.
   - `prisma/`, seed, `src/lib/`, `src/server/` e Server Actions;
   - testes, README e configuração (lint, tsconfig, scripts).
@@ -18,7 +19,8 @@ Especificação completa: `docs/PROMPT.md`. A seção **Decisões** de lá vale 
 - Dinheiro em centavos (inteiro). Datas em UTC no banco e exibidas em `America/Sao_Paulo`. Use os helpers de `src/lib/money.ts` e `src/lib/dates.ts`.
 - Interface 100% em PT-BR.
 - Commits pequenos, com mensagem em PT-BR, só no git local. **Não dar push** sem o Welesson pedir.
-- Não adicionar dependência fora da lista em `docs/PROMPT.md` (Decisão 11) sem justificar.
+- Não adicionar dependência fora da lista em `docs/PROMPT.md` (Decisões 11 e 25) sem justificar.
+- **Multiusuário:** toda função de `src/server` recebe `ctx: { db, userId }` e toda consulta filtra por `ctx.userId`. Nunca aceitar `userId` vindo do navegador. Toda função nova que lê ou escreve dado de usuário precisa de teste de isolamento (IDOR) em `tests/integration/`.
 - Antes de dizer que uma etapa terminou: `npx tsc --noEmit`, `npm run lint` e `npm run test`, tudo passando.
 
 ## Comandos
@@ -27,13 +29,18 @@ Especificação completa: `docs/PROMPT.md`. A seção **Decisões** de lá vale 
 - `npm run lint`: ESLint (`next lint`).
 - `npm run test`: Vitest (unitários + integração). `npm run test:watch` pra modo watch.
 - `npx tsc --noEmit`: checagem de tipos.
+- `npm run db:start` / `db:stop` / `db:status`: liga, desliga e confere o PostgreSQL local (`D:\Claude\Ferramentas\postgresql-17`, sem serviço do Windows; precisa ligar depois de reiniciar o PC).
 - `npm run db:migrate`: `prisma migrate dev` (depois de mudar o schema; passe `--name <nome>`).
-- `npm run db:seed`: seed idempotente (pode rodar de novo sem duplicar).
+- `npm run db:seed`: recria a conta demo (idempotente, não mexe em outros usuários).
 - `npm run db:studio`: Prisma Studio.
 
 ## Convenções da base
-- Funções de `src/server/*` recebem o Prisma Client (`db`) como 1º argumento; as páginas passam o `prisma` de `@/server/db`.
+- Banco: PostgreSQL 17 (`financas_dev` e `financas_test`). A senha fica só no `.env` (fora do git). Sem Docker e sem admin nesta máquina.
+- **Migrations sem interação:** o `prisma migrate dev` falha aqui porque quer confirmar avisos. Gere o SQL com `npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/<timestamp>_<nome>/migration.sql` e aplique com `npx prisma migrate deploy`.
+- Funções de `src/server/*` recebem `ctx: { db, userId }` como 1º argumento. As páginas pegam o contexto com `getPageCtx()` e as actions com `runMutation`, que já confere a sessão (ambos em `src/server/session.ts` e `src/server/actions/run.ts`).
+- Conta financeira = model `Wallet` (o nome `Account` é reservado pelo Auth.js pra conta de login).
+- Ao derrubar um `next dev` que você subiu, mate a **árvore** de processos (o pai `next dev` + o `start-server.js`), senão o motor do Prisma fica travado e o `prisma generate` dá EPERM.
 - Server Actions ficam em `src/server/actions/`, são finas e retornam `ActionResult` (`@/lib/errors`). Regra de negócio quebrada vira `DomainError` com mensagem em PT-BR; qualquer outro erro vira mensagem genérica.
 - O que as telas podem usar está em `docs/CONTRATO.md`. Mudou assinatura em `src/server` ou nas actions? Atualize o contrato.
-- Banco de teste: `prisma/test.db`, recriado pelo `tests/global-setup.ts` (apaga o arquivo + `prisma migrate deploy`). Não usar `migrate reset` (o Prisma bloqueia quando chamado por IA, e não precisa).
+- Banco de teste: `financas_test` (variável `TEST_DATABASE_URL`), recriado pelo `tests/global-setup.ts` (apaga o schema `public` + `prisma migrate deploy`). Só aceita banco com nome terminando em `_test`. Não usar `migrate reset` (o Prisma bloqueia quando chamado por IA, e não precisa).
 - Testes ficam em `tests/unit/` e `tests/integration/`.
