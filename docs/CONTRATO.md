@@ -319,6 +319,10 @@ Erros possíveis: "Você já tem uma meta com esse nome.", "Não dá pra retirar
 
 Transferência **não é receita nem despesa**: muda o saldo das duas contas (`listWalletsWithBalance` já considera) e não aparece no resumo do mês nem nos orçamentos. Na tela `/contas`, um botão "Transferir" e a lista das transferências do mês. Conta com transferências não pode ser excluída ("Essa conta tem transferências...").
 
+### Meus dados (LGPD)
+- **Baixar meus dados:** link `GET /api/export/meus-dados` (JSON com tudo do usuário).
+- **Excluir minha conta:** `deleteMyAccountAction(confirmacao)` em `@/server/actions/account`. O usuário precisa digitar `EXCLUIR`. Com sucesso, encerra a sessão e vai pro `/login` (redirect). Erros: "Digite EXCLUIR pra confirmar.", "A conta de demonstração não pode ser excluída." (esconda o botão quando `isDemo`).
+
 ### `@/server/actions/auth` (use em `<form action={...}>`)
 | Action | O que faz |
 |---|---|
@@ -348,6 +352,7 @@ Erros possíveis: "Já existe um orçamento dessa categoria nesse mês.", "Orça
 | `/importar` e `/importar/[batchId]` | Importação de extrato (**nova**): upload, revisão e histórico |
 | `/metas` | Metas (**nova**): cards com barra de progresso, quanto falta, "guarde R$ X/mês até DD/MM", guardar/retirar, histórico, arquivar |
 | `/relatorios` | Relatórios (**nova**): exportar CSV + "Gastos x inflação" (barras nominal vs. corrigido, texto do último IPCA) |
+| `/minha-conta` | Minha conta (**nova**): nome/e-mail, "Baixar meus dados" e "Excluir minha conta" (zona de perigo, digitar EXCLUIR; escondido na demo) |
 | `/recorrentes` | Contas fixas e parcelados (**nova**): lista com próxima data/valor, parcelas pagas, pausar/retomar, criar, editar e excluir |
 | `/categorias` | Categorias |
 | `/orcamentos` | Orçamentos (sugestão: `?month=` igual às transações) |
