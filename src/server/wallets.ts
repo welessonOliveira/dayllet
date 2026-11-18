@@ -6,6 +6,7 @@ import type { WalletData } from "@/lib/validations";
 import type { Ctx } from "./context";
 import { isUniqueError } from "./db";
 import { ensureDefaultWallet } from "./defaults";
+import { netTransfersByWallet } from "./transfers";
 
 export type WalletWithBalance = Wallet & {
   balance: WalletBalance;
@@ -33,18 +34,19 @@ export function listWallets(ctx: Ctx): Promise<Wallet[]> {
 
 /** Contas com saldo atual, saldo previsto e quantidade de lançamentos. */
 export async function listWalletsWithBalance(ctx: Ctx): Promise<WalletWithBalance[]> {
-  const [wallets, txs] = await Promise.all([
+  const [wallets, txs, transfers] = await Promise.all([
     listWallets(ctx),
     ctx.db.transaction.findMany({
       where: { userId: ctx.userId },
       select: { walletId: true, type: true, status: true, amountCents: true },
     }),
+    netTransfersByWallet(ctx),
   ]);
   return wallets.map((w) => {
     const daConta = txs.filter((t) => t.walletId === w.id);
     return {
       ...w,
-      balance: calcWalletBalance(w.openingBalanceCents, daConta),
+      balance: calcWalletBalance(w.openingBalanceCents, daConta, transfers.get(w.id) ?? 0),
       transactionCount: daConta.length,
     };
   });
@@ -94,6 +96,10 @@ export async function deleteWallet(ctx: Ctx, id: string): Promise<void> {
       `Essa conta tem ${n} ${n === 1 ? "lançamento" : "lançamentos"} e não pode ser excluída. ` +
         "Mova ou exclua os lançamentos antes.",
     );
+  }
+  const transf = await ctx.db.transfer.count({ where: { OR: [{ fromWalletId: id }, { toWalletId: id }] } });
+  if (transf > 0) {
+    throw new DomainError("Essa conta tem transferências e não pode ser excluída. Apague as transferências antes.");
   }
   const regras = await ctx.db.recurringRule.count({ where: { walletId: id } });
   if (regras > 0) {

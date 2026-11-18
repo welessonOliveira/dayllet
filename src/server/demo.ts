@@ -94,6 +94,7 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
     await tx.importBatch.deleteMany({ where: { userId } });
     await tx.categoryRule.deleteMany({ where: { userId } });
     await tx.goal.deleteMany({ where: { userId } });
+    await tx.transfer.deleteMany({ where: { userId } });
     await tx.recurringRule.deleteMany({ where: { userId } });
     await tx.budget.deleteMany({ where: { userId } });
     await tx.category.deleteMany({ where: { userId } });
@@ -156,6 +157,18 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
         month,
         limitCents: b.limitCents,
       })),
+    });
+
+    // Saque: tirou R$ 100 da conta corrente pra carteira (não é despesa).
+    await tx.transfer.create({
+      data: {
+        userId,
+        fromWalletId: principal.id,
+        toWalletId: carteira.id,
+        amountCents: 10000,
+        date: daysAgoUtc(20, now),
+        note: "Saque",
+      },
     });
 
     // Metas: uma com prazo (em 5 meses) e uma reserva sem prazo.

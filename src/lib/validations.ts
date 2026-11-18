@@ -245,6 +245,32 @@ export type RecurringRuleFormOutput = z.output<typeof recurringRuleSchema>;
 /** Dados validados, prontos pro servidor. */
 export type RecurringRuleData = RecurringRuleFormOutput;
 
+// ---------- Transferência entre contas ----------
+
+export const transferSchema = z
+  .object({
+    fromWalletId: idField("Escolha a conta de origem."),
+    toWalletId: idField("Escolha a conta de destino."),
+    amount: moneyField,
+    date: z
+      .string({ error: "Informe a data." })
+      .refine(isValidDateInput, "Data inválida.")
+      .transform(dateInputToUtc),
+    note: optionalText(200),
+  })
+  .refine((v) => v.fromWalletId !== v.toWalletId, {
+    path: ["toWalletId"],
+    message: "Escolha uma conta diferente da origem.",
+  });
+
+export type TransferFormValues = z.input<typeof transferSchema>;
+export type TransferFormOutput = z.output<typeof transferSchema>;
+export type TransferData = { fromWalletId: string; toWalletId: string; amountCents: number; date: Date; note: string | null };
+
+export function toTransferData(p: TransferFormOutput): TransferData {
+  return { fromWalletId: p.fromWalletId, toWalletId: p.toWalletId, amountCents: p.amount, date: p.date, note: p.note };
+}
+
 // ---------- Metas ----------
 
 export const goalSchema = z.object({

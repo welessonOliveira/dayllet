@@ -97,6 +97,7 @@ type ActionResult<T> =
 | `recurringRuleSchema` | `kind` ("FIXED" = conta fixa, "INSTALLMENT" = parcelado), `description`, `type`, `amount` (fixa: valor de cada vez; parcelado: **valor total**), `categoryId`, `walletId?`, `frequency?` (só fixa: "WEEKLY"/"MONTHLY"/"YEARLY", padrão MONTHLY), `startDate` ("YYYY-MM-DD", 1ª vez/1ª parcela), `endDate?` (só fixa, vazio = sem fim), `installments?` (só parcelado, "2" a "120"), `notes?` | `RecurringRuleFormValues` | `RecurringRuleFormOutput` |
 | `goalSchema` | `name`, `target` ("4.000,00"), `targetDate?` ("YYYY-MM-DD" ou vazio = sem prazo), `color?` | `GoalFormValues` | `GoalFormOutput` |
 | `goalContributionSchema` | `kind?` ("DEPOSIT" = guardar, "WITHDRAW" = retirar; padrão DEPOSIT), `amount`, `date` ("YYYY-MM-DD"), `note?` | `GoalContributionFormValues` | `GoalContributionFormOutput` |
+| `transferSchema` | `fromWalletId`, `toWalletId` (diferente da origem), `amount`, `date` ("YYYY-MM-DD"), `note?` | `TransferFormValues` | `TransferFormOutput` |
 | `walletSchema` | `name`, `kind?` ("CHECKING"/"SAVINGS"/"WALLET", padrão CHECKING), `openingBalance?` ("1.500,00", "-200" ou vazio = 0) | `WalletFormValues` | `WalletFormOutput` |
 | `categorySchema` | `name`, `type`, `color?` ("#rrggbb" ou vazio) | `CategoryFormValues` | `CategoryFormOutput` |
 | `budgetSchema` | `categoryId`, `month` ("YYYY-MM"), `limit` ("800,00") | `BudgetFormValues` | `BudgetFormOutput` |
@@ -140,6 +141,7 @@ Todas recebem `ctx` (de `await getPageCtx()`) como 1º argumento e só enxergam 
 | `listImports(ctx)` | `@/server/imports` | — | últimas 30 importações: `ImportBatch & { wallet, rowCount, importedCount }` (em revisão primeiro) |
 | `getImport(ctx, id)` | `@/server/imports` | `id` | `ImportView \| null` (linhas em ordem + resumo) |
 | `listCategoryRules(ctx)` | `@/server/categoryRules` | — | `(CategoryRule & { category })[]` (mais usadas primeiro): tela "Regras aprendidas" |
+| `listTransfers(ctx, month?)` | `@/server/transfers` | `"YYYY-MM"` opcional | `(Transfer & { fromWallet; toWallet })[]` (mais recente primeiro) |
 | `listWallets(ctx)` | `@/server/wallets` | — | `Wallet[]` (padrão primeiro, depois A-Z). Pro select de conta. |
 | `listWalletsWithBalance(ctx)` | `@/server/wallets` | — | `WalletWithBalance[]` |
 | `getSessionUser()` | `@/server/session` | — | `{ id, name, email, isDemo } \| null` (menu do usuário, selo "demo") |
@@ -308,6 +310,14 @@ Erros possíveis: "Você já tem uma meta com esse nome.", "Não dá pra retirar
 
 ### Exportar CSV (link, não action)
 - `GET /api/export/transacoes?month=2026-11&type=&categoryId=&walletId=&q=` baixa o CSV (Excel pt-BR) com os mesmos filtros da tela de transações. Use um `<a href=... download>` "Exportar CSV" na tela de Transações e em Relatórios, montando a URL com os filtros atuais.
+
+### `@/server/actions/transfers`
+| Action | Entrada | `data` no sucesso | Mensagem |
+|---|---|---|---|
+| `createTransferAction(input)` | `TransferFormValues` | `Transfer` | "Transferência feita." |
+| `deleteTransferAction(id)` | `string` | `null` | "Transferência apagada." |
+
+Transferência **não é receita nem despesa**: muda o saldo das duas contas (`listWalletsWithBalance` já considera) e não aparece no resumo do mês nem nos orçamentos. Na tela `/contas`, um botão "Transferir" e a lista das transferências do mês. Conta com transferências não pode ser excluída ("Essa conta tem transferências...").
 
 ### `@/server/actions/auth` (use em `<form action={...}>`)
 | Action | O que faz |

@@ -74,6 +74,7 @@ model User {
   imports        ImportBatch[]
   categoryRules  CategoryRule[]
   goals          Goal[]
+  transfers      Transfer[]
 }
 
 /// Conta de LOGIN (ex.: GitHub). Nome exigido pelo Auth.js.
@@ -130,9 +131,29 @@ model Wallet {
   transactions        Transaction[]
   recurringRules      RecurringRule[]
   imports             ImportBatch[]
+  transfersOut        Transfer[]      @relation("TransferFrom")
+  transfersIn         Transfer[]      @relation("TransferTo")
 
   @@unique([userId, name])
   @@index([userId])
+}
+
+/// Transferência entre contas do mesmo usuário (Decisão 18, ajustada).
+/// Não é receita nem despesa: só tira de uma conta e põe na outra.
+model Transfer {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromWalletId String
+  fromWallet   Wallet   @relation("TransferFrom", fields: [fromWalletId], references: [id], onDelete: Restrict)
+  toWalletId   String
+  toWallet     Wallet   @relation("TransferTo", fields: [toWalletId], references: [id], onDelete: Restrict)
+  amountCents  Int
+  date         DateTime
+  note         String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId, date])
 }
 
 model Category {

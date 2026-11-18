@@ -64,8 +64,10 @@ export type WalletBalance = {
 export function calcWalletBalance(
   openingBalanceCents: number,
   transactions: TxLike[],
+  /** Transferências: + o que entrou nesta conta, − o que saiu (já somadas). */
+  netTransfersCents = 0,
 ): WalletBalance {
-  let current = openingBalanceCents;
+  let current = openingBalanceCents + netTransfersCents;
   let pendente = 0;
   for (const t of transactions) {
     const valor = t.type === "INCOME" ? t.amountCents : -t.amountCents;

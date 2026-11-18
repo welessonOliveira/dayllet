@@ -168,3 +168,10 @@ Implementar em etapas: schema, seed, regras, server/actions, telas e testes. Dep
 23. **Inflação:** IPCA da API SGS do Banco Central (série 433), com cache na tabela `IndexRate`.
 24. **Ordem de implementação:** (1) fundação multiusuário: Postgres, Auth.js, `userId`, `Account` e conta demo; (2) recorrentes e parcelas; (3) projeção e previsto vs. realizado; (4) importação OFX/CSV; (5) categorização automática; (6) metas; (7) relatórios e IPCA; (8) deploy (Vercel + Neon) desde a etapa 1, e README comercial no fim. Cartão de crédito (fatura) fica pra depois de tudo.
 25. **Dependências novas permitidas na v2:** `next-auth@5` e `@auth/prisma-adapter` (login). Parser de OFX/CSV feito na mão, sem biblioteca, e com testes. Qualquer outra dependência continua precisando de justificativa.
+
+### Ajustes feitos durante a implementação (2026-11-18)
+
+- **Decisão 18 (transferência):** virou um model próprio, `Transfer` (conta de origem, conta de destino, valor e data), em vez de duas "pernas" de `Transaction` com tipo `TRANSFER`. Motivo: assim a transferência nunca entra por engano em receitas, despesas, orçamento, gráfico ou importação. Ela só mexe no saldo de cada conta, e a soma das contas não muda.
+- **Decisão 15 (banco):** o Postgres local foi instalado sem serviço do Windows (sem admin). Liga com `npm run db:start`.
+- **Decisão 16 (login):** o model do Auth.js se chama `Account`, então a conta financeira virou `Wallet` no código ("Conta" na tela).
+- **Decisão 19 (recorrência):** ocorrências com data antes do dia em que a regra foi criada entram como **pagas** (histórico), e de lá pra frente como **pendentes**. Apagar uma ocorrência gera um `RecurringSkip`, então ela não volta.
