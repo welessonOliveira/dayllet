@@ -1,5 +1,6 @@
-// Schema do app Finanças.
+// Schema do app Finanças (v2, multiusuário).
 // Dinheiro sempre em centavos (Int). Datas em UTC.
+// Regra de ouro: toda tabela de dado do usuário tem userId, e toda consulta filtra por ele.
 
 generator client {
   provider = "prisma-client-js"
@@ -20,19 +21,116 @@ enum TransactionStatus {
   PENDING
 }
 
+enum WalletKind {
+  CHECKING // conta corrente
+  SAVINGS // poupança
+  WALLET // carteira / dinheiro vivo
+}
+
+// ---------- Usuário e login (tabelas no formato que o Auth.js espera) ----------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  /// true = conta de demonstração (dados resetados de tempos em tempos)
+  isDemo        Boolean   @default(false)
+  /// Quando os dados de demonstração foram recriados pela última vez.
+  demoResetAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  wallets      Wallet[]
+  categories   Category[]
+  transactions Transaction[]
+  budgets      Budget[]
+}
+
+/// Conta de LOGIN (ex.: GitHub). Nome exigido pelo Auth.js.
+/// Não confundir com Wallet, que é a conta financeira.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------- Finanças ----------
+
+/// Conta FINANCEIRA (corrente, poupança, carteira). Na tela aparece como "Conta".
+model Wallet {
+  id                  String        @id @default(cuid())
+  userId              String
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String
+  kind                WalletKind    @default(CHECKING)
+  /// Saldo que a conta já tinha antes do primeiro lançamento no app.
+  openingBalanceCents Int           @default(0)
+  /// Conta usada quando o lançamento não diz qual (só uma por usuário).
+  isDefault           Boolean       @default(false)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  transactions        Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
 model Category {
   id           String        @id @default(cuid())
-  name         String        @unique
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
   type         CategoryType
   color        String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   transactions Transaction[]
   budgets      Budget[]
+
+  // Nome único POR USUÁRIO (dois usuários podem ter "Lazer").
+  @@unique([userId, name])
+  @@index([userId])
 }
 
 model Transaction {
   id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId    String
+  // Restrict: conta com lançamentos não pode ser apagada.
+  wallet      Wallet            @relation(fields: [walletId], references: [id], onDelete: Restrict)
   description String
   amountCents Int
   // Repete o tipo da categoria pra facilitar os filtros.
@@ -47,12 +145,15 @@ model Transaction {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
-  @@index([date])
+  @@index([userId, date])
   @@index([categoryId])
+  @@index([walletId])
 }
 
 model Budget {
   id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   categoryId String
   // Cascade: apagar a categoria apaga os orçamentos dela.
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -61,5 +162,7 @@ model Budget {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  // A categoria já é de um usuário só, então isso também é "por usuário".
   @@unique([categoryId, month])
+  @@index([userId, month])
 }
