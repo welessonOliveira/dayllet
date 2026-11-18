@@ -11,6 +11,12 @@
   --color-foreground: var(--foreground);
 }
 
+html {
+  /* Evita que o topo fixo ou o menu inferior do celular cubram elementos focados pelo teclado */
+  scroll-padding-top: 5rem;
+  scroll-padding-bottom: 6rem;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -18,7 +24,39 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+::selection {
+  background-color: #ede9fe;
+  color: #4c1d95;
+}
+
+/* Padroniza indicador de foco visível para navegação por teclado */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+
 /* Números alinhados para valores monetários e tabelas */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Respeita a preferência do sistema por movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-pulse {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
 }

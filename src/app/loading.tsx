@@ -3,7 +3,7 @@ export default function Loading() {
     <div
       role="status"
       aria-label="Carregando conteúdo"
-      className="space-y-6 animate-pulse"
+      className="animate-pulse space-y-6 motion-reduce:animate-none"
     >
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="space-y-2">

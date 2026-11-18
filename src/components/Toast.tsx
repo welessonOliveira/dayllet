@@ -66,14 +66,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={item.id}
               role={isSuccess ? "status" : "alert"}
-              className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border bg-white p-4 shadow-lg transition-all ${
+              className={`pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl border bg-white p-4 shadow-lg transition-all motion-reduce:transition-none ${
                 isSuccess
                   ? "border-emerald-200 text-slate-900"
                   : "border-rose-200 text-slate-900"
               }`}
             >
               <span
-                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
                   isSuccess
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-rose-100 text-rose-700"
@@ -114,7 +114,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={() => remove(item.id)}
                 aria-label="Fechar aviso"
-                className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                className="-my-2 -mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-400 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:mr-0 md:h-8 md:w-8"
               >
                 <svg
                   className="h-4 w-4"
