@@ -1,6 +1,7 @@
 "use client";
 
 import type { Category, Wallet } from "@prisma/client";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import {
@@ -412,9 +413,18 @@ export function TransactionsClient({
                         {formatDate(new Date(tx.date))}
                       </td>
                       <td className="px-4 py-4">
-                        <p className="font-semibold text-slate-900">
-                          {tx.description}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="font-semibold text-slate-900">
+                            {tx.description}
+                          </p>
+                          {tx.recurringRuleId && (
+                            <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+                              {tx.installmentNo && tx.installmentOf
+                                ? `Parcela ${tx.installmentNo}/${tx.installmentOf}`
+                                : "Fixa"}
+                            </span>
+                          )}
+                        </div>
                         {tx.notes && (
                           <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">
                             {tx.notes}
@@ -519,9 +529,18 @@ export function TransactionsClient({
                 <li key={tx.id} className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-semibold text-slate-900">
-                        {tx.description}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="font-semibold text-slate-900">
+                          {tx.description}
+                        </p>
+                        {tx.recurringRuleId && (
+                          <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+                            {tx.installmentNo && tx.installmentOf
+                              ? `Parcela ${tx.installmentNo}/${tx.installmentOf}`
+                              : "Fixa"}
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
                         <span className="inline-flex items-center gap-1 font-medium text-slate-700">
                           <span
@@ -646,6 +665,24 @@ export function TransactionsClient({
               (conta {deletingTx.wallet.name})? Essa ação não pode ser desfeita.
             </>
           ) : null
+        }
+        warning={
+          deletingTx?.recurringRuleId ? (
+            <div className="space-y-1.5">
+              <p>
+                <strong>Lançamento recorrente:</strong> só essa ocorrência some.
+                Pra parar as próximas, pause ou exclua a conta fixa ou
+                parcelamento em Recorrentes.
+              </p>
+              <Link
+                href="/recorrentes"
+                onClick={() => setDeletingTx(null)}
+                className="-mx-2 inline-flex min-h-11 items-center rounded-lg px-2 font-semibold underline hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2"
+              >
+                Ir para Recorrentes →
+              </Link>
+            </div>
+          ) : undefined
         }
         confirmLabel="Sim, excluir transação"
       />

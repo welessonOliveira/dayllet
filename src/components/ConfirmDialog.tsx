@@ -11,7 +11,9 @@ type ConfirmDialogProps = {
   description: ReactNode;
   warning?: ReactNode;
   warningTone?: "amber" | "red";
+  confirmTone?: "danger" | "primary";
   confirmLabel?: string;
+  loadingLabel?: string;
   cancelLabel?: string;
   loading?: boolean;
   confirmDisabled?: boolean;
@@ -25,11 +27,16 @@ export function ConfirmDialog({
   description,
   warning,
   warningTone = "amber",
+  confirmTone = "danger",
   confirmLabel = "Sim, excluir",
+  loadingLabel,
   cancelLabel = "Cancelar",
   loading = false,
   confirmDisabled = false,
 }: ConfirmDialogProps) {
+  const busyText =
+    loadingLabel ?? (confirmTone === "danger" ? "Excluindo..." : "Salvando...");
+
   return (
     <Modal
       open={open}
@@ -71,9 +78,13 @@ export function ConfirmDialog({
               data-autofocus
               disabled={loading}
               onClick={onConfirm}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+                confirmTone === "primary"
+                  ? "bg-violet-600 hover:bg-violet-700 focus-visible:ring-violet-500"
+                  : "bg-rose-600 hover:bg-rose-700 focus-visible:ring-rose-500"
+              }`}
             >
-              {loading ? "Excluindo..." : confirmLabel}
+              {loading ? busyText : confirmLabel}
             </button>
           )}
         </div>
