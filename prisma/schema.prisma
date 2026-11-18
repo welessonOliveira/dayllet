@@ -1,0 +1,65 @@
+// Schema do app Finanças.
+// Dinheiro sempre em centavos (Int). Datas em UTC.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionStatus {
+  PAID
+  PENDING
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  type         CategoryType
+  color        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+  budgets      Budget[]
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  description String
+  amountCents Int
+  // Repete o tipo da categoria pra facilitar os filtros.
+  // O servidor sempre confere se bate com Category.type.
+  type        CategoryType
+  status      TransactionStatus @default(PAID)
+  date        DateTime
+  categoryId  String
+  // Restrict: categoria com transações não pode ser apagada.
+  category    Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([date])
+  @@index([categoryId])
+}
+
+model Budget {
+  id         String   @id @default(cuid())
+  categoryId String
+  // Cascade: apagar a categoria apaga os orçamentos dela.
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  month      String // "YYYY-MM"
+  limitCents Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([categoryId, month])
+}
