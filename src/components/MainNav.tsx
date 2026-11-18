@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { signOutAction } from "@/server/actions/auth";
+import type { SessionUser } from "@/server/session";
+import { AuthSubmitButton } from "./AuthSubmitButton";
 
 type NavItem = {
   href: string;
@@ -37,6 +40,17 @@ const LINKS: NavItem[] = [
     ),
   },
   {
+    href: "/contas",
+    label: "Contas",
+    mobileLabel: "Contas",
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5z" />
+        <path d="M16 12h5" />
+      </svg>
+    ),
+  },
+  {
     href: "/categorias",
     label: "Categorias",
     mobileLabel: "Categorias",
@@ -59,20 +73,26 @@ const LINKS: NavItem[] = [
   },
 ];
 
-export function MainNav() {
+type MainNavProps = {
+  user?: SessionUser | null;
+};
+
+export function MainNav({ user }: MainNavProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  const displayName = user?.name || user?.email || "Usuário";
+
   return (
     <>
-      {/* Topo — marca no celular + barra de navegação completa no desktop */}
+      {/* Topo — marca + usuário no celular, e navegação completa + usuário no desktop */}
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+        <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 px-4 py-2 md:px-6">
           <Link
             href="/"
-            className="-mx-1.5 flex min-h-11 items-center gap-2.5 rounded-xl px-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+            className="-mx-1.5 flex min-h-11 shrink-0 items-center gap-2.5 rounded-xl px-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600 text-white shadow-xs">
               <svg
@@ -94,7 +114,7 @@ export function MainNav() {
               <span className="block text-base font-bold tracking-tight text-slate-900">
                 Finanças
               </span>
-              <span className="block text-[11px] font-medium text-slate-500">
+              <span className="hidden text-[11px] font-medium text-slate-500 xl:block">
                 Gestão pessoal
               </span>
             </div>
@@ -103,7 +123,7 @@ export function MainNav() {
           {/* Menu Desktop */}
           <nav
             aria-label="Menu principal"
-            className="hidden items-center gap-1.5 md:flex"
+            className="hidden items-center gap-1 md:flex"
           >
             {LINKS.map((item) => {
               const ativo = isActive(item.href);
@@ -112,7 +132,7 @@ export function MainNav() {
                   key={item.href}
                   href={item.href}
                   aria-current={ativo ? "page" : undefined}
-                  className={`flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
+                  className={`flex min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 lg:px-3.5 ${
                     ativo
                       ? "bg-violet-600 text-white shadow-xs"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -124,15 +144,41 @@ export function MainNav() {
               );
             })}
           </nav>
+
+          {/* Usuário logado + selo Demo + botão Sair */}
+          {user && (
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-xl bg-slate-100/80 px-2.5 py-1.5">
+                <span className="max-w-24 truncate text-xs font-semibold text-slate-700 sm:max-w-32">
+                  {displayName}
+                </span>
+                {user.isDemo && (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800">
+                    Demo
+                  </span>
+                )}
+              </div>
+
+              <form action={signOutAction}>
+                <AuthSubmitButton
+                  pendingLabel="Saindo..."
+                  ariaLabel="Sair da conta"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 md:min-h-9 md:min-w-0 md:py-1.5"
+                >
+                  Sair
+                </AuthSubmitButton>
+              </form>
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Menu fixo no rodapé do celular */}
+      {/* Menu fixo no rodapé do celular (5 abas <= limite de 5) */}
       <nav
         aria-label="Menu inferior"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-1.5 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       >
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
+        <div className="mx-auto grid max-w-md grid-cols-5 gap-0.5">
           {LINKS.map((item) => {
             const ativo = isActive(item.href);
             return (
@@ -140,15 +186,15 @@ export function MainNav() {
                 key={item.href}
                 href={item.href}
                 aria-current={ativo ? "page" : undefined}
-                className={`relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-2.5 text-[11px] font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-500 ${
+                className={`relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-500 ${
                   ativo ? "text-violet-600" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 {ativo && (
-                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-violet-600" />
+                  <span className="absolute top-0 h-0.5 w-7 rounded-full bg-violet-600" />
                 )}
                 {item.icon}
-                <span>{item.mobileLabel}</span>
+                <span className="truncate">{item.mobileLabel}</span>
               </Link>
             );
           })}
