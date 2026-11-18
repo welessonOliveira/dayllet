@@ -1,18 +1,32 @@
-// PLACEHOLDER de Orçamentos: a tela de verdade será feita pelo Gemini.
-import { currentMonth, formatMonthLabel } from "@/lib/dates";
+import { BudgetsClient } from "@/components/BudgetsClient";
+import { currentMonth, isValidMonth } from "@/lib/dates";
+import type { SearchParams } from "@/lib/validations";
 import { listBudgetsWithProgress } from "@/server/budgets";
+import { listCategories } from "@/server/categories";
 import { prisma } from "@/server/db";
 
-export const dynamic = "force-dynamic";
+export default async function OrcamentosPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const rawMonth = Array.isArray(params.month) ? params.month[0] : params.month;
+  const month =
+    rawMonth && isValidMonth(rawMonth.trim())
+      ? rawMonth.trim()
+      : currentMonth();
 
-export default async function OrcamentosPage() {
-  const month = currentMonth();
-  const budgets = await listBudgetsWithProgress(prisma, month);
+  const [budgets, expenseCategories] = await Promise.all([
+    listBudgetsWithProgress(prisma, month),
+    listCategories(prisma, "EXPENSE"),
+  ]);
+
   return (
-    <section className="space-y-2">
-      <h1 className="text-2xl font-bold">Orçamentos</h1>
-      <p className="text-sm opacity-70">Placeholder · {formatMonthLabel(month)}</p>
-      <p>{budgets.length} orçamentos neste mês.</p>
-    </section>
+    <BudgetsClient
+      month={month}
+      budgets={budgets}
+      expenseCategories={expenseCategories}
+    />
   );
 }
