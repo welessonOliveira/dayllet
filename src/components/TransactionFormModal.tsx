@@ -19,6 +19,7 @@ import {
   type TransactionFormValues,
   transactionSchema,
 } from "@/lib/validations";
+import { suggestCategoryAction } from "@/server/actions/imports";
 import {
   createTransactionAction,
   updateTransactionAction,
@@ -57,6 +58,7 @@ export function TransactionFormModal({
 }: TransactionFormModalProps) {
   const toast = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [suggestedCatId, setSuggestedCatId] = useState<string | null>(null);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const defaultDate =
@@ -82,6 +84,7 @@ export function TransactionFormModal({
   useEffect(() => {
     if (!open) return;
     setServerError(null);
+    setSuggestedCatId(null);
 
     const fallbackWalletId =
       wallets.find((w) => w.isDefault)?.id ?? wallets[0]?.id ?? "";
@@ -123,7 +126,59 @@ export function TransactionFormModal({
 
   const selectedType = form.watch("type") || "EXPENSE";
   const selectedStatus = form.watch("status") || "PAID";
+  const watchedDescription = form.watch("description") || "";
+  const watchedCategoryId = form.watch("categoryId") || "";
   const filteredCategories = categories.filter((c) => c.type === selectedType);
+
+  // Sugestão automática de categoria ao digitar descrição (só se categoria estiver vazia)
+  useEffect(() => {
+    if (!open || editingTransaction) return;
+    const text = watchedDescription.trim();
+    if (text.length < 3 || form.getValues("categoryId")) return;
+
+    const timer = window.setTimeout(async () => {
+      if (form.getValues("categoryId")) return;
+      const currentType = form.getValues("type") || "EXPENSE";
+      const res = await suggestCategoryAction(text, currentType);
+      if (
+        res.ok &&
+        res.data.categoryId &&
+        !form.getValues("categoryId") &&
+        categories.some(
+          (c) => c.id === res.data.categoryId && c.type === currentType,
+        )
+      ) {
+        form.setValue("categoryId", res.data.categoryId, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        setSuggestedCatId(res.data.categoryId);
+      }
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [open, editingTransaction, watchedDescription, selectedType, categories, form]);
+
+  async function trySuggestOnBlur() {
+    const text = (form.getValues("description") || "").trim();
+    if (text.length < 2 || form.getValues("categoryId")) return;
+    const currentType = form.getValues("type") || "EXPENSE";
+    const res = await suggestCategoryAction(text, currentType);
+    if (
+      res.ok &&
+      res.data.categoryId &&
+      !form.getValues("categoryId") &&
+      categories.some(
+        (c) => c.id === res.data.categoryId && c.type === currentType,
+      )
+    ) {
+      form.setValue("categoryId", res.data.categoryId, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setSuggestedCatId(res.data.categoryId);
+    }
+  }
 
   function handleTypeSwitch(nextType: CategoryType) {
     if (nextType === selectedType) return;
@@ -301,7 +356,11 @@ export function TransactionFormModal({
                 ? "Ex.: Supermercado, Aluguel, Conta de luz"
                 : "Ex.: Salário, Projeto freelance"
             }
-            {...form.register("description")}
+            {...form.register("description", {
+              onBlur: () => {
+                void trySuggestOnBlur();
+              },
+            })}
             className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
           />
           {errors.description?.message && (
@@ -444,13 +503,20 @@ export function TransactionFormModal({
                 ))}
               </select>
             )}
-            {errors.categoryId?.message && (
+            {errors.categoryId?.message ? (
               <p
                 id="tx-category-error"
                 className="mt-1 text-xs font-medium text-rose-600"
               >
                 {errors.categoryId.message}
               </p>
+            ) : (
+              suggestedCatId &&
+              watchedCategoryId === suggestedCatId && (
+                <p className="mt-1 text-xs font-medium text-violet-600">
+                  Categoria sugerida automaticamente pelas suas regras.
+                </p>
+              )
             )}
           </div>
         </div>
