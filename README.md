@@ -1,6 +1,8 @@
-# Finanças
+# Dayllet
 
-Sistema de gestão financeira pessoal em português do Brasil. Vai além do "CRUD de receitas e despesas": tem várias contas, contas fixas e parcelamentos que se lançam sozinhos, projeção do saldo, importação de extrato bancário com categorização automática, metas, relatórios e correção pela inflação. É multiusuário, com login, e tem uma **conta de demonstração** que entra em 1 clique.
+**No ar:** https://dayllet.vercel.app · entre como visitante e teste com dados de exemplo.
+
+**Dayllet** (day + wallet) é um sistema de gestão financeira pessoal em português do Brasil. Vai além do "CRUD de receitas e despesas": tem várias contas, contas fixas e parcelamentos que se lançam sozinhos, projeção do saldo, importação de extrato bancário com categorização automática, metas, relatórios e correção pela inflação. É multiusuário, com login, e tem uma **conta de demonstração** que entra em 1 clique.
 
 > Especificação e decisões: [`docs/PROMPT.md`](docs/PROMPT.md) (veja as "Decisões da v2"). Funções e actions disponíveis pras telas: [`docs/CONTRATO.md`](docs/CONTRATO.md).
 

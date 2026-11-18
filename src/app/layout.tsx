@@ -3,7 +3,7 @@ import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Finanças — Gestão financeira pessoal",
+  title: "Dayllet — Finanças pessoais do dia a dia",
   description:
     "Controle de contas, receitas, despesas, categorias e orçamentos mensais",
 };

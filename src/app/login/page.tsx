@@ -43,7 +43,7 @@ export default async function LoginPage() {
             </svg>
           </span>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            Finanças
+            Dayllet
           </h1>
           <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             Acompanhe suas contas, receitas, despesas e orçamentos mensais em um

@@ -196,7 +196,7 @@ export function MainNav({ user }: MainNavProps) {
               </svg>
             </span>
             <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100">
-              Finanças
+              Dayllet
             </span>
           </Link>
 

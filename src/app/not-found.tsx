@@ -11,7 +11,7 @@ export default function NotFound() {
           Página não encontrada
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          O endereço que você tentou acessar não existe no Finanças.
+          O endereço que você tentou acessar não existe no Dayllet.
         </p>
         <Link
           href="/"
