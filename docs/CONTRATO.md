@@ -6,6 +6,7 @@ Este arquivo lista tudo que as telas podem usar. **Não edite** `src/lib/`, `src
 > - Toda função de leitura recebe o **contexto `ctx`**, não mais o `prisma`. Pegue com `const ctx = await getPageCtx()`.
 > - Entrou o conceito de **Conta** (`Wallet`): corrente, poupança ou carteira, com saldo. Toda transação é de uma conta.
 > - Telas novas: `/login` e `/contas`.
+> - **Etapas 6 e 7 (metas + relatórios):** telas novas `/metas` e `/relatorios`. Exportar CSV é um link (`/api/export/transacoes?...`), e o relatório de inflação usa o IPCA real do Banco Central.
 > - **Etapas 4 e 5 (importação + categorização automática):** tela nova `/importar` (upload → revisão → confirmar). As categorias escolhidas viram regras, e a regra sugere a categoria na próxima importação e no formulário de transação (`suggestCategoryAction`).
 > - **Etapa 3 (projeção):** `getMonthForecast`, `getCashflow` e `getBalanceProjection` em `@/server/forecast`: "vai sobrar R$ X no fim do mês", previsto vs. realizado e saldo dos próximos meses.
 > - **Etapa 2 (contas fixas e parcelados):** tela nova `/recorrentes`. As ocorrências viram transações normais automaticamente (com `recurringRuleId`, e no parcelado `installmentNo`/`installmentOf`), então aparecem sozinhas na lista, no dashboard e nos orçamentos.
@@ -94,6 +95,8 @@ type ActionResult<T> =
 |---|---|---|---|
 | `transactionSchema` | `description`, `amount` ("1.234,56"), `type` ("INCOME"/"EXPENSE"), `status?` ("PAID"/"PENDING", padrão PAID), `date` ("YYYY-MM-DD"), `categoryId`, `walletId?` (vazio = conta padrão), `notes?` | `TransactionFormValues` | `TransactionFormOutput` |
 | `recurringRuleSchema` | `kind` ("FIXED" = conta fixa, "INSTALLMENT" = parcelado), `description`, `type`, `amount` (fixa: valor de cada vez; parcelado: **valor total**), `categoryId`, `walletId?`, `frequency?` (só fixa: "WEEKLY"/"MONTHLY"/"YEARLY", padrão MONTHLY), `startDate` ("YYYY-MM-DD", 1ª vez/1ª parcela), `endDate?` (só fixa, vazio = sem fim), `installments?` (só parcelado, "2" a "120"), `notes?` | `RecurringRuleFormValues` | `RecurringRuleFormOutput` |
+| `goalSchema` | `name`, `target` ("4.000,00"), `targetDate?` ("YYYY-MM-DD" ou vazio = sem prazo), `color?` | `GoalFormValues` | `GoalFormOutput` |
+| `goalContributionSchema` | `kind?` ("DEPOSIT" = guardar, "WITHDRAW" = retirar; padrão DEPOSIT), `amount`, `date` ("YYYY-MM-DD"), `note?` | `GoalContributionFormValues` | `GoalContributionFormOutput` |
 | `walletSchema` | `name`, `kind?` ("CHECKING"/"SAVINGS"/"WALLET", padrão CHECKING), `openingBalance?` ("1.500,00", "-200" ou vazio = 0) | `WalletFormValues` | `WalletFormOutput` |
 | `categorySchema` | `name`, `type`, `color?` ("#rrggbb" ou vazio) | `CategoryFormValues` | `CategoryFormOutput` |
 | `budgetSchema` | `categoryId`, `month` ("YYYY-MM"), `limit` ("800,00") | `BudgetFormValues` | `BudgetFormOutput` |
@@ -131,6 +134,9 @@ Todas recebem `ctx` (de `await getPageCtx()`) como 1º argumento e só enxergam 
 | `getBalanceProjection(ctx, months?)` | `@/server/forecast` | quantos meses a partir do atual (padrão 6, máx 24) | `{ month, balanceCents }[]` (saldo projetado no fim de cada mês) |
 | `listRecurringRules(ctx)` | `@/server/recurring` | — | `RecurringRuleView[]` (ativas primeiro, depois A-Z) |
 | `getRecurringRule(ctx, id)` | `@/server/recurring` | `id` | `(RecurringRule & { category; wallet }) \| null` |
+| `listGoals(ctx, { includeArchived? })` | `@/server/goals` | — | `GoalWithProgress[]` (não concluídas primeiro, depois por prazo) |
+| `getGoal(ctx, id)` | `@/server/goals` | `id` | `Goal & { contributions: GoalContribution[]; progress: GoalProgress } \| null` (histórico mais recente primeiro) |
+| `getInflationReport(ctx, months?)` | `@/server/reports` | meses (padrão 12, máx 36) | `InflationReport` |
 | `listImports(ctx)` | `@/server/imports` | — | últimas 30 importações: `ImportBatch & { wallet, rowCount, importedCount }` (em revisão primeiro) |
 | `getImport(ctx, id)` | `@/server/imports` | `id` | `ImportView \| null` (linhas em ordem + resumo) |
 | `listCategoryRules(ctx)` | `@/server/categoryRules` | — | `(CategoryRule & { category })[]` (mais usadas primeiro): tela "Regras aprendidas" |
@@ -143,6 +149,21 @@ Tipos:
 ```ts
 type TransactionWithCategory = Transaction & { category: Category; wallet: Wallet };
 type WalletWithBalance = Wallet & { balance: WalletBalance; transactionCount: number };
+type GoalProgress = {
+  targetCents; savedCents; remainingCents;   // number
+  percent: number;      // pode passar de 100
+  percentBar: number;   // até 100 (barra)
+  done: boolean;        // bateu a meta
+  monthsLeft: number | null;          // meses até o prazo (null = sem prazo; 0 = passou)
+  monthlyNeededCents: number | null;  // "guarde R$ X por mês pra chegar lá"
+  overdue: boolean;     // prazo passou e não bateu
+};
+type GoalWithProgress = Goal & { progress: GoalProgress; contributionCount: number };
+// Goal: { id, name, targetCents, targetDate, color, archived }  GoalContribution: { id, amountCents (+ guardou, − tirou), date, note }
+type InflationReport = {
+  lastIpcaMonth: string | null;   // último IPCA publicado (null = sem dados: mostre "IPCA indisponível no momento")
+  rows: { month; expenseCents; adjustedCents; inflationBps }[];  // gasto do mês, o mesmo gasto em dinheiro de hoje, inflação acumulada (bps: 123 = 1,23%)
+};
 type ImportSummary = { total; toImport; duplicates; possibleDuplicates; withoutCategory };  // todos number
 type ImportView = ImportBatch & {
   wallet: Wallet;
@@ -273,6 +294,21 @@ Fluxo de tela da importação:
 - Arquivos de exemplo pra testar (dados fictícios): `/exemplos/extrato-exemplo.ofx` e `/exemplos/extrato-exemplo.csv`. Deixe um link "Baixar extrato de exemplo" na tela.
 - No formulário de transação: ao sair do campo descrição (ou com debounce), chame `suggestCategoryAction` e, **se a categoria ainda estiver vazia**, preencha com a sugerida (nunca sobrescreva a escolha do usuário).
 
+### `@/server/actions/goals`
+| Action | Entrada | `data` no sucesso | Mensagem |
+|---|---|---|---|
+| `createGoalAction(input)` | `GoalFormValues` | `Goal` | "Meta criada." |
+| `updateGoalAction(id, input)` | `string, GoalFormValues` | `Goal` | "Meta atualizada." |
+| `setGoalArchivedAction(id, archived)` | `string, boolean` | `Goal` | "Meta arquivada." / "Meta reativada." |
+| `deleteGoalAction(id)` | `string` | `null` | "Meta excluída." (apaga o histórico junto: avise na confirmação) |
+| `addGoalContributionAction(goalId, input)` | `string, GoalContributionFormValues` | `GoalContribution` | "Valor guardado na meta." / "Valor retirado da meta." |
+| `deleteGoalContributionAction(id)` | `string` | `null` | "Movimentação apagada." |
+
+Erros possíveis: "Você já tem uma meta com esse nome.", "Não dá pra retirar mais do que está guardado nessa meta.", "Apagar esse depósito deixaria a meta negativa. ...", "Meta não encontrada."
+
+### Exportar CSV (link, não action)
+- `GET /api/export/transacoes?month=2026-11&type=&categoryId=&walletId=&q=` baixa o CSV (Excel pt-BR) com os mesmos filtros da tela de transações. Use um `<a href=... download>` "Exportar CSV" na tela de Transações e em Relatórios, montando a URL com os filtros atuais.
+
 ### `@/server/actions/auth` (use em `<form action={...}>`)
 | Action | O que faz |
 |---|---|
@@ -300,6 +336,8 @@ Erros possíveis: "Já existe um orçamento dessa categoria nesse mês.", "Orça
 | `/transacoes` | Transações (filtros via `?month=&type=&categoryId=&walletId=&q=`) |
 | `/contas` | Contas (**nova**, ainda não existe): lista com saldo, criar, editar, excluir e tornar padrão |
 | `/importar` e `/importar/[batchId]` | Importação de extrato (**nova**): upload, revisão e histórico |
+| `/metas` | Metas (**nova**): cards com barra de progresso, quanto falta, "guarde R$ X/mês até DD/MM", guardar/retirar, histórico, arquivar |
+| `/relatorios` | Relatórios (**nova**): exportar CSV + "Gastos x inflação" (barras nominal vs. corrigido, texto do último IPCA) |
 | `/recorrentes` | Contas fixas e parcelados (**nova**): lista com próxima data/valor, parcelas pagas, pausar/retomar, criar, editar e excluir |
 | `/categorias` | Categorias |
 | `/orcamentos` | Orçamentos (sugestão: `?month=` igual às transações) |
