@@ -101,9 +101,7 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
                 strokeDashoffset={slice.dashOffset}
                 className="transition-all duration-300"
               >
-                <title>
-                  {slice.name}: {formatBRL(slice.totalCents)} ({slice.percent}%)
-                </title>
+                <title>{`${slice.name}: ${formatBRL(slice.totalCents)} (${slice.percent}%)`}</title>
               </circle>
             ))}
           </g>
