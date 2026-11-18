@@ -40,6 +40,7 @@ const FIELD_DOM_IDS: Record<keyof TransactionFormValues, string> = {
   amount: "tx-amount",
   date: "tx-date",
   categoryId: "tx-category",
+  walletId: "tx-wallet",
   status: "tx-status-PAID",
   notes: "tx-notes",
 };

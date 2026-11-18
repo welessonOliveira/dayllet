@@ -3,13 +3,14 @@ import { currentMonth, isValidMonth } from "@/lib/dates";
 import type { SearchParams } from "@/lib/validations";
 import { listBudgetsWithProgress } from "@/server/budgets";
 import { listCategories } from "@/server/categories";
-import { prisma } from "@/server/db";
+import { getPageCtx } from "@/server/session";
 
 export default async function OrcamentosPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const ctx = await getPageCtx();
   const params = await searchParams;
   const rawMonth = Array.isArray(params.month) ? params.month[0] : params.month;
   const month =
@@ -18,8 +19,8 @@ export default async function OrcamentosPage({
       : currentMonth();
 
   const [budgets, expenseCategories] = await Promise.all([
-    listBudgetsWithProgress(prisma, month),
-    listCategories(prisma, "EXPENSE"),
+    listBudgetsWithProgress(ctx, month),
+    listCategories(ctx, "EXPENSE"),
   ]);
 
   return (

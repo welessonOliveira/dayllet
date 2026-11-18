@@ -11,7 +11,7 @@ import {
 import { formatBRL } from "@/lib/money";
 import type { SearchParams } from "@/lib/validations";
 import { getDashboardData } from "@/server/dashboard";
-import { prisma } from "@/server/db";
+import { getPageCtx } from "@/server/session";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,7 @@ export default async function DashboardPage({
 }: {
   searchParams?: Promise<SearchParams>;
 }) {
+  const ctx = await getPageCtx();
   const params = searchParams ? await searchParams : {};
   const rawMonth = Array.isArray(params.month) ? params.month[0] : params.month;
   const selectedMonth =
@@ -28,7 +29,7 @@ export default async function DashboardPage({
       : currentMonth();
 
   const { month, summary, topExpenses, budgets, expensesByCategory } =
-    await getDashboardData(prisma, selectedMonth);
+    await getDashboardData(ctx, selectedMonth);
 
   const isNegativeBalance = summary.balanceCents < 0;
 

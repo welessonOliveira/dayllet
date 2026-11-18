@@ -1,7 +1,7 @@
 import { TransactionsClient } from "@/components/TransactionsClient";
 import { type SearchParams, parseTransactionFilters } from "@/lib/validations";
 import { listCategories } from "@/server/categories";
-import { prisma } from "@/server/db";
+import { getPageCtx } from "@/server/session";
 import { listTransactions } from "@/server/transactions";
 
 export default async function TransacoesPage({
@@ -9,10 +9,11 @@ export default async function TransacoesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const ctx = await getPageCtx();
   const filters = parseTransactionFilters(await searchParams);
   const [transactions, categories] = await Promise.all([
-    listTransactions(prisma, filters),
-    listCategories(prisma),
+    listTransactions(ctx, filters),
+    listCategories(ctx),
   ]);
 
   return (
