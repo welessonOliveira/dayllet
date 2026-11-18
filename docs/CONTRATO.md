@@ -6,6 +6,7 @@ Este arquivo lista tudo que as telas podem usar. **Não edite** `src/lib/`, `src
 > - Toda função de leitura recebe o **contexto `ctx`**, não mais o `prisma`. Pegue com `const ctx = await getPageCtx()`.
 > - Entrou o conceito de **Conta** (`Wallet`): corrente, poupança ou carteira, com saldo. Toda transação é de uma conta.
 > - Telas novas: `/login` e `/contas`.
+> - **Etapa 3 (projeção):** `getMonthForecast`, `getCashflow` e `getBalanceProjection` em `@/server/forecast`: "vai sobrar R$ X no fim do mês", previsto vs. realizado e saldo dos próximos meses.
 > - **Etapa 2 (contas fixas e parcelados):** tela nova `/recorrentes`. As ocorrências viram transações normais automaticamente (com `recurringRuleId`, e no parcelado `installmentNo`/`installmentOf`), então aparecem sozinhas na lista, no dashboard e nos orçamentos.
 
 ## Como usar
@@ -124,6 +125,9 @@ Todas recebem `ctx` (de `await getPageCtx()`) como 1º argumento e só enxergam 
 | `getCategory(ctx, id)` | `@/server/categories` | `id` | `Category \| null` |
 | `listBudgetsWithProgress(ctx, month)` | `@/server/budgets` | `month: "YYYY-MM"` | `BudgetWithProgress[]` (A-Z pela categoria) |
 | `getBudget(ctx, id)` | `@/server/budgets` | `id` | `(Budget & { category: Category }) \| null` |
+| `getMonthForecast(ctx, month)` | `@/server/forecast` | `"YYYY-MM"` | `MonthForecast` (projeção do mês; passado = realizado) |
+| `getCashflow(ctx, { back?, ahead? })` | `@/server/forecast` | meses pra trás (padrão 5, máx 24) e pra frente (padrão 3, máx 12) | `MonthCashflow[]` (previsto vs. realizado, em ordem) |
+| `getBalanceProjection(ctx, months?)` | `@/server/forecast` | quantos meses a partir do atual (padrão 6, máx 24) | `{ month, balanceCents }[]` (saldo projetado no fim de cada mês) |
 | `listRecurringRules(ctx)` | `@/server/recurring` | — | `RecurringRuleView[]` (ativas primeiro, depois A-Z) |
 | `getRecurringRule(ctx, id)` | `@/server/recurring` | `id` | `(RecurringRule & { category; wallet }) \| null` |
 | `listWallets(ctx)` | `@/server/wallets` | — | `Wallet[]` (padrão primeiro, depois A-Z). Pro select de conta. |
@@ -135,6 +139,24 @@ Tipos:
 ```ts
 type TransactionWithCategory = Transaction & { category: Category; wallet: Wallet };
 type WalletWithBalance = Wallet & { balance: WalletBalance; transactionCount: number };
+type BalancePoint = { date: Date; balanceCents: number };
+type MonthForecast = {
+  month: string;
+  mode: "past" | "current" | "future";     // passado = só realizado
+  currentBalanceCents: number;             // saldo total das contas hoje
+  endOfMonthBalanceCents: number;          // "vai terminar o mês com R$ X" (negativo = vai faltar)
+  pendingIncomeCents: number;              // a receber no mês (no atual, inclui atrasados)
+  pendingExpenseCents: number;             // a pagar no mês (no atual, inclui atrasados)
+  overdueExpenseCents: number;             // contas atrasadas (pendentes com data antes de hoje)
+  daily: BalancePoint[];                   // saldo no fim de cada dia (gráfico de linha). No mês atual começa HOJE.
+  lowest: BalancePoint | null;             // dia em que o saldo fica mais baixo (se < 0, avisar!)
+};
+type MonthCashflow = {
+  month: string;
+  plannedIncomeCents: number; plannedExpenseCents: number;    // previsto = pago + pendente
+  realizedIncomeCents: number; realizedExpenseCents: number;  // realizado = só pago
+  plannedNetCents: number; realizedNetCents: number;          // receitas - despesas
+};
 type RecurringRuleView = RecurringRule & {
   category: Category; wallet: Wallet;
   scheduleLabel: string;            // "Todo mês, dia 10" | "Parcelado em 12x" | "Toda semana"
@@ -167,6 +189,8 @@ Dicas de tela:
 - Na exclusão de conta: se `transactionCount > 0`, avise que não dá. A última conta também não pode ser excluída.
 - **Lançamento que veio de regra** (`recurringRuleId` preenchido): mostre um selo "Fixa" ou "Parcela 3/12" (`installmentNo`/`installmentOf`). Ao excluir, avise: "Só essa ocorrência some. Pra parar as próximas, pause ou exclua a conta fixa em Recorrentes." Editar o lançamento mexe só nele.
 - **Regras novas geram lançamentos na hora**: o que é antes do dia de hoje entra como pago (histórico), e de hoje em diante entra como pendente.
+- **Projeção:** destaque `endOfMonthBalanceCents` ("Previsão pro fim do mês"). Se `lowest.balanceCents < 0`, mostre um alerta: "Seu saldo fica negativo em DD/MM". Se `overdueExpenseCents > 0`, alerta de contas atrasadas. Gráficos sempre em SVG puro (Decisão 10).
+- **Previsto vs. realizado:** barras lado a lado por mês (previsto mais claro, realizado sólido), separando receitas e despesas. Meses futuros só têm previsto.
 - No formulário de parcelado, mostre a prévia das parcelas com `splitInstallments` (ex.: "12x de R$ 200,00").
 
 ---
