@@ -95,6 +95,10 @@ export async function deleteWallet(ctx: Ctx, id: string): Promise<void> {
         "Mova ou exclua os lançamentos antes.",
     );
   }
+  const regras = await ctx.db.recurringRule.count({ where: { walletId: id } });
+  if (regras > 0) {
+    throw new DomainError("Essa conta é usada em conta fixa ou parcelamento e não pode ser excluída.");
+  }
   const total = await ctx.db.wallet.count({ where: { userId: ctx.userId } });
   if (total <= 1) throw new DomainError("Você precisa ter pelo menos uma conta.");
 

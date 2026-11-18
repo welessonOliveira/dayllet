@@ -5,6 +5,7 @@ import { DomainError } from "@/lib/errors";
 import { type BudgetProgress, calcBudgetProgress, checkBudgetCategoryType } from "@/lib/rules";
 import type { BudgetData } from "@/lib/validations";
 import type { Ctx } from "./context";
+import { syncRecurring } from "./recurring";
 import { isUniqueError } from "./db";
 
 export type BudgetWithProgress = Budget & {
@@ -20,6 +21,7 @@ const NAO_ENCONTRADO = "Orçamento não encontrado.";
  * O gasto conta despesas pagas e pendentes (Decisão 2).
  */
 export async function listBudgetsWithProgress(ctx: Ctx, month: string): Promise<BudgetWithProgress[]> {
+  await syncRecurring(ctx, month); // conta fixa do mês também pesa no orçamento
   const { start, end } = monthRange(month);
   const budgets = await ctx.db.budget.findMany({
     where: { userId: ctx.userId, month },

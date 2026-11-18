@@ -5,6 +5,7 @@ import { z } from "zod";
 import { CATEGORY_TYPES, TRANSACTION_STATUSES, WALLET_KINDS, type CategoryType } from "./constants";
 import { currentMonth, dateInputToUtc, isValidDateInput, isValidMonth } from "./dates";
 import { parseBRLToCents, parseSignedBRLToCents } from "./money";
+import { FREQUENCIES } from "./recurrence";
 
 const MAX_CENTS = 10_000_000_000; // R$ 100 milhões, só pra barrar absurdo
 
@@ -160,6 +161,89 @@ export type WalletData = { name: string; kind: (typeof WALLET_KINDS)[number]; op
 export function toWalletData(parsed: WalletFormOutput): WalletData {
   return { name: parsed.name, kind: parsed.kind, openingBalanceCents: parsed.openingBalance };
 }
+
+// ---------- Recorrente / parcelado ----------
+
+export const RECURRING_KINDS = ["FIXED", "INSTALLMENT"] as const;
+export type RecurringKind = (typeof RECURRING_KINDS)[number];
+
+const optionalDateField = z
+  .string()
+  .trim()
+  .nullish()
+  .transform((v, ctx) => {
+    if (!v) return null;
+    if (!isValidDateInput(v)) {
+      ctx.addIssue({ code: "custom", message: "Data inválida." });
+      return z.NEVER;
+    }
+    return dateInputToUtc(v);
+  });
+
+export const recurringRuleSchema = z
+  .object({
+    /** "FIXED" = conta fixa (repete); "INSTALLMENT" = compra parcelada. */
+    kind: z.enum(RECURRING_KINDS, { error: "Escolha conta fixa ou parcelado." }),
+    description: z
+      .string({ error: "Informe a descrição." })
+      .trim()
+      .min(1, "Informe a descrição.")
+      .max(120, "Use no máximo 120 caracteres."),
+    type: z.enum(CATEGORY_TYPES, { error: "Escolha receita ou despesa." }),
+    /** Conta fixa: valor de cada vez. Parcelado: valor TOTAL da compra. */
+    amount: moneyField,
+    categoryId: idField("Escolha uma categoria."),
+    walletId: z
+      .string()
+      .trim()
+      .nullish()
+      .transform((v) => (v ? v : null)),
+    /** Só na conta fixa. No parcelado é sempre mensal. */
+    frequency: z.enum(FREQUENCIES, { error: "Frequência inválida." }).default("MONTHLY"),
+    /** Primeira ocorrência / primeira parcela ("YYYY-MM-DD"). */
+    startDate: z
+      .string({ error: "Informe a data da primeira vez." })
+      .refine(isValidDateInput, "Data inválida.")
+      .transform(dateInputToUtc),
+    /** Só na conta fixa: até quando repete (vazio = sem fim). */
+    endDate: optionalDateField,
+    /** Só no parcelado: número de parcelas ("2" a "120"). */
+    installments: z.string().trim().nullish(),
+    notes: optionalText(500),
+  })
+  .transform((v, ctx) => {
+    let installments: number | null = null;
+    if (v.kind === "INSTALLMENT") {
+      const n = Number(v.installments);
+      if (!v.installments || !Number.isInteger(n) || n < 2 || n > 120) {
+        ctx.addIssue({ code: "custom", path: ["installments"], message: "Informe de 2 a 120 parcelas." });
+        return z.NEVER;
+      }
+      installments = n;
+    }
+    if (v.kind === "FIXED" && v.endDate && v.endDate < v.startDate) {
+      ctx.addIssue({ code: "custom", path: ["endDate"], message: "O fim precisa ser depois do começo." });
+      return z.NEVER;
+    }
+    return {
+      description: v.description,
+      type: v.type,
+      amountCents: v.amount,
+      categoryId: v.categoryId,
+      walletId: v.walletId,
+      frequency: v.kind === "INSTALLMENT" ? ("MONTHLY" as const) : v.frequency,
+      startDate: v.startDate,
+      endDate: v.kind === "INSTALLMENT" ? null : v.endDate,
+      installments,
+      notes: v.notes,
+    };
+  });
+
+export type RecurringRuleFormValues = z.input<typeof recurringRuleSchema>;
+/** O que o zodResolver entrega no handleSubmit (3º genérico do useForm). */
+export type RecurringRuleFormOutput = z.output<typeof recurringRuleSchema>;
+/** Dados validados, prontos pro servidor. */
+export type RecurringRuleData = RecurringRuleFormOutput;
 
 // ---------- Orçamento ----------
 

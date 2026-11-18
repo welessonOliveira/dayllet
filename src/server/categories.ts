@@ -20,7 +20,7 @@ const NAO_ENCONTRADA = "Categoria não encontrada.";
 async function getOwnWithCounts(ctx: Ctx, id: string) {
   const c = await ctx.db.category.findFirst({
     where: { id, userId: ctx.userId },
-    include: { _count: { select: { transactions: true, budgets: true } } },
+    include: { _count: { select: { transactions: true, budgets: true, recurringRules: true } } },
   });
   if (!c) throw new DomainError(NAO_ENCONTRADA);
   return c;
@@ -81,6 +81,9 @@ export async function updateCategory(ctx: Ctx, id: string, data: CategoryData): 
     if (atual._count.budgets > 0) {
       throw new DomainError("Não dá pra trocar o tipo de uma categoria que tem orçamentos.");
     }
+    if (atual._count.recurringRules > 0) {
+      throw new DomainError("Não dá pra trocar o tipo de uma categoria usada em conta fixa ou parcelamento.");
+    }
   }
 
   try {
@@ -103,6 +106,13 @@ export async function deleteCategory(ctx: Ctx, id: string): Promise<{ deletedBud
     throw new DomainError(
       `Essa categoria tem ${n} ${n === 1 ? "transação" : "transações"} e não pode ser excluída. ` +
         "Mude essas transações de categoria ou exclua elas antes.",
+    );
+  }
+  const r = atual._count.recurringRules;
+  if (r > 0) {
+    throw new DomainError(
+      `Essa categoria é usada em ${r} ${r === 1 ? "conta fixa ou parcelamento" : "contas fixas ou parcelamentos"} ` +
+        "e não pode ser excluída.",
     );
   }
 

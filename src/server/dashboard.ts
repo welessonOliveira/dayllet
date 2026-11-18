@@ -9,6 +9,7 @@ import {
 } from "@/lib/rules";
 import { type BudgetWithProgress, listBudgetsWithProgress } from "./budgets";
 import type { Ctx } from "./context";
+import { syncRecurring } from "./recurring";
 import type { TransactionWithCategory } from "./transactions";
 import { type WalletWithBalance, listWalletsWithBalance } from "./wallets";
 
@@ -29,6 +30,7 @@ export type DashboardData = {
 };
 
 export async function getDashboardData(ctx: Ctx, month: string): Promise<DashboardData> {
+  await syncRecurring(ctx, month); // gera contas fixas/parcelas que faltam até esse mês
   const { start, end } = monthRange(month);
   const [transacoes, budgets, wallets] = await Promise.all([
     ctx.db.transaction.findMany({

@@ -6,17 +6,22 @@ import { DomainError } from "@/lib/errors";
 import { checkCategoryType } from "@/lib/rules";
 import type { TransactionData, TransactionFilters } from "@/lib/validations";
 import type { Ctx } from "./context";
+import { syncRecurring } from "./recurring";
 import { getDefaultWalletId, getOwnWallet } from "./wallets";
 
 export type TransactionWithCategory = Transaction & { category: Category; wallet: Wallet };
 
 const NAO_ENCONTRADA = "Transação não encontrada.";
 
-/** Transações do mês com os filtros, da mais recente pra mais antiga. */
-export function listTransactions(
+/**
+ * Transações do mês com os filtros, da mais recente pra mais antiga.
+ * Antes, gera as contas fixas/parcelas que faltam até esse mês.
+ */
+export async function listTransactions(
   ctx: Ctx,
   filters: TransactionFilters,
 ): Promise<TransactionWithCategory[]> {
+  await syncRecurring(ctx, filters.month);
   const { start, end } = monthRange(filters.month);
   const where: Prisma.TransactionWhereInput = {
     userId: ctx.userId,
@@ -89,7 +94,20 @@ export async function setTransactionStatus(
   return ctx.db.transaction.update({ where: { id }, data: { status } });
 }
 
+/**
+ * Exclui o lançamento. Se ele veio de uma conta fixa/parcelado, guarda um
+ * "pulo" (RecurringSkip) pra regra não gerar essa ocorrência de novo.
+ */
 export async function deleteTransaction(ctx: Ctx, id: string): Promise<void> {
-  await assertOwnTransaction(ctx, id);
-  await ctx.db.transaction.delete({ where: { id } });
+  const tx = await ctx.db.transaction.findFirst({ where: { id, userId: ctx.userId } });
+  if (!tx) throw new DomainError(NAO_ENCONTRADA);
+  await ctx.db.$transaction(async (db) => {
+    if (tx.recurringRuleId && tx.occurrenceDate) {
+      await db.recurringSkip.createMany({
+        data: [{ ruleId: tx.recurringRuleId, occurrenceDate: tx.occurrenceDate }],
+        skipDuplicates: true,
+      });
+    }
+    await db.transaction.delete({ where: { id } });
+  });
 }

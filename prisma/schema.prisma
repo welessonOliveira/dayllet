@@ -21,6 +21,12 @@ enum TransactionStatus {
   PENDING
 }
 
+enum Frequency {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
 enum WalletKind {
   CHECKING // conta corrente
   SAVINGS // poupança
@@ -44,10 +50,11 @@ model User {
 
   accounts     Account[]
   sessions     Session[]
-  wallets      Wallet[]
-  categories   Category[]
-  transactions Transaction[]
-  budgets      Budget[]
+  wallets        Wallet[]
+  categories     Category[]
+  transactions   Transaction[]
+  budgets        Budget[]
+  recurringRules RecurringRule[]
 }
 
 /// Conta de LOGIN (ex.: GitHub). Nome exigido pelo Auth.js.
@@ -99,9 +106,10 @@ model Wallet {
   openingBalanceCents Int           @default(0)
   /// Conta usada quando o lançamento não diz qual (só uma por usuário).
   isDefault           Boolean       @default(false)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
   transactions        Transaction[]
+  recurringRules      RecurringRule[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -115,9 +123,10 @@ model Category {
   type         CategoryType
   color        String?
   createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  transactions Transaction[]
-  budgets      Budget[]
+  updatedAt      DateTime        @updatedAt
+  transactions   Transaction[]
+  budgets        Budget[]
+  recurringRules RecurringRule[]
 
   // Nome único POR USUÁRIO (dois usuários podem ter "Lazer").
   @@unique([userId, name])
@@ -142,12 +151,68 @@ model Transaction {
   // Restrict: categoria com transações não pode ser apagada.
   category    Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   notes       String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
 
+  // Origem: gerado por uma regra recorrente/parcelada (Decisão 19).
+  recurringRuleId String?
+  // SetNull: apagar a regra mantém os lançamentos que já existiam (o histórico).
+  recurringRule   RecurringRule? @relation(fields: [recurringRuleId], references: [id], onDelete: SetNull)
+  /// Data ORIGINAL da ocorrência na regra. É a identidade dela: se o usuário
+  /// mudar a `date` do lançamento, a regra não gera outro igual.
+  occurrenceDate  DateTime?
+  /// Parcela N de M (só no parcelado).
+  installmentNo   Int?
+  installmentOf   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Gerar 2x a mesma ocorrência (duas abas abertas, por exemplo) é impossível.
+  @@unique([recurringRuleId, occurrenceDate])
   @@index([userId, date])
   @@index([categoryId])
   @@index([walletId])
+}
+
+/// Conta fixa (todo mês/semana/ano) ou compra parcelada.
+/// Os lançamentos são criados "na leitura", até o mês que está sendo visto.
+model RecurringRule {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId     String
+  wallet       Wallet       @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  categoryId   String
+  category     Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  type         CategoryType
+  description  String
+  /// Recorrente: valor de CADA ocorrência. Parcelado: valor TOTAL (dividido nas parcelas).
+  amountCents  Int
+  frequency    Frequency    @default(MONTHLY)
+  /// Primeira ocorrência (12:00 UTC). O dia dela define o dia das próximas.
+  startDate    DateTime
+  /// Última data possível (inclusiva). null = sem fim.
+  endDate      DateTime?
+  /// Parcelado: número de parcelas. null = recorrente.
+  installments Int?
+  notes        String?
+  /// false = pausada (não gera mais nada).
+  active       Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  transactions Transaction[]
+  skips        RecurringSkip[]
+
+  @@index([userId])
+}
+
+/// Ocorrência que o usuário apagou de propósito: a regra não gera de novo.
+model RecurringSkip {
+  ruleId         String
+  rule           RecurringRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  occurrenceDate DateTime
+
+  @@id([ruleId, occurrenceDate])
 }
 
 model Budget {

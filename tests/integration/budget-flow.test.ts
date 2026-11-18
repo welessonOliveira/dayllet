@@ -256,7 +256,9 @@ describe("usuário novo e conta demo", () => {
     await resetDemoData(db, demo.id, t0);
     await resetDemoData(db, demo.id, t0);
     const demoCtx = { db, userId: demo.id };
-    expect(await db.transaction.count({ where: { userId: demo.id } })).toBe(21);
+    // 18 avulsas + 8 geradas pelas regras (aluguel 3x, internet 3x, celular 2 parcelas)
+    expect(await db.transaction.count({ where: { userId: demo.id } })).toBe(26);
+    expect(await db.recurringRule.count({ where: { userId: demo.id } })).toBe(3);
     expect(await listWallets(demoCtx)).toHaveLength(2);
 
     const atual = (await db.user.findUnique({ where: { id: demo.id } }))!;

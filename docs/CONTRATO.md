@@ -6,6 +6,7 @@ Este arquivo lista tudo que as telas podem usar. **Não edite** `src/lib/`, `src
 > - Toda função de leitura recebe o **contexto `ctx`**, não mais o `prisma`. Pegue com `const ctx = await getPageCtx()`.
 > - Entrou o conceito de **Conta** (`Wallet`): corrente, poupança ou carteira, com saldo. Toda transação é de uma conta.
 > - Telas novas: `/login` e `/contas`.
+> - **Etapa 2 (contas fixas e parcelados):** tela nova `/recorrentes`. As ocorrências viram transações normais automaticamente (com `recurringRuleId`, e no parcelado `installmentNo`/`installmentOf`), então aparecem sozinhas na lista, no dashboard e nos orçamentos.
 
 ## Como usar
 
@@ -90,11 +91,16 @@ type ActionResult<T> =
 | Schema | Campos do formulário (entrada, tudo string) | Tipo da entrada | Tipo da saída (3º genérico do `useForm`) |
 |---|---|---|---|
 | `transactionSchema` | `description`, `amount` ("1.234,56"), `type` ("INCOME"/"EXPENSE"), `status?` ("PAID"/"PENDING", padrão PAID), `date` ("YYYY-MM-DD"), `categoryId`, `walletId?` (vazio = conta padrão), `notes?` | `TransactionFormValues` | `TransactionFormOutput` |
+| `recurringRuleSchema` | `kind` ("FIXED" = conta fixa, "INSTALLMENT" = parcelado), `description`, `type`, `amount` (fixa: valor de cada vez; parcelado: **valor total**), `categoryId`, `walletId?`, `frequency?` (só fixa: "WEEKLY"/"MONTHLY"/"YEARLY", padrão MONTHLY), `startDate` ("YYYY-MM-DD", 1ª vez/1ª parcela), `endDate?` (só fixa, vazio = sem fim), `installments?` (só parcelado, "2" a "120"), `notes?` | `RecurringRuleFormValues` | `RecurringRuleFormOutput` |
 | `walletSchema` | `name`, `kind?` ("CHECKING"/"SAVINGS"/"WALLET", padrão CHECKING), `openingBalance?` ("1.500,00", "-200" ou vazio = 0) | `WalletFormValues` | `WalletFormOutput` |
 | `categorySchema` | `name`, `type`, `color?` ("#rrggbb" ou vazio) | `CategoryFormValues` | `CategoryFormOutput` |
 | `budgetSchema` | `categoryId`, `month` ("YYYY-MM"), `limit` ("800,00") | `BudgetFormValues` | `BudgetFormOutput` |
 
 - `parseTransactionFilters(searchParams)` → `TransactionFilters` `{ month: string; type?: CategoryType; categoryId?: string; walletId?: string; q?: string }`. Lê `?month=2026-11&type=EXPENSE&categoryId=...&walletId=...&q=texto`. Sem mês, usa o atual. Valores inválidos são ignorados.
+
+### `@/lib/recurrence`
+- `FREQUENCIES = ["WEEKLY", "MONTHLY", "YEARLY"]`, tipo `Frequency`. `FREQUENCY_LABEL`: `{ WEEKLY: "Toda semana", MONTHLY: "Todo mês", YEARLY: "Todo ano" }`.
+- `splitInstallments(totalCents, n)` → `number[]`: prévia das parcelas no formulário (a última leva o resto: 10000 em 3 = 3333, 3333, 3334).
 
 ### Tipos úteis de `@/lib/rules`
 - `MonthSummary`: `{ incomeCents, expenseCents, balanceCents, pendingExpenseCents, pendingIncomeCents, count }`. Receitas/despesas/saldo contam só o que está **pago**. `count` conta todas.
@@ -118,6 +124,8 @@ Todas recebem `ctx` (de `await getPageCtx()`) como 1º argumento e só enxergam 
 | `getCategory(ctx, id)` | `@/server/categories` | `id` | `Category \| null` |
 | `listBudgetsWithProgress(ctx, month)` | `@/server/budgets` | `month: "YYYY-MM"` | `BudgetWithProgress[]` (A-Z pela categoria) |
 | `getBudget(ctx, id)` | `@/server/budgets` | `id` | `(Budget & { category: Category }) \| null` |
+| `listRecurringRules(ctx)` | `@/server/recurring` | — | `RecurringRuleView[]` (ativas primeiro, depois A-Z) |
+| `getRecurringRule(ctx, id)` | `@/server/recurring` | `id` | `(RecurringRule & { category; wallet }) \| null` |
 | `listWallets(ctx)` | `@/server/wallets` | — | `Wallet[]` (padrão primeiro, depois A-Z). Pro select de conta. |
 | `listWalletsWithBalance(ctx)` | `@/server/wallets` | — | `WalletWithBalance[]` |
 | `getSessionUser()` | `@/server/session` | — | `{ id, name, email, isDemo } \| null` (menu do usuário, selo "demo") |
@@ -127,6 +135,16 @@ Tipos:
 ```ts
 type TransactionWithCategory = Transaction & { category: Category; wallet: Wallet };
 type WalletWithBalance = Wallet & { balance: WalletBalance; transactionCount: number };
+type RecurringRuleView = RecurringRule & {
+  category: Category; wallet: Wallet;
+  scheduleLabel: string;            // "Todo mês, dia 10" | "Parcelado em 12x" | "Toda semana"
+  nextDate: Date | null;            // próxima ocorrência a partir de hoje (null = pausada ou acabou)
+  nextAmountCents: number | null;   // valor dela (parcela ou valor fixo)
+  paidInstallments: number | null;  // parcelado: quantas já estão pagas (mostre "3 de 12 pagas")
+  finished: boolean;                // não tem mais ocorrências
+};
+// RecurringRule: { id, description, type, amountCents (fixa: cada vez | parcelado: TOTAL), frequency, startDate, endDate, installments, active, notes, ... }
+// Transaction ganhou: recurringRuleId (string | null), installmentNo e installmentOf (number | null)
 // Wallet: { id, name, kind, openingBalanceCents, isDefault, ... }
 type CategoryWithCounts = Category & { transactionCount: number; budgetCount: number };
 type BudgetWithProgress = Budget & { category: Category; progress: BudgetProgress };
@@ -147,6 +165,9 @@ Dicas de tela:
 - Orçamento só aceita categoria de despesa: use `listCategories(ctx, "EXPENSE")`.
 - **Saldo do mês** (`summary.balanceCents`) é o resultado do mês (recebido − pago no mês). **Saldo total** (`totalBalanceCents`) é quanto dinheiro tem nas contas hoje. São coisas diferentes, então mostre os dois com nomes claros.
 - Na exclusão de conta: se `transactionCount > 0`, avise que não dá. A última conta também não pode ser excluída.
+- **Lançamento que veio de regra** (`recurringRuleId` preenchido): mostre um selo "Fixa" ou "Parcela 3/12" (`installmentNo`/`installmentOf`). Ao excluir, avise: "Só essa ocorrência some. Pra parar as próximas, pause ou exclua a conta fixa em Recorrentes." Editar o lançamento mexe só nele.
+- **Regras novas geram lançamentos na hora**: o que é antes do dia de hoje entra como pago (histórico), e de hoje em diante entra como pendente.
+- No formulário de parcelado, mostre a prévia das parcelas com `splitInstallments` (ex.: "12x de R$ 200,00").
 
 ---
 
@@ -183,6 +204,19 @@ Erros possíveis: "Você já tem uma categoria com esse nome.", "Essa categoria 
 
 Erros possíveis: "Você já tem uma conta com esse nome.", "Essa conta tem N lançamentos e não pode ser excluída. ...", "Você precisa ter pelo menos uma conta.", "Conta não encontrada."
 
+### `@/server/actions/recurring`
+| Action | Entrada | `data` no sucesso | Mensagem |
+|---|---|---|---|
+| `createRecurringRuleAction(input)` | `RecurringRuleFormValues` | `RecurringRule` | "Conta fixa criada." / "Parcelamento criado." |
+| `updateRecurringRuleAction(id, input)` | `string, RecurringRuleFormValues` | `RecurringRule` | "Atualizado. As mudanças valem daqui pra frente." |
+| `setRecurringRuleActiveAction(id, active)` | `string, boolean` | `RecurringRule` | "Pausado." / "Retomado." |
+| `deleteRecurringRuleAction(id)` | `string` | `{ deletedFuture: number }` | "Excluído. O histórico foi mantido." |
+
+Regras: editar e pausar valem **só pra frente** (o que já passou ou foi pago não muda). Pausar apaga as ocorrências futuras pendentes. Excluir mantém o histórico e apaga só as futuras pendentes.
+Erros possíveis: campos inválidos, "Informe de 2 a 120 parcelas.", "O fim precisa ser depois do começo.", "Categoria não encontrada.", "Despesa só pode usar uma categoria de despesa.", "Conta fixa ou parcelamento não encontrado."
+
+Erros novos em outras actions: excluir categoria ou conta usada numa regra → "... é usada em conta fixa ou parcelamento e não pode ser excluída."
+
 ### `@/server/actions/auth` (use em `<form action={...}>`)
 | Action | O que faz |
 |---|---|
@@ -209,6 +243,7 @@ Erros possíveis: "Já existe um orçamento dessa categoria nesse mês.", "Orça
 | `/login` | Login: "Entrar como visitante (demo)" e "Entrar com GitHub" (se `githubEnabled`). Hoje é **placeholder**. |
 | `/transacoes` | Transações (filtros via `?month=&type=&categoryId=&walletId=&q=`) |
 | `/contas` | Contas (**nova**, ainda não existe): lista com saldo, criar, editar, excluir e tornar padrão |
+| `/recorrentes` | Contas fixas e parcelados (**nova**): lista com próxima data/valor, parcelas pagas, pausar/retomar, criar, editar e excluir |
 | `/categorias` | Categorias |
 | `/orcamentos` | Orçamentos (sugestão: `?month=` igual às transações) |
 
