@@ -148,3 +148,23 @@ Implementar em etapas: schema, seed, regras, server/actions, telas e testes. Dep
 10. **Gráfico:** feito em SVG ou CSS puro, sem biblioteca de gráfico.
 11. **Dependências permitidas:** next, react, react-dom, typescript, tailwind, prisma/@prisma/client, zod, react-hook-form, @hookform/resolvers, vitest, tsx (pra rodar o seed) e eslint (o do Next). Qualquer outra precisa de justificativa no commit.
 12. **Ambiente sem interação:** use flags que não fazem perguntas (`--name init`, `--yes`, etc.). O `create-next-app` não roda em pasta que já tem arquivos: gere numa pasta temporária e mova pra cá, ou monte a estrutura na mão.
+
+---
+
+## Decisões da v2: arquitetura de produto (2026-11-18, aprovadas pelo Welesson)
+
+> Estas decisões **substituem** o que estiver em conflito acima. Em especial: multiusuário, autenticação e importação de extrato **entram no escopo**. Banco aberto (Open Finance) e investimentos continuam fora.
+
+13. **Objetivo da v2:** sair do "CRUD de receitas e despesas" e virar um sistema com regras de negócio reais, pra portfólio: multiusuário com login, várias contas, lançamentos recorrentes e parcelados, projeção de saldo (previsto vs. realizado), importação de extrato (OFX/CSV) com revisão, categorização automática, metas, relatórios exportáveis e correção pela inflação (IPCA).
+14. **Arquitetura:** monolito modular no próprio Next.js. Regras puras em `src/lib`, um módulo por domínio em `src/server` e Server Actions finas. **Toda função de `src/server` recebe o contexto `{ db, userId }`**, e toda consulta filtra por `userId` da sessão (nunca do cliente). Isso evita IDOR.
+15. **Banco: PostgreSQL** em dev, teste e produção (produção no Neon). O SQLite sai, porque o Prisma não aceita migrations de dois bancos diferentes no mesmo projeto. Dinheiro continua em centavos (`Int`), e percentuais/taxas em pontos-base (`Int`).
+16. **Autenticação:** Auth.js (NextAuth v5) com login pelo GitHub e uma **conta demo** que entra em 1 clique, com dados de exemplo e reset periódico. Toda Server Action confere a sessão.
+17. **Multiusuário:** `userId` em toda tabela de dado do usuário. Nome de categoria é único **por usuário**.
+18. **Contas (`Account`):** corrente, carteira e poupança, com saldo inicial. Toda transação pertence a uma conta. **Transferência** entre contas é o tipo `TRANSFER`, com duas pernas ligadas por `transferGroupId`, e **não conta** como receita nem despesa nos totais.
+19. **Recorrência e parcelas:** a `RecurringRule` gera os lançamentos **na leitura** (sem cron), de forma idempotente (`@@unique([recurringRuleId, occurrenceDate])`). Dia 31 vira o último dia em meses curtos. No parcelamento, a última parcela leva o resto da divisão (R$ 100 em 3x = 33,33 + 33,33 + 33,34). Editar uma regra afeta só os lançamentos futuros.
+20. **Importação:** o arquivo vai pra uma área de revisão (`ImportBatch` + `ImportRow`) e só vira `Transaction` depois de confirmado. As duplicatas são tiradas por FITID (OFX) ou hash de data + valor + descrição (CSV), e o mesmo arquivo é barrado pelo hash. Aceita OFX em SGML e Windows-1252, e CSV com `dd/mm/aaaa` e vírgula decimal. **Extrato real nunca vai pro git.**
+21. **Categorização automática:** regras aprendidas (`CategoryRule`: padrão na descrição → categoria), criadas quando o usuário corrige uma categoria. IA fica como camada opcional no futuro.
+22. **Calculado na hora, nunca guardado:** saldo, projeção, previsto vs. realizado e progresso de orçamento e de meta. Tudo em funções puras com teste.
+23. **Inflação:** IPCA da API SGS do Banco Central (série 433), com cache na tabela `IndexRate`.
+24. **Ordem de implementação:** (1) fundação multiusuário: Postgres, Auth.js, `userId`, `Account` e conta demo; (2) recorrentes e parcelas; (3) projeção e previsto vs. realizado; (4) importação OFX/CSV; (5) categorização automática; (6) metas; (7) relatórios e IPCA; (8) deploy (Vercel + Neon) desde a etapa 1, e README comercial no fim. Cartão de crédito (fatura) fica pra depois de tudo.
+25. **Dependências novas permitidas na v2:** `next-auth@5` e `@auth/prisma-adapter` (login). Parser de OFX/CSV feito na mão, sem biblioteca, e com testes. Qualquer outra dependência continua precisando de justificativa.
