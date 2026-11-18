@@ -83,7 +83,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
         <button
           type="button"
           onClick={() => openCreate("EXPENSE")}
-          className="inline-flex items-center justify-center gap-2 self-start rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700 sm:self-auto"
+          className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 sm:self-auto"
         >
           <svg
             className="h-4 w-4"
@@ -128,7 +128,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
             <button
               type="button"
               onClick={() => openCreate("INCOME")}
-              className="rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 transition motion-reduce:transition-none hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 md:min-h-9 md:py-1.5"
             >
               + Receita
             </button>
@@ -162,7 +162,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       </p>
                       <Link
                         href={`/transacoes?type=INCOME&categoryId=${cat.id}`}
-                        className="text-xs text-slate-500 hover:text-violet-600 hover:underline"
+                        className="-mx-1.5 inline-flex min-h-9 items-center rounded-lg px-1.5 py-1 text-xs text-slate-500 transition motion-reduce:transition-none hover:text-violet-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-0 md:py-0"
                       >
                         {cat.transactionCount === 1
                           ? "1 transação"
@@ -171,12 +171,12 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-2">
                     <button
                       type="button"
                       onClick={() => openEdit(cat)}
                       aria-label={`Editar categoria ${cat.name}`}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-violet-700"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -184,7 +184,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       type="button"
                       onClick={() => setDeletingCat(cat)}
                       aria-label={`Excluir categoria ${cat.name}`}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
                     >
                       Excluir
                     </button>
@@ -224,7 +224,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
             <button
               type="button"
               onClick={() => openCreate("EXPENSE")}
-              className="rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2 md:min-h-9 md:py-1.5"
             >
               + Despesa
             </button>
@@ -258,7 +258,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
                         <Link
                           href={`/transacoes?type=EXPENSE&categoryId=${cat.id}`}
-                          className="hover:text-violet-600 hover:underline"
+                          className="-mx-1.5 inline-flex min-h-9 items-center rounded-lg px-1.5 py-1 transition motion-reduce:transition-none hover:text-violet-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-0 md:py-0"
                         >
                           {cat.transactionCount === 1
                             ? "1 transação"
@@ -278,12 +278,12 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-2">
                     <button
                       type="button"
                       onClick={() => openEdit(cat)}
                       aria-label={`Editar categoria ${cat.name}`}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-violet-700"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -291,7 +291,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       type="button"
                       onClick={() => setDeletingCat(cat)}
                       aria-label={`Excluir categoria ${cat.name}`}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
                     >
                       Excluir
                     </button>
@@ -371,7 +371,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                 <Link
                   href={`/transacoes?categoryId=${deletingCat.id}`}
                   onClick={() => setDeletingCat(null)}
-                  className="inline-block font-semibold underline hover:text-rose-950"
+                  className="-mx-2 inline-flex min-h-11 items-center rounded-lg px-2 font-semibold underline hover:text-rose-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2"
                 >
                   Ver transações desta categoria →
                 </Link>

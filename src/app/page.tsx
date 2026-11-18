@@ -51,7 +51,7 @@ export default async function DashboardPage({
           <MonthSelector month={month} />
           <Link
             href={`/transacoes?month=${month}`}
-            className="inline-flex items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700"
+            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
             <svg
               className="h-4 w-4"
@@ -138,7 +138,7 @@ export default async function DashboardPage({
             </span>
             <Link
               href={`/transacoes?month=${month}&type=EXPENSE`}
-              className="font-semibold text-amber-900 underline-offset-2 hover:underline"
+              className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-2 font-semibold text-amber-900 underline-offset-2 transition motion-reduce:transition-none hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2 md:my-0 md:min-h-0"
             >
               Ver contas →
             </Link>
@@ -254,7 +254,7 @@ export default async function DashboardPage({
             </div>
             <Link
               href="/categorias"
-              className="text-xs font-semibold text-violet-600 hover:text-violet-700"
+              className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-2 text-xs font-semibold text-violet-600 transition motion-reduce:transition-none hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:min-h-0"
             >
               Categorias →
             </Link>
@@ -275,7 +275,7 @@ export default async function DashboardPage({
             </div>
             <Link
               href={`/transacoes?month=${month}&type=EXPENSE`}
-              className="text-xs font-semibold text-violet-600 hover:text-violet-700"
+              className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-2 text-xs font-semibold text-violet-600 transition motion-reduce:transition-none hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:min-h-0"
             >
               Ver todas →
             </Link>
@@ -357,7 +357,7 @@ export default async function DashboardPage({
           </div>
           <Link
             href={`/orcamentos?month=${month}`}
-            className="text-xs font-semibold text-violet-600 hover:text-violet-700"
+            className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-2 text-xs font-semibold text-violet-600 transition motion-reduce:transition-none hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:min-h-0"
           >
             Gerenciar orçamentos →
           </Link>
@@ -374,7 +374,7 @@ export default async function DashboardPage({
             </p>
             <Link
               href={`/orcamentos?month=${month}`}
-              className="mt-4 inline-flex items-center rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-violet-700"
+              className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             >
               Criar orçamento
             </Link>
@@ -388,7 +388,7 @@ export default async function DashboardPage({
               return (
                 <div
                   key={b.id}
-                  className={`rounded-2xl border p-4 transition ${
+                  className={`rounded-2xl border p-4 transition motion-reduce:transition-none ${
                     progress.isOver
                       ? "border-rose-200 bg-rose-50/40"
                       : "border-slate-200/80 bg-slate-50/40"
@@ -430,7 +430,7 @@ export default async function DashboardPage({
 
                   <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200/80">
                     <div
-                      className={`h-full rounded-full transition-all ${
+                      className={`h-full rounded-full transition-all motion-reduce:transition-none ${
                         progress.isOver ? "bg-rose-600" : "bg-violet-600"
                       }`}
                       style={{ width: `${progress.percentBar}%` }}

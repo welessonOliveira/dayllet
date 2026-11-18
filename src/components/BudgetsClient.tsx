@@ -85,7 +85,7 @@ export function BudgetsClient({
               setEditingBudget(null);
               setFormOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700"
+            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
             <svg
               className="h-4 w-4"
@@ -202,7 +202,7 @@ export function BudgetsClient({
               setEditingBudget(null);
               setFormOpen(true);
             }}
-            className="mt-5 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700"
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
             Criar orçamento
           </button>
@@ -216,7 +216,7 @@ export function BudgetsClient({
             return (
               <article
                 key={b.id}
-                className={`flex flex-col justify-between rounded-3xl border p-6 shadow-xs transition ${
+                className={`flex flex-col justify-between rounded-3xl border p-6 shadow-xs transition motion-reduce:transition-none ${
                   progress.isOver
                     ? "border-rose-300 bg-rose-50/40"
                     : "border-slate-200/80 bg-white"
@@ -267,7 +267,7 @@ export function BudgetsClient({
                   {/* Barra de progresso */}
                   <div className="mt-5 h-3 w-full overflow-hidden rounded-full bg-slate-200/80">
                     <div
-                      className={`h-full rounded-full transition-all ${
+                      className={`h-full rounded-full transition-all motion-reduce:transition-none ${
                         progress.isOver ? "bg-rose-600" : "bg-violet-600"
                       }`}
                       style={{ width: `${progress.percentBar}%` }}
@@ -316,12 +316,12 @@ export function BudgetsClient({
                 <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-200/60 pt-3">
                   <Link
                     href={`/transacoes?month=${month}&type=EXPENSE&categoryId=${b.categoryId}`}
-                    className="text-xs font-semibold text-violet-600 hover:text-violet-700 hover:underline"
+                    className="-ml-2 inline-flex min-h-11 items-center rounded-xl px-2 text-xs font-semibold text-violet-600 transition motion-reduce:transition-none hover:text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9"
                   >
                     Ver gastos →
                   </Link>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => {
@@ -329,7 +329,7 @@ export function BudgetsClient({
                         setFormOpen(true);
                       }}
                       aria-label={`Editar orçamento de ${category.name}`}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-violet-700"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -337,7 +337,7 @@ export function BudgetsClient({
                       type="button"
                       onClick={() => setDeletingBudget(b)}
                       aria-label={`Excluir orçamento de ${category.name}`}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-100/70"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-100/70"
                     >
                       Excluir
                     </button>

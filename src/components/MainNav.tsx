@@ -70,7 +70,10 @@ export function MainNav() {
       {/* Topo — marca no celular + barra de navegação completa no desktop */}
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link
+            href="/"
+            className="-mx-1.5 flex min-h-11 items-center gap-2.5 rounded-xl px-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          >
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600 text-white shadow-xs">
               <svg
                 className="h-5 w-5"
@@ -109,7 +112,7 @@ export function MainNav() {
                   key={item.href}
                   href={item.href}
                   aria-current={ativo ? "page" : undefined}
-                  className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  className={`flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
                     ativo
                       ? "bg-violet-600 text-white shadow-xs"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -129,7 +132,7 @@ export function MainNav() {
         aria-label="Menu inferior"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       >
-        <div className="mx-auto grid max-w-md grid-cols-4">
+        <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
           {LINKS.map((item) => {
             const ativo = isActive(item.href);
             return (
@@ -137,7 +140,7 @@ export function MainNav() {
                 key={item.href}
                 href={item.href}
                 aria-current={ativo ? "page" : undefined}
-                className={`relative flex flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-semibold transition ${
+                className={`relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-2.5 text-[11px] font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-500 ${
                   ativo ? "text-violet-600" : "text-slate-500 hover:text-slate-800"
                 }`}
               >

@@ -99,7 +99,7 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
                 strokeWidth="24"
                 strokeDasharray={`${slice.length} ${circumference}`}
                 strokeDashoffset={slice.dashOffset}
-                className="transition-all duration-300"
+                className="transition-all duration-300 motion-reduce:transition-none"
               >
                 <title>{`${slice.name}: ${formatBRL(slice.totalCents)} (${slice.percent}%)`}</title>
               </circle>
@@ -117,12 +117,12 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
       </div>
 
       {/* Legenda detalhada por categoria */}
-      <ul className="w-full flex-1 space-y-3">
+      <ul className="w-full flex-1 space-y-2">
         {slices.map((slice) => (
           <li key={slice.categoryId}>
             <Link
               href={`/transacoes?month=${month}&type=EXPENSE&categoryId=${slice.categoryId}`}
-              className="group block rounded-xl p-1.5 -mx-1.5 transition hover:bg-slate-50"
+              className="group -mx-2 flex min-h-11 flex-col justify-center rounded-xl p-2 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             >
               <div className="flex items-center justify-between gap-2 text-sm">
                 <div className="flex min-w-0 items-center gap-2.5">
@@ -145,7 +145,7 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
               </div>
               <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full rounded-full transition-all"
+                  className="h-full rounded-full transition-all motion-reduce:transition-none"
                   style={{
                     width: `${Math.min(Math.max(slice.percent, 2), 100)}%`,
                     backgroundColor: slice.color,

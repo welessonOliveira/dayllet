@@ -162,7 +162,7 @@ export function TransactionsClient({
               setEditingTx(null);
               setFormOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700"
+            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
             <svg
               className="h-4 w-4"
@@ -180,7 +180,7 @@ export function TransactionsClient({
       {/* Barra de filtros */}
       <section
         aria-label="Filtros de transações"
-        className={`rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs transition-opacity sm:p-5 ${
+        className={`rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs transition-opacity motion-reduce:transition-none sm:p-5 ${
           isFilterPending ? "opacity-70" : ""
         }`}
       >
@@ -212,13 +212,13 @@ export function TransactionsClient({
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Buscar na descrição..."
                 aria-label="Buscar na descrição"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pr-3 pl-9 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/20"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pr-3 pl-9 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
               />
             </div>
             <button
               type="submit"
               disabled={isFilterPending}
-              className="rounded-xl bg-slate-900 px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-60"
             >
               Buscar
             </button>
@@ -244,7 +244,7 @@ export function TransactionsClient({
                   categoryId: keepCat ? filters.categoryId : undefined,
                 });
               }}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/20"
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               <option value="">Todos os tipos</option>
               <option value="EXPENSE">Somente despesas</option>
@@ -262,7 +262,7 @@ export function TransactionsClient({
                   categoryId: e.target.value || undefined,
                 });
               }}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/20"
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               <option value="">Todas as categorias</option>
               {visibleFilterCategories.map((cat) => (
@@ -295,7 +295,7 @@ export function TransactionsClient({
             <button
               type="button"
               onClick={clearFilters}
-              className="font-semibold text-violet-600 hover:text-violet-700 hover:underline"
+              className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-3 font-semibold text-violet-600 transition motion-reduce:transition-none hover:text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:min-h-8"
             >
               Limpar filtros
             </button>
@@ -336,7 +336,7 @@ export function TransactionsClient({
             <button
               type="button"
               onClick={clearFilters}
-              className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             >
               Limpar filtros
             </button>
@@ -347,7 +347,7 @@ export function TransactionsClient({
                 setEditingTx(null);
                 setFormOpen(true);
               }}
-              className="mt-5 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700"
+              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             >
               Nova transação
             </button>
@@ -378,7 +378,7 @@ export function TransactionsClient({
                   return (
                     <tr
                       key={tx.id}
-                      className="transition hover:bg-slate-50/70"
+                      className="transition motion-reduce:transition-none hover:bg-slate-50/70"
                     >
                       <td className="whitespace-nowrap px-5 py-4 text-xs font-medium text-slate-500 tabular-nums">
                         {formatDate(new Date(tx.date))}
@@ -421,7 +421,7 @@ export function TransactionsClient({
                           disabled={isToggling}
                           onClick={() => handleToggleStatus(tx)}
                           title="Clique para alternar a situação"
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition disabled:opacity-50 ${
+                          className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 ${
                             isPaid
                               ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                               : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
@@ -448,7 +448,7 @@ export function TransactionsClient({
                         {formatBRL(tx.amountCents)}
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-right">
-                        <div className="inline-flex items-center gap-1">
+                        <div className="inline-flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => {
@@ -456,7 +456,7 @@ export function TransactionsClient({
                               setFormOpen(true);
                             }}
                             aria-label={`Editar ${tx.description}`}
-                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-violet-700"
+                            className="inline-flex min-h-9 items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
                           >
                             Editar
                           </button>
@@ -464,7 +464,7 @@ export function TransactionsClient({
                             type="button"
                             onClick={() => setDeletingTx(tx)}
                             aria-label={`Excluir ${tx.description}`}
-                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                            className="inline-flex min-h-9 items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-600 transition motion-reduce:transition-none hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                           >
                             Excluir
                           </button>
@@ -477,7 +477,7 @@ export function TransactionsClient({
             </table>
           </div>
 
-          {/* Lista Mobile (cards empilhados) */}
+          {/* Lista Mobile (cards empilhados com alvos >= 44x44px) */}
           <ul className="divide-y divide-slate-100 md:hidden">
             {transactions.map((tx) => {
               const isIncome = tx.type === "INCOME";
@@ -525,19 +525,19 @@ export function TransactionsClient({
                     </p>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between gap-2">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <button
                       type="button"
                       disabled={isToggling}
                       onClick={() => handleToggleStatus(tx)}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition disabled:opacity-50 ${
+                      className={`inline-flex min-h-11 min-w-11 items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 ${
                         isPaid
                           ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                           : "border-amber-200 bg-amber-50 text-amber-800"
                       }`}
                     >
                       <span
-                        className={`h-1.5 w-1.5 rounded-full ${
+                        className={`h-2 w-2 rounded-full ${
                           isPaid ? "bg-emerald-500" : "bg-amber-500"
                         }`}
                       />
@@ -548,21 +548,23 @@ export function TransactionsClient({
                       </span>
                     </button>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => {
                           setEditingTx(tx);
                           setFormOpen(true);
                         }}
-                        className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                        aria-label={`Editar ${tx.description}`}
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
                       >
                         Editar
                       </button>
                       <button
                         type="button"
                         onClick={() => setDeletingTx(tx)}
-                        className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                        aria-label={`Excluir ${tx.description}`}
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3.5 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                       >
                         Excluir
                       </button>
