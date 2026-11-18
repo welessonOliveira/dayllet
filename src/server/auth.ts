@@ -1,5 +1,5 @@
 // Configuração do login (Auth.js v5).
-// - "demo": entra na conta de demonstração com 1 clique (sem senha).
+// - "demo": cria uma conta de demonstração só do visitante, com dados de exemplo (1 clique, sem senha).
 // - "github": só aparece se AUTH_GITHUB_ID e AUTH_GITHUB_SECRET estiverem no .env.
 // Sessão em JWT (cookie assinado com AUTH_SECRET); os usuários ficam no banco pelo adapter.
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -8,7 +8,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import { prisma } from "./db";
 import { setupNewUser } from "./defaults";
-import { ensureDemoUser, maybeResetDemo } from "./demo";
+import { createVisitorDemo } from "./demo";
 
 export const githubEnabled = Boolean(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET);
 
@@ -23,8 +23,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: "Conta de demonstração",
       credentials: {},
       async authorize() {
-        const user = await ensureDemoUser(prisma);
-        await maybeResetDemo(prisma, user);
+        // Cada visitante ganha a própria conta demo (apagada em 24h).
+        const user = await createVisitorDemo(prisma);
         return { id: user.id, name: user.name, email: user.email };
       },
     }),

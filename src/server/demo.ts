@@ -5,14 +5,62 @@ import type { TransactionStatus } from "@/lib/constants";
 import { currentMonth, dateInputToUtc, shiftMonth, todayInput } from "@/lib/dates";
 import type { Db } from "./db";
 import { DEFAULT_CATEGORIES } from "./defaults";
+import { purgeUser } from "./account";
 import { learnCategory } from "./categoryRules";
 import { syncRecurring } from "./recurring";
 
 export const DEMO_EMAIL = "demo@financas.local";
-/** De quanto em quanto tempo os dados da demo são recriados no login. */
+/** De quanto em quanto tempo os dados da demo FIXA (a do seed) são recriados. */
 export const DEMO_RESET_MS = 60 * 60 * 1000; // 1 hora
+/** Conta demo de visitante é apagada depois disso. */
+export const DEMO_TTL_MS = 24 * 60 * 60 * 1000; // 24 horas
+/** Teto de contas demo ao mesmo tempo (contra criação em massa). */
+export const MAX_DEMO_USERS = 200;
 
-/** Busca (ou cria) o usuário de demonstração. */
+/**
+ * Cria uma conta demo NOVA e só do visitante (com os dados de exemplo).
+ * Assim um visitante nunca vê nem mexe no que outro fez.
+ * Antes, apaga as demos vencidas e, se passou do teto, as mais antigas.
+ */
+export async function createVisitorDemo(db: Db, now = new Date()): Promise<User> {
+  await cleanupDemoUsers(db, now);
+  const user = await db.user.create({
+    data: {
+      email: `demo-${now.getTime()}-${Math.random().toString(36).slice(2, 10)}@financas.local`,
+      name: "Visitante (demo)",
+      isDemo: true,
+      createdAt: now,
+    },
+  });
+  await resetDemoData(db, user.id, now);
+  return user;
+}
+
+/** Apaga contas demo de visitante vencidas (e as mais antigas, se passou do teto). Devolve quantas. */
+export async function cleanupDemoUsers(db: Db, now = new Date(), max = MAX_DEMO_USERS): Promise<number> {
+  const visitantes = { isDemo: true, email: { not: DEMO_EMAIL } };
+  const vencidas = await db.user.findMany({
+    where: { ...visitantes, createdAt: { lt: new Date(now.getTime() - DEMO_TTL_MS) } },
+    select: { id: true },
+  });
+  const ativas = await db.user.count({ where: visitantes });
+  // Deixa espaço pra mais uma (a que vai ser criada agora).
+  const excesso = Math.max(ativas - vencidas.length - (max - 1), 0);
+  const maisAntigas =
+    excesso > 0
+      ? await db.user.findMany({
+          where: { ...visitantes, id: { notIn: vencidas.map((v) => v.id) } },
+          orderBy: { createdAt: "asc" },
+          take: excesso,
+          select: { id: true },
+        })
+      : [];
+  const ids = [...vencidas, ...maisAntigas].map((u) => u.id);
+  for (const id of ids) await purgeUser(db, id);
+  return ids.length;
+}
+
+/** Busca (ou cria) a conta demo FIXA (usada pelo seed e em desenvolvimento). */
 export async function ensureDemoUser(db: Db): Promise<User> {
   return db.user.upsert({
     where: { email: DEMO_EMAIL },

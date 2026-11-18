@@ -7,7 +7,7 @@ import { createBudget } from "@/server/budgets";
 import { createCategory } from "@/server/categories";
 import type { Ctx } from "@/server/context";
 import { setupNewUser } from "@/server/defaults";
-import { ensureDemoUser, resetDemoData } from "@/server/demo";
+import { DEMO_TTL_MS, cleanupDemoUsers, createVisitorDemo, ensureDemoUser, resetDemoData } from "@/server/demo";
 import { addGoalContribution, createGoal } from "@/server/goals";
 import { createImport } from "@/server/imports";
 import { createRecurringRule } from "@/server/recurring";
@@ -73,6 +73,35 @@ describe("meus dados (LGPD)", () => {
     }
     const depoisBruno = JSON.stringify(await exportUserData(bruno), (k, v) => (k === "exportedAt" ? undefined : v));
     expect(depoisBruno).toBe(antesBruno);
+  });
+
+  it("cada visitante ganha a própria demo; as vencidas (24h) somem e a fixa nunca", async () => {
+    const fixa = await ensureDemoUser(db);
+    const t0 = new Date("2026-11-18T12:00:00Z");
+    const v1 = await createVisitorDemo(db, t0);
+    const v2 = await createVisitorDemo(db, new Date(t0.getTime() + 60_000));
+    expect(v1.id).not.toBe(v2.id);
+    expect(await db.transaction.count({ where: { userId: v1.id } })).toBe(26);
+    // Mexer na demo de um visitante não muda a do outro.
+    await db.transaction.deleteMany({ where: { userId: v1.id } });
+    expect(await db.transaction.count({ where: { userId: v2.id } })).toBe(26);
+
+    // 24h e 1 min depois da primeira: só a v1 venceu.
+    expect(await cleanupDemoUsers(db, new Date(t0.getTime() + DEMO_TTL_MS + 30_000))).toBe(1);
+    expect(await db.user.findUnique({ where: { id: v1.id } })).toBeNull();
+    expect(await db.user.findUnique({ where: { id: v2.id } })).not.toBeNull();
+    expect(await db.user.findUnique({ where: { id: fixa.id } })).not.toBeNull();
+    expect(await db.user.findUnique({ where: { id: ana.userId } })).not.toBeNull(); // usuário normal intacto
+  });
+
+  it("teto de demos: passou do limite, apaga as mais antigas", async () => {
+    const t0 = new Date("2026-11-18T12:00:00Z");
+    const ids = [];
+    for (let i = 0; i < 4; i++) ids.push((await createVisitorDemo(db, new Date(t0.getTime() + i * 1000))).id);
+    // Com teto 3, sobram 2 (a 3ª vaga é da próxima que vai ser criada): somem as 2 mais antigas.
+    expect(await cleanupDemoUsers(db, new Date(t0.getTime() + 10_000), 3)).toBe(2);
+    const restantes = await db.user.findMany({ where: { id: { in: ids } }, orderBy: { createdAt: "asc" } });
+    expect(restantes.map((u) => u.id)).toEqual(ids.slice(2));
   });
 
   it("a conta demo não pode ser excluída", async () => {

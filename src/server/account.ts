@@ -1,6 +1,7 @@
 // "Meus dados" (LGPD): baixar tudo que é do usuário e excluir a conta.
 import { DomainError } from "@/lib/errors";
 import type { Ctx } from "./context";
+import type { Db } from "./db";
 
 /** Todos os dados do usuário num objeto (vira o JSON de "Baixar meus dados"). */
 export async function exportUserData(ctx: Ctx) {
@@ -52,8 +53,13 @@ export async function deleteAccount(ctx: Ctx, confirmation: string): Promise<voi
   const user = await ctx.db.user.findUnique({ where: { id: ctx.userId } });
   if (!user) throw new DomainError("Usuário não encontrado.");
   if (user.isDemo) throw new DomainError("A conta de demonstração não pode ser excluída.");
+  await purgeUser(ctx.db, ctx.userId);
+}
 
-  const where = { userId: ctx.userId };
+/** Apaga o usuário e tudo dele (sem checagens). Usado na exclusão e na limpeza das demos. */
+export async function purgeUser(db: Db, userId: string): Promise<void> {
+  const ctx = { db, userId };
+  const where = { userId };
   await ctx.db.$transaction([
     // Primeiro o que aponta pra contas/categorias com Restrict...
     ctx.db.transaction.deleteMany({ where }),
