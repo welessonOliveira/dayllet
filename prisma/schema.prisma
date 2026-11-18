@@ -333,6 +333,19 @@ model GoalContribution {
   @@index([goalId, date])
 }
 
+/// Cache de índices de inflação (Decisão 23). Global: não é dado de usuário.
+model IndexRate {
+  /// "IPCA" (série 433 do SGS/Banco Central).
+  series    String
+  /// "YYYY-MM"
+  month     String
+  /// Variação do mês em pontos-base: 0,42% = 42. Inteiro, sem float.
+  rateBps   Int
+  fetchedAt DateTime @default(now())
+
+  @@id([series, month])
+}
+
 /// Ocorrência que o usuário apagou de propósito: a regra não gera de novo.
 model RecurringSkip {
   ruleId         String
