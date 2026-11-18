@@ -26,7 +26,7 @@ export default async function FluxoPage() {
       </div>
 
       {/* Previsto vs. Realizado por mês */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-xs">
         <div className="mb-5">
           <h2 className="text-base font-bold text-slate-900">
             Previsto vs. realizado por mês
@@ -40,7 +40,7 @@ export default async function FluxoPage() {
       </section>
 
       {/* Saldo projetado nos próximos 6 meses */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-xs">
         <div className="mb-5">
           <h2 className="text-base font-bold text-slate-900">
             Saldo projetado nos próximos 6 meses
