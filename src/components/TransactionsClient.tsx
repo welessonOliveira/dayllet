@@ -132,6 +132,14 @@ export function TransactionsClient({
     else listedExpenseCents += tx.amountCents;
   }
 
+  const csvParams = new URLSearchParams();
+  csvParams.set("month", filters.month);
+  if (filters.type) csvParams.set("type", filters.type);
+  if (filters.categoryId) csvParams.set("categoryId", filters.categoryId);
+  if (filters.walletId) csvParams.set("walletId", filters.walletId);
+  if (filters.q) csvParams.set("q", filters.q);
+  const exportCsvHref = `/api/export/transacoes?${csvParams.toString()}`;
+
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
@@ -162,6 +170,22 @@ export function TransactionsClient({
               q: filters.q,
             }}
           />
+          <a
+            href={exportCsvHref}
+            download
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition motion-reduce:transition-none hover:bg-slate-50 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 sm:text-sm"
+          >
+            <svg
+              className="h-4 w-4 text-violet-600"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+              <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+            </svg>
+            <span>Exportar CSV</span>
+          </a>
           <button
             type="button"
             onClick={() => {
