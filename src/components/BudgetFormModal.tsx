@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Category } from "@prisma/client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { centsToInput } from "@/lib/money";
 import {
@@ -28,6 +28,12 @@ type BudgetFormModalProps = {
   existingCategoryIdsInMonth: string[];
 };
 
+const FIELD_DOM_IDS: Record<keyof BudgetFormValues, string> = {
+  categoryId: "bud-category",
+  month: "bud-month",
+  limit: "bud-limit",
+};
+
 export function BudgetFormModal({
   open,
   onClose,
@@ -38,9 +44,11 @@ export function BudgetFormModal({
 }: BudgetFormModalProps) {
   const toast = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
+  const errorSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<BudgetFormValues, unknown, BudgetFormOutput>({
     resolver: zodResolver(budgetSchema),
+    shouldFocusError: false,
     defaultValues: {
       categoryId: "",
       month: defaultMonth,
@@ -66,6 +74,15 @@ export function BudgetFormModal({
       });
     }
   }, [open, editingBudget, defaultMonth, form]);
+
+  function focusErrorSummary() {
+    window.requestAnimationFrame(() => {
+      const box = errorSummaryRef.current;
+      if (!box) return;
+      box.scrollIntoView({ block: "nearest" });
+      box.focus();
+    });
+  }
 
   const watchedMonth = form.watch("month");
 
@@ -104,10 +121,26 @@ export function BudgetFormModal({
         }
       }
     }
+
+    focusErrorSummary();
+  }
+
+  function onInvalid() {
+    focusErrorSummary();
   }
 
   const isSubmitting = form.formState.isSubmitting;
-  const { errors } = form.formState;
+  const { errors, submitCount } = form.formState;
+
+  const fieldErrorEntries = (
+    Object.entries(errors) as [
+      keyof BudgetFormValues,
+      { message?: string } | undefined,
+    ][]
+  ).filter(([, err]) => Boolean(err?.message));
+
+  const showErrorSummary =
+    Boolean(serverError) || (submitCount > 0 && fieldErrorEntries.length > 0);
 
   return (
     <Modal
@@ -119,16 +152,37 @@ export function BudgetFormModal({
       maxWidthClass="max-w-md"
     >
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         noValidate
         className="space-y-4"
       >
-        {serverError && (
+        {showErrorSummary && (
           <div
+            ref={errorSummaryRef}
             role="alert"
-            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800"
+            tabIndex={-1}
+            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
           >
-            {serverError}
+            <p className="font-semibold text-rose-900">
+              {serverError ?? "Confira os campos destacados antes de salvar:"}
+            </p>
+            {fieldErrorEntries.length > 0 && (
+              <ul className="mt-1.5 list-disc space-y-1 pl-5 text-xs">
+                {fieldErrorEntries.map(([field, err]) => (
+                  <li key={field}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById(FIELD_DOM_IDS[field])?.focus()
+                      }
+                      className="text-left font-medium underline underline-offset-2 hover:text-rose-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                    >
+                      {err?.message}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
@@ -145,7 +199,7 @@ export function BudgetFormModal({
               Nenhuma categoria de despesa cadastrada.{" "}
               <Link
                 href="/categorias"
-                className="font-semibold underline hover:text-amber-950"
+                className="inline-flex min-h-9 items-center rounded-lg px-1 font-semibold underline hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2"
               >
                 Criar categoria de despesa
               </Link>
@@ -153,8 +207,13 @@ export function BudgetFormModal({
           ) : (
             <select
               id="bud-category"
+              data-autofocus
+              aria-invalid={Boolean(errors.categoryId) || undefined}
+              aria-describedby={
+                errors.categoryId ? "bud-category-error" : undefined
+              }
               {...form.register("categoryId")}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               <option value="">Selecione uma categoria...</option>
               {expenseCategories.map((cat) => {
@@ -172,7 +231,10 @@ export function BudgetFormModal({
             </select>
           )}
           {errors.categoryId?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="bud-category-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.categoryId.message}
             </p>
           )}
@@ -190,11 +252,16 @@ export function BudgetFormModal({
             <input
               id="bud-month"
               type="month"
+              aria-invalid={Boolean(errors.month) || undefined}
+              aria-describedby={errors.month ? "bud-month-error" : undefined}
               {...form.register("month")}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             />
             {errors.month?.message && (
-              <p className="mt-1 text-xs font-medium text-rose-600">
+              <p
+                id="bud-month-error"
+                className="mt-1 text-xs font-medium text-rose-600"
+              >
                 {errors.month.message}
               </p>
             )}
@@ -216,12 +283,17 @@ export function BudgetFormModal({
                 type="text"
                 inputMode="decimal"
                 placeholder="800,00"
+                aria-invalid={Boolean(errors.limit) || undefined}
+                aria-describedby={errors.limit ? "bud-limit-error" : undefined}
                 {...form.register("limit")}
-                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 tabular-nums outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
               />
             </div>
             {errors.limit?.message && (
-              <p className="mt-1 text-xs font-medium text-rose-600">
+              <p
+                id="bud-limit-error"
+                className="mt-1 text-xs font-medium text-rose-600"
+              >
                 {errors.limit.message}
               </p>
             )}
@@ -239,14 +311,14 @@ export function BudgetFormModal({
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={isSubmitting || expenseCategories.length === 0}
-            className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting
               ? "Salvando..."

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Category } from "@prisma/client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   CATEGORY_TYPE_LABEL,
@@ -34,6 +34,16 @@ type TransactionFormModalProps = {
   defaultMonth: string;
 };
 
+const FIELD_DOM_IDS: Record<keyof TransactionFormValues, string> = {
+  type: "tx-type-expense",
+  description: "tx-description",
+  amount: "tx-amount",
+  date: "tx-date",
+  categoryId: "tx-category",
+  status: "tx-status-PAID",
+  notes: "tx-notes",
+};
+
 export function TransactionFormModal({
   open,
   onClose,
@@ -43,12 +53,14 @@ export function TransactionFormModal({
 }: TransactionFormModalProps) {
   const toast = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
+  const errorSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const defaultDate =
     defaultMonth === currentMonth() ? todayInput() : `${defaultMonth}-01`;
 
   const form = useForm<TransactionFormValues, unknown, TransactionFormOutput>({
     resolver: zodResolver(transactionSchema),
+    shouldFocusError: false,
     defaultValues: {
       description: "",
       amount: "",
@@ -87,6 +99,15 @@ export function TransactionFormModal({
       });
     }
   }, [open, editingTransaction, defaultMonth, form]);
+
+  function focusErrorSummary() {
+    window.requestAnimationFrame(() => {
+      const box = errorSummaryRef.current;
+      if (!box) return;
+      box.scrollIntoView({ block: "nearest" });
+      box.focus();
+    });
+  }
 
   const selectedType = form.watch("type") || "EXPENSE";
   const selectedStatus = form.watch("status") || "PAID";
@@ -144,10 +165,26 @@ export function TransactionFormModal({
         }
       }
     }
+
+    focusErrorSummary();
+  }
+
+  function onInvalid() {
+    focusErrorSummary();
   }
 
   const isSubmitting = form.formState.isSubmitting;
-  const { errors } = form.formState;
+  const { errors, submitCount } = form.formState;
+
+  const fieldErrorEntries = (
+    Object.entries(errors) as [
+      keyof TransactionFormValues,
+      { message?: string } | undefined,
+    ][]
+  ).filter(([, err]) => Boolean(err?.message));
+
+  const showErrorSummary =
+    Boolean(serverError) || (submitCount > 0 && fieldErrorEntries.length > 0);
 
   return (
     <Modal
@@ -158,16 +195,37 @@ export function TransactionFormModal({
       subtitle="Preencha os dados do lançamento financeiro"
     >
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         noValidate
         className="space-y-4"
       >
-        {serverError && (
+        {showErrorSummary && (
           <div
+            ref={errorSummaryRef}
             role="alert"
-            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800"
+            tabIndex={-1}
+            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
           >
-            {serverError}
+            <p className="font-semibold text-rose-900">
+              {serverError ?? "Confira os campos destacados antes de salvar:"}
+            </p>
+            {fieldErrorEntries.length > 0 && (
+              <ul className="mt-1.5 list-disc space-y-1 pl-5 text-xs">
+                {fieldErrorEntries.map(([field, err]) => (
+                  <li key={field}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById(FIELD_DOM_IDS[field])?.focus()
+                      }
+                      className="text-left font-medium underline underline-offset-2 hover:text-rose-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                    >
+                      {err?.message}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
@@ -182,9 +240,11 @@ export function TransactionFormModal({
               return (
                 <button
                   key={t}
+                  id={t === "EXPENSE" ? "tx-type-expense" : "tx-type-income"}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => handleTypeSwitch(t)}
-                  className={`rounded-xl py-2 text-sm font-semibold transition ${
+                  className={`min-h-11 rounded-xl py-2 text-sm font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
                     active
                       ? t === "EXPENSE"
                         ? "bg-white text-rose-600 shadow-xs"
@@ -198,7 +258,10 @@ export function TransactionFormModal({
             })}
           </div>
           {errors.type?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="tx-type-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.type.message}
             </p>
           )}
@@ -214,17 +277,25 @@ export function TransactionFormModal({
           </label>
           <input
             id="tx-description"
+            data-autofocus
             type="text"
+            aria-invalid={Boolean(errors.description) || undefined}
+            aria-describedby={
+              errors.description ? "tx-description-error" : undefined
+            }
             placeholder={
               selectedType === "EXPENSE"
                 ? "Ex.: Supermercado, Aluguel, Conta de luz"
                 : "Ex.: Salário, Projeto freelance"
             }
             {...form.register("description")}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
           />
           {errors.description?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="tx-description-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.description.message}
             </p>
           )}
@@ -248,12 +319,17 @@ export function TransactionFormModal({
                 type="text"
                 inputMode="decimal"
                 placeholder="0,00"
+                aria-invalid={Boolean(errors.amount) || undefined}
+                aria-describedby={errors.amount ? "tx-amount-error" : undefined}
                 {...form.register("amount")}
-                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 tabular-nums outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
               />
             </div>
             {errors.amount?.message && (
-              <p className="mt-1 text-xs font-medium text-rose-600">
+              <p
+                id="tx-amount-error"
+                className="mt-1 text-xs font-medium text-rose-600"
+              >
                 {errors.amount.message}
               </p>
             )}
@@ -269,11 +345,16 @@ export function TransactionFormModal({
             <input
               id="tx-date"
               type="date"
+              aria-invalid={Boolean(errors.date) || undefined}
+              aria-describedby={errors.date ? "tx-date-error" : undefined}
               {...form.register("date")}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             />
             {errors.date?.message && (
-              <p className="mt-1 text-xs font-medium text-rose-600">
+              <p
+                id="tx-date-error"
+                className="mt-1 text-xs font-medium text-rose-600"
+              >
                 {errors.date.message}
               </p>
             )}
@@ -294,7 +375,7 @@ export function TransactionFormModal({
               {CATEGORY_TYPE_LABEL[selectedType].toLowerCase()} cadastrada.{" "}
               <Link
                 href="/categorias"
-                className="font-semibold underline hover:text-amber-950"
+                className="inline-flex min-h-9 items-center rounded-lg px-1 font-semibold underline hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2"
               >
                 Criar categoria
               </Link>
@@ -302,8 +383,12 @@ export function TransactionFormModal({
           ) : (
             <select
               id="tx-category"
+              aria-invalid={Boolean(errors.categoryId) || undefined}
+              aria-describedby={
+                errors.categoryId ? "tx-category-error" : undefined
+              }
               {...form.register("categoryId")}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               <option value="">Selecione uma categoria...</option>
               {filteredCategories.map((cat) => (
@@ -314,7 +399,10 @@ export function TransactionFormModal({
             </select>
           )}
           {errors.categoryId?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="tx-category-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.categoryId.message}
             </p>
           )}
@@ -331,11 +419,13 @@ export function TransactionFormModal({
               return (
                 <button
                   key={st}
+                  id={`tx-status-${st}`}
                   type="button"
+                  aria-pressed={active}
                   onClick={() =>
                     form.setValue("status", st, { shouldDirty: true })
                   }
-                  className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
+                  className={`flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
                     active
                       ? st === "PAID"
                         ? "border-emerald-300 bg-emerald-50 text-emerald-800"
@@ -354,7 +444,10 @@ export function TransactionFormModal({
             })}
           </div>
           {errors.status?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="tx-status-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.status.message}
             </p>
           )}
@@ -372,12 +465,17 @@ export function TransactionFormModal({
           <textarea
             id="tx-notes"
             rows={2}
+            aria-invalid={Boolean(errors.notes) || undefined}
+            aria-describedby={errors.notes ? "tx-notes-error" : undefined}
             placeholder="Detalhes adicionais, parcela, forma de pagamento..."
             {...form.register("notes")}
-            className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+            className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
           />
           {errors.notes?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="tx-notes-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.notes.message}
             </p>
           )}
@@ -389,14 +487,14 @@ export function TransactionFormModal({
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={isSubmitting || filteredCategories.length === 0}
-            className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting
               ? "Salvando..."

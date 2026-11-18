@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CATEGORY_TYPE_LABEL, type CategoryType } from "@/lib/constants";
 import {
@@ -30,6 +30,12 @@ const PRESET_COLORS = [
   "#64748b",
 ];
 
+const FIELD_DOM_IDS: Record<keyof CategoryFormValues, string> = {
+  type: "cat-type-expense",
+  name: "cat-name",
+  color: "cat-color",
+};
+
 type CategoryFormModalProps = {
   open: boolean;
   onClose: () => void;
@@ -45,9 +51,11 @@ export function CategoryFormModal({
 }: CategoryFormModalProps) {
   const toast = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
+  const errorSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<CategoryFormValues, unknown, CategoryFormOutput>({
     resolver: zodResolver(categorySchema),
+    shouldFocusError: false,
     defaultValues: {
       name: "",
       type: defaultType,
@@ -73,6 +81,15 @@ export function CategoryFormModal({
       });
     }
   }, [open, editingCategory, defaultType, form]);
+
+  function focusErrorSummary() {
+    window.requestAnimationFrame(() => {
+      const box = errorSummaryRef.current;
+      if (!box) return;
+      box.scrollIntoView({ block: "nearest" });
+      box.focus();
+    });
+  }
 
   const selectedType = form.watch("type") || "EXPENSE";
   const selectedColor = form.watch("color") ?? "";
@@ -117,10 +134,26 @@ export function CategoryFormModal({
         }
       }
     }
+
+    focusErrorSummary();
+  }
+
+  function onInvalid() {
+    focusErrorSummary();
   }
 
   const isSubmitting = form.formState.isSubmitting;
-  const { errors } = form.formState;
+  const { errors, submitCount } = form.formState;
+
+  const fieldErrorEntries = (
+    Object.entries(errors) as [
+      keyof CategoryFormValues,
+      { message?: string } | undefined,
+    ][]
+  ).filter(([, err]) => Boolean(err?.message));
+
+  const showErrorSummary =
+    Boolean(serverError) || (submitCount > 0 && fieldErrorEntries.length > 0);
 
   return (
     <Modal
@@ -132,16 +165,37 @@ export function CategoryFormModal({
       maxWidthClass="max-w-md"
     >
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         noValidate
         className="space-y-4"
       >
-        {serverError && (
+        {showErrorSummary && (
           <div
+            ref={errorSummaryRef}
             role="alert"
-            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800"
+            tabIndex={-1}
+            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
           >
-            {serverError}
+            <p className="font-semibold text-rose-900">
+              {serverError ?? "Confira os campos destacados antes de salvar:"}
+            </p>
+            {fieldErrorEntries.length > 0 && (
+              <ul className="mt-1.5 list-disc space-y-1 pl-5 text-xs">
+                {fieldErrorEntries.map(([field, err]) => (
+                  <li key={field}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById(FIELD_DOM_IDS[field])?.focus()
+                      }
+                      className="text-left font-medium underline underline-offset-2 hover:text-rose-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                    >
+                      {err?.message}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
@@ -156,12 +210,14 @@ export function CategoryFormModal({
               return (
                 <button
                   key={t}
+                  id={t === "EXPENSE" ? "cat-type-expense" : "cat-type-income"}
                   type="button"
+                  aria-pressed={active}
                   disabled={typeLocked && !active}
                   onClick={() =>
                     form.setValue("type", t, { shouldDirty: true })
                   }
-                  className={`rounded-xl py-2 text-sm font-semibold transition ${
+                  className={`min-h-11 rounded-xl py-2 text-sm font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
                     active
                       ? t === "EXPENSE"
                         ? "bg-white text-rose-600 shadow-xs"
@@ -181,7 +237,10 @@ export function CategoryFormModal({
             </p>
           )}
           {errors.type?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="cat-type-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.type.message}
             </p>
           )}
@@ -197,17 +256,23 @@ export function CategoryFormModal({
           </label>
           <input
             id="cat-name"
+            data-autofocus
             type="text"
+            aria-invalid={Boolean(errors.name) || undefined}
+            aria-describedby={errors.name ? "cat-name-error" : undefined}
             placeholder={
               selectedType === "EXPENSE"
                 ? "Ex.: Alimentação, Moradia, Lazer"
                 : "Ex.: Salário, Freelance, Reembolso"
             }
             {...form.register("name")}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
           />
           {errors.name?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="cat-name-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.name.message}
             </p>
           )}
@@ -223,7 +288,7 @@ export function CategoryFormModal({
             <span className="font-normal text-slate-400">(opcional)</span>
           </label>
 
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {PRESET_COLORS.map((hex) => {
               const active = selectedColor.toLowerCase() === hex;
               return (
@@ -231,19 +296,24 @@ export function CategoryFormModal({
                   key={hex}
                   type="button"
                   aria-label={`Escolher cor ${hex}`}
+                  aria-pressed={active}
                   onClick={() =>
                     form.setValue("color", hex, {
                       shouldDirty: true,
                       shouldValidate: true,
                     })
                   }
-                  className={`h-7 w-7 rounded-full transition ${
-                    active
-                      ? "ring-2 ring-slate-900 ring-offset-2 scale-105"
-                      : "hover:scale-105"
-                  }`}
-                  style={{ backgroundColor: hex }}
-                />
+                  className="flex h-11 w-11 items-center justify-center rounded-xl transition motion-reduce:transition-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9"
+                >
+                  <span
+                    className={`h-7 w-7 rounded-full transition motion-reduce:transition-none ${
+                      active
+                        ? "ring-2 ring-slate-900 ring-offset-2 scale-105"
+                        : ""
+                    }`}
+                    style={{ backgroundColor: hex }}
+                  />
+                </button>
               );
             })}
           </div>
@@ -263,14 +333,16 @@ export function CategoryFormModal({
                   shouldValidate: true,
                 })
               }
-              className="h-10 w-12 cursor-pointer rounded-xl border border-slate-200 bg-white p-1"
+              className="h-11 w-12 cursor-pointer rounded-xl border border-slate-200 bg-white p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             />
             <input
               id="cat-color"
               type="text"
               placeholder="#7c3aed"
+              aria-invalid={Boolean(errors.color) || undefined}
+              aria-describedby={errors.color ? "cat-color-error" : undefined}
               {...form.register("color")}
-              className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+              className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             />
             {selectedColor && (
               <button
@@ -281,14 +353,17 @@ export function CategoryFormModal({
                     shouldValidate: true,
                   })
                 }
-                className="rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
               >
                 Limpar
               </button>
             )}
           </div>
           {errors.color?.message && (
-            <p className="mt-1 text-xs font-medium text-rose-600">
+            <p
+              id="cat-color-error"
+              className="mt-1 text-xs font-medium text-rose-600"
+            >
               {errors.color.message}
             </p>
           )}
@@ -300,14 +375,14 @@ export function CategoryFormModal({
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting
               ? "Salvando..."
