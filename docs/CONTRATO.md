@@ -346,7 +346,7 @@ Erros possíveis: "Já existe um orçamento dessa categoria nesse mês.", "Orça
 | Rota | Tela |
 |---|---|
 | `/` | Dashboard |
-| `/login` | Login: "Entrar como visitante (demo)" e "Entrar com GitHub" (se `githubEnabled`). Hoje é **placeholder**. |
+| `/login` | Login: "Entrar como visitante (demo)" e "Entrar com GitHub" (se `githubEnabled`). Texto da demo: **cada visitante ganha uma conta de demonstração só dele, com dados de exemplo, que é apagada em 24 horas** (não é mais "recriada a cada 1h"). |
 | `/transacoes` | Transações (filtros via `?month=&type=&categoryId=&walletId=&q=`) |
 | `/contas` | Contas (**nova**, ainda não existe): lista com saldo, criar, editar, excluir e tornar padrão |
 | `/importar` e `/importar/[batchId]` | Importação de extrato (**nova**): upload, revisão e histórico |

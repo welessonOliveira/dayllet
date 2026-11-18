@@ -46,7 +46,7 @@ npm run dev                     # http://localhost:3000
 
 ### Login
 
-- **Conta demo:** botão "Entrar como visitante (demo)". Os dados dela são recriados do zero a cada 1 hora (no login seguinte). Ela já vem com contas fixas, um parcelado, metas e regras de categoria.
+- **Conta demo:** botão "Entrar como visitante (demo)". **Cada visitante ganha uma conta demo só dele**, com dados de exemplo (contas fixas, um parcelado, metas, transferência e regras de categoria), que é apagada depois de 24 horas. Um visitante nunca vê o que outro fez. O `npm run db:seed` cria uma demo fixa (`demo@financas.local`) pra desenvolvimento.
 - **GitHub (opcional):** crie um OAuth App em https://github.com/settings/developers com callback `http://localhost:3000/api/auth/callback/github` e preencha `AUTH_GITHUB_ID` e `AUTH_GITHUB_SECRET` no `.env`. Sem isso, o botão do GitHub não aparece.
 - Usuário novo ganha as categorias padrão e uma conta ("Conta principal").
 
