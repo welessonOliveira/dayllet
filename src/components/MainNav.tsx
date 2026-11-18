@@ -69,6 +69,19 @@ const LINKS: NavItem[] = [
     ),
   },
   {
+    href: "/fluxo",
+    label: "Fluxo de caixa",
+    mobileLabel: "Fluxo",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M3 3v18h18" />
+        <rect x="7" y="10" width="3" height="7" rx="0.8" />
+        <rect x="12" y="6" width="3" height="11" rx="0.8" />
+        <rect x="17" y="13" width="3" height="4" rx="0.8" />
+      </svg>
+    ),
+  },
+  {
     href: "/categorias",
     label: "Categorias",
     mobileLabel: "Categorias",
