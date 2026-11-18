@@ -13,6 +13,7 @@ import { formatBRL } from "@/lib/money";
 import type { SearchParams } from "@/lib/validations";
 import { getDashboardData } from "@/server/dashboard";
 import { getMonthForecast } from "@/server/forecast";
+import { listGoals } from "@/server/goals";
 import { getPageCtx } from "@/server/session";
 
 export const dynamic = "force-dynamic";
@@ -32,15 +33,19 @@ export default async function DashboardPage({
 
   // getMonthForecast sincroniza ocorrências recorrentes do mês antes de ler o resumo
   const forecast = await getMonthForecast(ctx, selectedMonth);
-  const {
-    month,
-    summary,
-    topExpenses,
-    budgets,
-    expensesByCategory,
-    wallets,
-    totalBalanceCents,
-  } = await getDashboardData(ctx, selectedMonth);
+  const [
+    {
+      month,
+      summary,
+      topExpenses,
+      budgets,
+      expensesByCategory,
+      wallets,
+      totalBalanceCents,
+    },
+    goals,
+  ] = await Promise.all([getDashboardData(ctx, selectedMonth), listGoals(ctx)]);
+  const topGoals = goals.slice(0, 2);
 
   const isNegativeTotal = totalBalanceCents < 0;
   const isNegativeMonthBalance = summary.balanceCents < 0;
@@ -584,6 +589,81 @@ export default async function DashboardPage({
                       : `Restante: ${formatBRL(progress.remainingCents)}`}
                   </p>
                 </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Card compacto de Metas (2 primeiras metas) */}
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Metas</h2>
+            <p className="text-xs text-slate-500">
+              Acompanhamento rápido das suas principais reservas
+            </p>
+          </div>
+          <Link
+            href="/metas"
+            className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-2 text-xs font-semibold text-violet-600 transition motion-reduce:transition-none hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:min-h-0"
+          >
+            Ver todas as metas →
+          </Link>
+        </div>
+
+        {topGoals.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center">
+            <p className="text-sm font-semibold text-slate-700">
+              Você ainda não criou nenhuma meta
+            </p>
+            <Link
+              href="/metas"
+              className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+            >
+              Criar meta
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {topGoals.map((g) => {
+              const color = g.color || "#7c3aed";
+              return (
+                <Link
+                  key={g.id}
+                  href="/metas"
+                  className="block rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 transition motion-reduce:transition-none hover:border-violet-200 hover:bg-violet-50/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span className="truncate text-sm font-bold text-slate-900">
+                        {g.name}
+                      </span>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-bold text-violet-700 tabular-nums">
+                      {g.progress.percent}%
+                    </span>
+                  </div>
+                  <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+                    <div
+                      className="h-full rounded-full transition-all motion-reduce:transition-none"
+                      style={{
+                        width: `${g.progress.percentBar}%`,
+                        backgroundColor: g.progress.done ? "#059669" : color,
+                      }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-slate-600 tabular-nums">
+                    <strong className="font-semibold text-slate-800">
+                      {formatBRL(g.progress.savedCents)}
+                    </strong>{" "}
+                    de {formatBRL(g.progress.targetCents)}
+                  </p>
+                </Link>
               );
             })}
           </div>
