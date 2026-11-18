@@ -68,6 +68,8 @@ export const transactionSchema = z.object({
 
 /** O que o formulário de transação manda (tudo string). */
 export type TransactionFormValues = z.input<typeof transactionSchema>;
+/** O que o zodResolver entrega no handleSubmit (3º genérico do useForm). */
+export type TransactionFormOutput = z.output<typeof transactionSchema>;
 
 /** Dados validados, prontos pro servidor. */
 export type TransactionData = {
@@ -107,6 +109,8 @@ export const categorySchema = z.object({
 
 export type CategoryFormValues = z.input<typeof categorySchema>;
 export type CategoryData = z.output<typeof categorySchema>;
+/** O que o zodResolver entrega no handleSubmit (3º genérico do useForm). */
+export type CategoryFormOutput = CategoryData;
 
 // ---------- Orçamento ----------
 
@@ -119,6 +123,8 @@ export const budgetSchema = z.object({
 });
 
 export type BudgetFormValues = z.input<typeof budgetSchema>;
+/** O que o zodResolver entrega no handleSubmit (3º genérico do useForm). */
+export type BudgetFormOutput = z.output<typeof budgetSchema>;
 export type BudgetData = { categoryId: string; month: string; limitCents: number };
 
 export function toBudgetData(parsed: z.output<typeof budgetSchema>): BudgetData {
