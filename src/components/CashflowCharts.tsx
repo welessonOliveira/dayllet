@@ -386,94 +386,124 @@ type SixMonthProjectionProps = {
   points: { month: string; balanceCents: number }[];
 };
 
-export function SixMonthProjectionSection({ points }: SixMonthProjectionProps) {
-  const thisMonth = currentMonth();
+type SvgLineProjectionProps = {
+  points: { month: string; balanceCents: number }[];
+  width: number;
+  height: number;
+  padX: number;
+  padY: number;
+  className: string;
+};
 
-  const width = 680;
-  const height = 140;
-  const padX = 36;
-  const padY = 22;
+function SvgLineProjection({
+  points,
+  width,
+  height,
+  padX,
+  padY,
+  className,
+}: SvgLineProjectionProps) {
   const innerW = width - padX * 2;
   const innerH = height - padY * 2;
 
-  let polyline = "";
-  let coords: {
-    x: number;
-    y: number;
-    month: string;
-    balanceCents: number;
-  }[] = [];
-
-  if (points.length > 0) {
-    const vals = points.map((p) => p.balanceCents);
-    let minV = Math.min(...vals);
-    let maxV = Math.max(...vals);
-    if (minV === maxV) {
-      minV -= 1000;
-      maxV += 1000;
-    }
-    const span = maxV - minV;
-
-    coords = points.map((p, i) => ({
-      x:
-        points.length === 1
-          ? padX + innerW / 2
-          : padX + (i / (points.length - 1)) * innerW,
-      y: padY + innerH - ((p.balanceCents - minV) / span) * innerH,
-      month: p.month,
-      balanceCents: p.balanceCents,
-    }));
-
-    polyline = coords
-      .map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`)
-      .join(" ");
+  const vals = points.map((p) => p.balanceCents);
+  let minV = Math.min(...vals);
+  let maxV = Math.max(...vals);
+  if (minV === maxV) {
+    minV -= 1000;
+    maxV += 1000;
   }
+  const span = maxV - minV;
+
+  const coords = points.map((p, i) => ({
+    x:
+      points.length === 1
+        ? padX + innerW / 2
+        : padX + (i / (points.length - 1)) * innerW,
+    y: padY + innerH - ((p.balanceCents - minV) / span) * innerH,
+    month: p.month,
+    balanceCents: p.balanceCents,
+  }));
+
+  const polyline = coords
+    .map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`)
+    .join(" ");
 
   const anyNegative = points.some((p) => p.balanceCents < 0);
 
   return (
-    <div className="space-y-5">
-      {coords.length > 1 && (
-        <div className="overflow-x-auto rounded-2xl bg-slate-50/75 p-4 ring-1 ring-slate-200/60">
-          <svg
-            viewBox={`0 0 ${width} ${height}`}
-            role="img"
-            aria-label="Linha de tendência do saldo projetado nos próximos 6 meses"
-            className="h-36 min-w-[480px] w-full overflow-visible"
-          >
-            <polyline
-              points={polyline}
-              fill="none"
-              stroke={anyNegative ? "#e11d48" : "#7c3aed"}
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label="Linha de tendência do saldo projetado nos próximos 6 meses"
+      className={className}
+    >
+      <polyline
+        points={polyline}
+        fill="none"
+        stroke={anyNegative ? "#e11d48" : "#7c3aed"}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {coords.map((c) => {
+        const neg = c.balanceCents < 0;
+        return (
+          <g key={c.month}>
+            <title>{`${capitalizeFirst(formatMonthLabel(c.month))}: ${formatBRL(c.balanceCents)}`}</title>
+            <circle
+              cx={c.x}
+              cy={c.y}
+              r="5"
+              fill={neg ? "#e11d48" : "#7c3aed"}
+              stroke="#ffffff"
+              strokeWidth="2"
             />
-            {coords.map((c) => {
-              const neg = c.balanceCents < 0;
-              return (
-                <g key={c.month}>
-                  <title>{`${capitalizeFirst(formatMonthLabel(c.month))}: ${formatBRL(c.balanceCents)}`}</title>
-                  <circle
-                    cx={c.x}
-                    cy={c.y}
-                    r="5"
-                    fill={neg ? "#e11d48" : "#7c3aed"}
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                  />
-                  <text
-                    x={c.x}
-                    y={height - 4}
-                    textAnchor="middle"
-                    className="fill-slate-500 text-[11px] font-semibold"
-                  >
-                    {shortMonth(c.month)}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+            <text
+              x={c.x}
+              y={height - 4}
+              textAnchor="middle"
+              className="fill-slate-500 text-[11px] font-semibold"
+            >
+              {shortMonth(c.month)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+export function SixMonthProjectionSection({ points }: SixMonthProjectionProps) {
+  const thisMonth = currentMonth();
+
+  return (
+    <div className="space-y-5">
+      {points.length > 1 && (
+        <div className="rounded-2xl bg-slate-50/75 p-3 sm:p-4 ring-1 ring-slate-200/60">
+          {/* Versão celular (< 640px): cabe perfeitamente em 390px sem rolagem */}
+          <div className="sm:hidden">
+            <SvgLineProjection
+              points={points}
+              width={340}
+              height={120}
+              padX={22}
+              padY={20}
+              className="h-32 w-full overflow-visible"
+            />
+          </div>
+
+          {/* Versão desktop (>= 640px): proporção ampla */}
+          <div className="hidden sm:block">
+            <SvgLineProjection
+              points={points}
+              width={680}
+              height={140}
+              padX={36}
+              padY={22}
+              className="h-36 w-full overflow-visible"
+            />
+          </div>
         </div>
       )}
 

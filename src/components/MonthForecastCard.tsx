@@ -11,6 +11,10 @@ function shortDayMonth(d: Date): string {
   return formatDate(new Date(d)).slice(0, 5);
 }
 
+function capitalizeFirst(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
   const isPast = forecast.mode === "past";
   const isNegativeEnd = forecast.endOfMonthBalanceCents < 0;
@@ -105,7 +109,7 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
                 {isPast ? "Saldo no fim do mês" : "Previsão pro fim do mês"}
               </span>
               <span className="text-xs text-slate-500">
-                {formatMonthLabel(forecast.month)}
+                {capitalizeFirst(formatMonthLabel(forecast.month))}
               </span>
             </div>
 

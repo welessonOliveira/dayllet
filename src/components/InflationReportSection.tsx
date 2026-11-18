@@ -22,6 +22,10 @@ function shortMonth(month: string): string {
   return `${nomes[Number(m) - 1]}/${y.slice(2)}`;
 }
 
+function capitalizeFirst(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 function monthToMmYyyy(month: string): string {
   const [y, m] = month.split("-");
   return `${m}/${y}`;
@@ -130,7 +134,7 @@ export function InflationReportSection({
 
             return (
               <g key={r.month}>
-                <title>{`${formatMonthLabel(r.month)} — Nominal: ${formatBRL(r.expenseCents)} | Corrigido: ${formatBRL(r.adjustedCents)} (${formatBps(r.inflationBps)})`}</title>
+                <title>{`${capitalizeFirst(formatMonthLabel(r.month))} — Nominal: ${formatBRL(r.expenseCents)} | Corrigido: ${formatBRL(r.adjustedCents)} (${formatBps(r.inflationBps)})`}</title>
 
                 {nomH > 0 && (
                   <rect
@@ -202,9 +206,9 @@ export function InflationReportSection({
                 >
                   <Link
                     href={`/transacoes?month=${r.month}&type=EXPENSE`}
-                    className="inline-flex min-h-9 items-center capitalize hover:text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                    className="inline-flex min-h-9 items-center hover:text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
                   >
-                    {formatMonthLabel(r.month)}
+                    {capitalizeFirst(formatMonthLabel(r.month))}
                   </Link>
                 </th>
                 <td className="whitespace-nowrap px-4 py-3 text-right text-slate-700">
