@@ -93,6 +93,7 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
     await tx.transaction.deleteMany({ where: { userId } });
     await tx.importBatch.deleteMany({ where: { userId } });
     await tx.categoryRule.deleteMany({ where: { userId } });
+    await tx.goal.deleteMany({ where: { userId } });
     await tx.recurringRule.deleteMany({ where: { userId } });
     await tx.budget.deleteMany({ where: { userId } });
     await tx.category.deleteMany({ where: { userId } });
@@ -155,6 +156,28 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
         month,
         limitCents: b.limitCents,
       })),
+    });
+
+    // Metas: uma com prazo (em 5 meses) e uma reserva sem prazo.
+    const notebook = await tx.goal.create({
+      data: {
+        userId,
+        name: "Notebook novo",
+        targetCents: 400000,
+        targetDate: dateInputToUtc(`${shiftMonth(month, 4)}-28`),
+        color: "#7c3aed",
+      },
+    });
+    const reserva = await tx.goal.create({
+      data: { userId, name: "Reserva de emergência", targetCents: 1000000, color: "#16a34a" },
+    });
+    await tx.goalContribution.createMany({
+      data: [
+        { goalId: notebook.id, amountCents: 50000, date: daysAgoUtc(40, now), note: "Começando" },
+        { goalId: notebook.id, amountCents: 60000, date: daysAgoUtc(10, now) },
+        { goalId: reserva.id, amountCents: 200000, date: daysAgoUtc(60, now) },
+        { goalId: reserva.id, amountCents: 50000, date: daysAgoUtc(30, now) },
+      ],
     });
 
     await tx.user.update({ where: { id: userId }, data: { demoResetAt: now } });

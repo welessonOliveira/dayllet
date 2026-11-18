@@ -73,6 +73,7 @@ model User {
   recurringRules RecurringRule[]
   imports        ImportBatch[]
   categoryRules  CategoryRule[]
+  goals          Goal[]
 }
 
 /// Conta de LOGIN (ex.: GitHub). Nome exigido pelo Auth.js.
@@ -296,6 +297,40 @@ model CategoryRule {
 
   @@unique([userId, pattern])
   @@index([userId])
+}
+
+/// Meta de economia (Decisão 13): "PC novo: R$ 4.000 até março".
+model Goal {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  targetCents   Int
+  /// Data alvo (12:00 UTC) ou null = sem prazo.
+  targetDate    DateTime?
+  color         String?
+  /// true = arquivada (escondida da lista principal).
+  archived      Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  contributions GoalContribution[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+/// Dinheiro guardado (positivo) ou retirado (negativo) de uma meta.
+model GoalContribution {
+  id          String   @id @default(cuid())
+  goalId      String
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  /// Positivo = guardou; negativo = tirou.
+  amountCents Int
+  date        DateTime
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([goalId, date])
 }
 
 /// Ocorrência que o usuário apagou de propósito: a regra não gera de novo.

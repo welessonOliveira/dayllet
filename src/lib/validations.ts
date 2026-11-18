@@ -245,6 +245,54 @@ export type RecurringRuleFormOutput = z.output<typeof recurringRuleSchema>;
 /** Dados validados, prontos pro servidor. */
 export type RecurringRuleData = RecurringRuleFormOutput;
 
+// ---------- Metas ----------
+
+export const goalSchema = z.object({
+  name: z
+    .string({ error: "Informe o nome da meta." })
+    .trim()
+    .min(1, "Informe o nome da meta.")
+    .max(60, "Use no máximo 60 caracteres."),
+  /** Quanto quer juntar, ex.: "4.000,00". */
+  target: moneyField,
+  /** Até quando ("YYYY-MM-DD"), vazio = sem prazo. */
+  targetDate: optionalDateField,
+  color: z
+    .string()
+    .trim()
+    .nullish()
+    .transform((v) => (v ? v.toLowerCase() : null))
+    .refine((v) => v === null || /^#[0-9a-f]{6}$/.test(v), "Cor inválida. Use o formato #RRGGBB."),
+});
+
+export type GoalFormValues = z.input<typeof goalSchema>;
+export type GoalFormOutput = z.output<typeof goalSchema>;
+export type GoalData = { name: string; targetCents: number; targetDate: Date | null; color: string | null };
+
+export function toGoalData(p: GoalFormOutput): GoalData {
+  return { name: p.name, targetCents: p.target, targetDate: p.targetDate, color: p.color };
+}
+
+export const goalContributionSchema = z.object({
+  /** "DEPOSIT" = guardei; "WITHDRAW" = tirei. */
+  kind: z.enum(["DEPOSIT", "WITHDRAW"], { error: "Escolha guardar ou retirar." }).default("DEPOSIT"),
+  amount: moneyField,
+  date: z
+    .string({ error: "Informe a data." })
+    .refine(isValidDateInput, "Data inválida.")
+    .transform(dateInputToUtc),
+  note: optionalText(200),
+});
+
+export type GoalContributionFormValues = z.input<typeof goalContributionSchema>;
+export type GoalContributionFormOutput = z.output<typeof goalContributionSchema>;
+/** Valor com sinal: positivo guardou, negativo tirou. */
+export type GoalContributionData = { amountCents: number; date: Date; note: string | null };
+
+export function toGoalContributionData(p: GoalContributionFormOutput): GoalContributionData {
+  return { amountCents: p.kind === "WITHDRAW" ? -p.amount : p.amount, date: p.date, note: p.note };
+}
+
 // ---------- Orçamento ----------
 
 export const budgetSchema = z.object({
