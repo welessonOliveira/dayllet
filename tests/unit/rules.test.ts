@@ -4,6 +4,7 @@ import {
   calcBudgetProgress,
   calcBudgetSpent,
   calcMonthSummary,
+  calcWalletBalance,
   checkBudgetCategoryType,
   checkCategoryType,
   expensesByCategory,
@@ -55,6 +56,23 @@ describe("saldo mensal (calcMonthSummary)", () => {
       pendingIncomeCents: 0,
       count: 0,
     });
+  });
+});
+
+describe("saldo da conta (calcWalletBalance)", () => {
+  it("saldo inicial + recebido - pago; previsto inclui os pendentes", () => {
+    expect(
+      calcWalletBalance(100000, [
+        tx("INCOME", 50000),
+        tx("EXPENSE", 20000),
+        tx("EXPENSE", 5000, "PENDING"),
+        tx("INCOME", 1000, "PENDING"),
+      ]),
+    ).toEqual({ currentCents: 130000, projectedCents: 126000 });
+  });
+
+  it("conta sem lançamentos fica com o saldo inicial (pode ser negativo)", () => {
+    expect(calcWalletBalance(-5000, [])).toEqual({ currentCents: -5000, projectedCents: -5000 });
   });
 });
 

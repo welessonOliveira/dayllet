@@ -4,19 +4,31 @@ import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { type ActionResult, DomainError, GENERIC_ERROR } from "@/lib/errors";
 import { fieldErrorsOf } from "@/lib/validations";
+import type { Ctx } from "../context";
+import { getActionCtx } from "../session";
 
 /** Revalida todas as telas (os dados de uma afetam as outras). */
 export function revalidateAll(): void {
   revalidatePath("/", "layout");
 }
 
-/** Roda a mutation e converte erros em mensagem amigável. */
+export const NOT_LOGGED: ActionResult<never> = {
+  ok: false,
+  error: "Sua sessão expirou. Entre de novo pra continuar.",
+};
+
+/**
+ * Roda a mutation COM o usuário logado e converte erros em mensagem amigável.
+ * Sem sessão, nem chama a função (Server Action é endpoint público).
+ */
 export async function runMutation<T>(
-  fn: () => Promise<T>,
+  fn: (ctx: Ctx) => Promise<T>,
   message: string,
 ): Promise<ActionResult<T>> {
+  const ctx = await getActionCtx();
+  if (!ctx) return NOT_LOGGED;
   try {
-    const data = await fn();
+    const data = await fn(ctx);
     revalidateAll();
     return { ok: true, data, message };
   } catch (e) {

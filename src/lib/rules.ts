@@ -53,6 +53,28 @@ export function calcBudgetSpent(transactions: TxLike[]): number {
     .reduce((soma, t) => soma + t.amountCents, 0);
 }
 
+export type WalletBalance = {
+  /** Saldo de hoje: saldo inicial + o que já foi recebido - o que já foi pago. */
+  currentCents: number;
+  /** Saldo se tudo que está pendente for pago/recebido. */
+  projectedCents: number;
+};
+
+/** Saldo de uma conta a partir do saldo inicial e de TODAS as transações dela. */
+export function calcWalletBalance(
+  openingBalanceCents: number,
+  transactions: TxLike[],
+): WalletBalance {
+  let current = openingBalanceCents;
+  let pendente = 0;
+  for (const t of transactions) {
+    const valor = t.type === "INCOME" ? t.amountCents : -t.amountCents;
+    if (t.status === "PAID") current += valor;
+    else pendente += valor;
+  }
+  return { currentCents: current, projectedCents: current + pendente };
+}
+
 export type BudgetProgress = {
   limitCents: number;
   spentCents: number;

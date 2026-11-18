@@ -8,8 +8,9 @@ import {
   topExpenses,
 } from "@/lib/rules";
 import { type BudgetWithProgress, listBudgetsWithProgress } from "./budgets";
-import type { Db } from "./db";
+import type { Ctx } from "./context";
 import type { TransactionWithCategory } from "./transactions";
+import { type WalletWithBalance, listWalletsWithBalance } from "./wallets";
 
 export type DashboardData = {
   month: string;
@@ -21,17 +22,22 @@ export type DashboardData = {
   budgets: BudgetWithProgress[];
   /** Despesas por categoria (pro gráfico), da maior pra menor. */
   expensesByCategory: CategoryTotal[];
+  /** Contas com saldo atual e previsto (saldo total = soma delas). */
+  wallets: WalletWithBalance[];
+  /** Soma dos saldos de todas as contas. */
+  totalBalanceCents: number;
 };
 
-export async function getDashboardData(db: Db, month: string): Promise<DashboardData> {
+export async function getDashboardData(ctx: Ctx, month: string): Promise<DashboardData> {
   const { start, end } = monthRange(month);
-  const [transacoes, budgets] = await Promise.all([
-    db.transaction.findMany({
-      where: { date: { gte: start, lt: end } },
-      include: { category: true },
+  const [transacoes, budgets, wallets] = await Promise.all([
+    ctx.db.transaction.findMany({
+      where: { userId: ctx.userId, date: { gte: start, lt: end } },
+      include: { category: true, wallet: true },
       orderBy: { date: "desc" },
     }),
-    listBudgetsWithProgress(db, month),
+    listBudgetsWithProgress(ctx, month),
+    listWalletsWithBalance(ctx),
   ]);
 
   return {
@@ -40,5 +46,7 @@ export async function getDashboardData(db: Db, month: string): Promise<Dashboard
     topExpenses: topExpenses(transacoes, 5),
     budgets,
     expensesByCategory: expensesByCategory(transacoes),
+    wallets,
+    totalBalanceCents: wallets.reduce((s, w) => s + w.balance.currentCents, 0),
   };
 }

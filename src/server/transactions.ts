@@ -1,92 +1,95 @@
-// Queries e mutations de transação. Todas recebem o banco (`db`) como parâmetro.
-import type { Category, Prisma, Transaction } from "@prisma/client";
+// Queries e mutations de transação. Todas recebem o contexto { db, userId }.
+import type { Category, Prisma, Transaction, Wallet } from "@prisma/client";
 import type { TransactionStatus } from "@/lib/constants";
 import { monthRange } from "@/lib/dates";
 import { DomainError } from "@/lib/errors";
 import { checkCategoryType } from "@/lib/rules";
 import type { TransactionData, TransactionFilters } from "@/lib/validations";
-import { type Db, isNotFoundError } from "./db";
+import type { Ctx } from "./context";
+import { getDefaultWalletId, getOwnWallet } from "./wallets";
 
-export type TransactionWithCategory = Transaction & { category: Category };
+export type TransactionWithCategory = Transaction & { category: Category; wallet: Wallet };
 
 const NAO_ENCONTRADA = "Transação não encontrada.";
 
 /** Transações do mês com os filtros, da mais recente pra mais antiga. */
 export function listTransactions(
-  db: Db,
+  ctx: Ctx,
   filters: TransactionFilters,
 ): Promise<TransactionWithCategory[]> {
   const { start, end } = monthRange(filters.month);
   const where: Prisma.TransactionWhereInput = {
+    userId: ctx.userId,
     date: { gte: start, lt: end },
     ...(filters.type && { type: filters.type }),
     ...(filters.categoryId && { categoryId: filters.categoryId }),
+    ...(filters.walletId && { walletId: filters.walletId }),
     // Postgres diferencia maiúsculas: "insensitive" faz "feira" achar "Feira".
     ...(filters.q && { description: { contains: filters.q, mode: "insensitive" } }),
   };
-  return db.transaction.findMany({
+  return ctx.db.transaction.findMany({
     where,
-    include: { category: true },
+    include: { category: true, wallet: true },
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
   });
 }
 
-export function getTransaction(
-  db: Db,
-  id: string,
-): Promise<TransactionWithCategory | null> {
-  return db.transaction.findUnique({ where: { id }, include: { category: true } });
+export function getTransaction(ctx: Ctx, id: string): Promise<TransactionWithCategory | null> {
+  return ctx.db.transaction.findFirst({
+    where: { id, userId: ctx.userId },
+    include: { category: true, wallet: true },
+  });
 }
 
-// Regra principal: o tipo da transação tem que bater com o da categoria.
-async function assertCategoryOk(db: Db, data: TransactionData): Promise<void> {
-  const categoria = await db.category.findUnique({ where: { id: data.categoryId } });
+async function assertOwnTransaction(ctx: Ctx, id: string): Promise<void> {
+  const n = await ctx.db.transaction.count({ where: { id, userId: ctx.userId } });
+  if (n === 0) throw new DomainError(NAO_ENCONTRADA);
+}
+
+/**
+ * Confere categoria e conta (as duas precisam ser do usuário) e devolve
+ * os dados prontos pro banco. Regra principal: o tipo da transação tem
+ * que bater com o da categoria.
+ */
+async function prepare(ctx: Ctx, data: TransactionData) {
+  const categoria = await ctx.db.category.findFirst({
+    where: { id: data.categoryId, userId: ctx.userId },
+  });
   if (!categoria) throw new DomainError("Categoria não encontrada.");
   const erro = checkCategoryType(data.type, categoria.type);
   if (erro) throw new DomainError(erro);
+
+  const walletId = data.walletId
+    ? (await getOwnWallet(ctx, data.walletId)).id
+    : await getDefaultWalletId(ctx);
+
+  return { ...data, walletId, userId: ctx.userId };
 }
 
-export async function createTransaction(
-  db: Db,
-  data: TransactionData,
-): Promise<Transaction> {
-  await assertCategoryOk(db, data);
-  return db.transaction.create({ data });
+export async function createTransaction(ctx: Ctx, data: TransactionData): Promise<Transaction> {
+  return ctx.db.transaction.create({ data: await prepare(ctx, data) });
 }
 
 export async function updateTransaction(
-  db: Db,
+  ctx: Ctx,
   id: string,
   data: TransactionData,
 ): Promise<Transaction> {
-  await assertCategoryOk(db, data);
-  try {
-    return await db.transaction.update({ where: { id }, data });
-  } catch (e) {
-    if (isNotFoundError(e)) throw new DomainError(NAO_ENCONTRADA);
-    throw e;
-  }
+  await assertOwnTransaction(ctx, id);
+  return ctx.db.transaction.update({ where: { id }, data: await prepare(ctx, data) });
 }
 
 /** Troca só o status (pago/pendente). Bom pra um botão rápido na lista. */
 export async function setTransactionStatus(
-  db: Db,
+  ctx: Ctx,
   id: string,
   status: TransactionStatus,
 ): Promise<Transaction> {
-  try {
-    return await db.transaction.update({ where: { id }, data: { status } });
-  } catch (e) {
-    if (isNotFoundError(e)) throw new DomainError(NAO_ENCONTRADA);
-    throw e;
-  }
+  await assertOwnTransaction(ctx, id);
+  return ctx.db.transaction.update({ where: { id }, data: { status } });
 }
 
-export async function deleteTransaction(db: Db, id: string): Promise<void> {
-  try {
-    await db.transaction.delete({ where: { id } });
-  } catch (e) {
-    if (isNotFoundError(e)) throw new DomainError(NAO_ENCONTRADA);
-    throw e;
-  }
+export async function deleteTransaction(ctx: Ctx, id: string): Promise<void> {
+  await assertOwnTransaction(ctx, id);
+  await ctx.db.transaction.delete({ where: { id } });
 }

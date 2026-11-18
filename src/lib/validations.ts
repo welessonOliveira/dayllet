@@ -2,9 +2,9 @@
 // Eles recebem o que o formulário manda (strings) e devolvem
 // os dados prontos pro banco (centavos, Date, etc.).
 import { z } from "zod";
-import { CATEGORY_TYPES, TRANSACTION_STATUSES, type CategoryType } from "./constants";
+import { CATEGORY_TYPES, TRANSACTION_STATUSES, WALLET_KINDS, type CategoryType } from "./constants";
 import { currentMonth, dateInputToUtc, isValidDateInput, isValidMonth } from "./dates";
-import { parseBRLToCents } from "./money";
+import { parseBRLToCents, parseSignedBRLToCents } from "./money";
 
 const MAX_CENTS = 10_000_000_000; // R$ 100 milhões, só pra barrar absurdo
 
@@ -63,6 +63,12 @@ export const transactionSchema = z.object({
     .refine(isValidDateInput, "Data inválida.")
     .transform(dateInputToUtc),
   categoryId: idField("Escolha uma categoria."),
+  /** Conta (Wallet). Opcional: sem ela, o servidor usa a conta padrão do usuário. */
+  walletId: z
+    .string()
+    .trim()
+    .nullish()
+    .transform((v) => (v ? v : null)),
   notes: optionalText(500),
 });
 
@@ -79,6 +85,8 @@ export type TransactionData = {
   status: (typeof TRANSACTION_STATUSES)[number];
   date: Date;
   categoryId: string;
+  /** null = usar a conta padrão. */
+  walletId: string | null;
   notes: string | null;
 };
 
@@ -112,6 +120,47 @@ export type CategoryData = z.output<typeof categorySchema>;
 /** O que o zodResolver entrega no handleSubmit (3º genérico do useForm). */
 export type CategoryFormOutput = CategoryData;
 
+// ---------- Conta (Wallet) ----------
+
+/** Saldo inicial digitado (pt-BR), pode ser zero ou negativo. Vazio = 0. */
+const signedMoneyField = z
+  .string()
+  .trim()
+  .nullish()
+  .transform((valor, ctx) => {
+    if (!valor) return 0;
+    const cents = parseSignedBRLToCents(valor);
+    if (cents === null) {
+      ctx.addIssue({ code: "custom", message: "Valor inválido. Use o formato 1.234,56." });
+      return z.NEVER;
+    }
+    if (Math.abs(cents) > MAX_CENTS) {
+      ctx.addIssue({ code: "custom", message: "Valor alto demais." });
+      return z.NEVER;
+    }
+    return cents;
+  });
+
+export const walletSchema = z.object({
+  name: z
+    .string({ error: "Informe o nome." })
+    .trim()
+    .min(1, "Informe o nome.")
+    .max(40, "Use no máximo 40 caracteres."),
+  kind: z.enum(WALLET_KINDS, { error: "Escolha o tipo da conta." }).default("CHECKING"),
+  /** Saldo antes do primeiro lançamento no app, ex.: "1.500,00" ou "-200". */
+  openingBalance: signedMoneyField,
+});
+
+export type WalletFormValues = z.input<typeof walletSchema>;
+/** O que o zodResolver entrega no handleSubmit (3º genérico do useForm). */
+export type WalletFormOutput = z.output<typeof walletSchema>;
+export type WalletData = { name: string; kind: (typeof WALLET_KINDS)[number]; openingBalanceCents: number };
+
+export function toWalletData(parsed: WalletFormOutput): WalletData {
+  return { name: parsed.name, kind: parsed.kind, openingBalanceCents: parsed.openingBalance };
+}
+
 // ---------- Orçamento ----------
 
 export const budgetSchema = z.object({
@@ -138,6 +187,8 @@ export type TransactionFilters = {
   month: string;
   type?: CategoryType;
   categoryId?: string;
+  /** Só lançamentos desta conta (Wallet). */
+  walletId?: string;
   /** Texto buscado na descrição. */
   q?: string;
 };
@@ -162,6 +213,7 @@ export function parseTransactionFilters(
     month: month && isValidMonth(month) ? month : currentMonth(now),
     type: type === "INCOME" || type === "EXPENSE" ? type : undefined,
     categoryId: one("categoryId"),
+    walletId: one("walletId"),
     q: one("q")?.slice(0, 120),
   };
 }

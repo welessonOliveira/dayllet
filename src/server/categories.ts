@@ -1,9 +1,10 @@
-// Queries e mutations de categoria. Todas recebem o banco (`db`) como parâmetro.
+// Queries e mutations de categoria. Todas recebem o contexto { db, userId }.
 import type { Category } from "@prisma/client";
 import { DomainError } from "@/lib/errors";
 import type { CategoryType } from "@/lib/constants";
 import type { CategoryData } from "@/lib/validations";
-import { type Db, isNotFoundError, isUniqueError } from "./db";
+import type { Ctx } from "./context";
+import { isUniqueError } from "./db";
 
 export type CategoryWithCounts = Category & {
   /** Quantas transações usam a categoria (se > 0, não pode excluir). */
@@ -12,22 +13,33 @@ export type CategoryWithCounts = Category & {
   budgetCount: number;
 };
 
-const NOME_DUPLICADO = "Já existe uma categoria com esse nome.";
+const NOME_DUPLICADO = "Você já tem uma categoria com esse nome.";
 const NAO_ENCONTRADA = "Categoria não encontrada.";
 
+/** Busca uma categoria DO USUÁRIO, com contagens. Erro se não for dele. */
+async function getOwnWithCounts(ctx: Ctx, id: string) {
+  const c = await ctx.db.category.findFirst({
+    where: { id, userId: ctx.userId },
+    include: { _count: { select: { transactions: true, budgets: true } } },
+  });
+  if (!c) throw new DomainError(NAO_ENCONTRADA);
+  return c;
+}
+
 /** Categorias em ordem alfabética. Filtra por tipo se passar `type`. */
-export function listCategories(db: Db, type?: CategoryType): Promise<Category[]> {
-  return db.category.findMany({
-    where: type ? { type } : undefined,
+export function listCategories(ctx: Ctx, type?: CategoryType): Promise<Category[]> {
+  return ctx.db.category.findMany({
+    where: { userId: ctx.userId, ...(type && { type }) },
     orderBy: { name: "asc" },
   });
 }
 
 /** Categorias separadas em receitas e despesas, com contagens. */
 export async function listCategoriesGrouped(
-  db: Db,
+  ctx: Ctx,
 ): Promise<{ income: CategoryWithCounts[]; expense: CategoryWithCounts[] }> {
-  const rows = await db.category.findMany({
+  const rows = await ctx.db.category.findMany({
+    where: { userId: ctx.userId },
     orderBy: { name: "asc" },
     include: { _count: { select: { transactions: true, budgets: true } } },
   });
@@ -42,13 +54,13 @@ export async function listCategoriesGrouped(
   };
 }
 
-export function getCategory(db: Db, id: string): Promise<Category | null> {
-  return db.category.findUnique({ where: { id } });
+export function getCategory(ctx: Ctx, id: string): Promise<Category | null> {
+  return ctx.db.category.findFirst({ where: { id, userId: ctx.userId } });
 }
 
-export async function createCategory(db: Db, data: CategoryData): Promise<Category> {
+export async function createCategory(ctx: Ctx, data: CategoryData): Promise<Category> {
   try {
-    return await db.category.create({ data });
+    return await ctx.db.category.create({ data: { ...data, userId: ctx.userId } });
   } catch (e) {
     if (isUniqueError(e)) throw new DomainError(NOME_DUPLICADO);
     throw e;
@@ -59,35 +71,22 @@ export async function createCategory(db: Db, data: CategoryData): Promise<Catego
  * Edita a categoria. Trocar o tipo só é permitido se ela não tiver
  * transações nem orçamentos (senão os dados ficariam inconsistentes).
  */
-export async function updateCategory(
-  db: Db,
-  id: string,
-  data: CategoryData,
-): Promise<Category> {
-  const atual = await db.category.findUnique({
-    where: { id },
-    include: { _count: { select: { transactions: true, budgets: true } } },
-  });
-  if (!atual) throw new DomainError(NAO_ENCONTRADA);
+export async function updateCategory(ctx: Ctx, id: string, data: CategoryData): Promise<Category> {
+  const atual = await getOwnWithCounts(ctx, id);
 
   if (atual.type !== data.type) {
     if (atual._count.transactions > 0) {
-      throw new DomainError(
-        "Não dá pra trocar o tipo de uma categoria que já tem transações.",
-      );
+      throw new DomainError("Não dá pra trocar o tipo de uma categoria que já tem transações.");
     }
     if (atual._count.budgets > 0) {
-      throw new DomainError(
-        "Não dá pra trocar o tipo de uma categoria que tem orçamentos.",
-      );
+      throw new DomainError("Não dá pra trocar o tipo de uma categoria que tem orçamentos.");
     }
   }
 
   try {
-    return await db.category.update({ where: { id }, data });
+    return await ctx.db.category.update({ where: { id }, data });
   } catch (e) {
     if (isUniqueError(e)) throw new DomainError(NOME_DUPLICADO);
-    if (isNotFoundError(e)) throw new DomainError(NAO_ENCONTRADA);
     throw e;
   }
 }
@@ -96,15 +95,8 @@ export async function updateCategory(
  * Exclui a categoria. Bloqueia se tiver transações (Decisão 8).
  * Os orçamentos dela são apagados junto (cascade); retorna quantos foram.
  */
-export async function deleteCategory(
-  db: Db,
-  id: string,
-): Promise<{ deletedBudgets: number }> {
-  const atual = await db.category.findUnique({
-    where: { id },
-    include: { _count: { select: { transactions: true, budgets: true } } },
-  });
-  if (!atual) throw new DomainError(NAO_ENCONTRADA);
+export async function deleteCategory(ctx: Ctx, id: string): Promise<{ deletedBudgets: number }> {
+  const atual = await getOwnWithCounts(ctx, id);
 
   const n = atual._count.transactions;
   if (n > 0) {
@@ -114,6 +106,6 @@ export async function deleteCategory(
     );
   }
 
-  await db.category.delete({ where: { id } });
+  await ctx.db.category.delete({ where: { id } });
   return { deletedBudgets: atual._count.budgets };
 }

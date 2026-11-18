@@ -31,9 +31,23 @@ export function parseBRLToCents(input: string): number | null {
   return Number.isSafeInteger(centavos) ? centavos : null;
 }
 
+/**
+ * Igual ao parseBRLToCents, mas aceita sinal de menos ("-150,00" -> -15000).
+ * Usado no saldo inicial de uma conta, que pode começar negativo (cheque especial).
+ */
+export function parseSignedBRLToCents(input: string): number | null {
+  const texto = input.trim();
+  const negativo = /^-/.test(texto) || /^R\$\s*-/i.test(texto);
+  const cents = parseBRLToCents(texto.replace("-", ""));
+  if (cents === null) return null;
+  return negativo ? -cents : cents;
+}
+
 /** Centavos -> texto pra preencher input de edição: 123456 -> "1.234,56". */
 export function centsToInput(cents: number): string {
-  const inteiros = Math.trunc(cents / 100);
-  const decimais = String(Math.abs(cents % 100)).padStart(2, "0");
-  return `${inteiros.toLocaleString("pt-BR")},${decimais}`;
+  const sinal = cents < 0 ? "-" : "";
+  const abs = Math.abs(cents);
+  const inteiros = Math.trunc(abs / 100);
+  const decimais = String(abs % 100).padStart(2, "0");
+  return `${sinal}${inteiros.toLocaleString("pt-BR")},${decimais}`;
 }

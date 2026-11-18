@@ -8,7 +8,6 @@ import {
   toTransactionData,
   transactionSchema,
 } from "@/lib/validations";
-import { prisma } from "../db";
 import {
   createTransaction,
   deleteTransaction,
@@ -23,7 +22,7 @@ export async function createTransactionAction(
   const parsed = parseInput(transactionSchema, input);
   if (!parsed.ok) return parsed.result;
   return runMutation(
-    () => createTransaction(prisma, toTransactionData(parsed.data)),
+    (ctx) => createTransaction(ctx, toTransactionData(parsed.data)),
     "Transação criada.",
   );
 }
@@ -36,7 +35,7 @@ export async function updateTransactionAction(
   const parsed = parseInput(transactionSchema, input);
   if (!parsed.ok) return parsed.result;
   return runMutation(
-    () => updateTransaction(prisma, id, toTransactionData(parsed.data)),
+    (ctx) => updateTransaction(ctx, id, toTransactionData(parsed.data)),
     "Transação atualizada.",
   );
 }
@@ -49,13 +48,13 @@ export async function setTransactionStatusAction(
   if (!TRANSACTION_STATUSES.includes(status)) {
     return { ok: false, error: "Status inválido." };
   }
-  return runMutation(() => setTransactionStatus(prisma, id, status), "Status atualizado.");
+  return runMutation((ctx) => setTransactionStatus(ctx, id, status), "Status atualizado.");
 }
 
 export async function deleteTransactionAction(id: string): Promise<ActionResult<null>> {
   if (!isId(id)) return INVALID_ID;
-  return runMutation(async () => {
-    await deleteTransaction(prisma, id);
+  return runMutation(async (ctx) => {
+    await deleteTransaction(ctx, id);
     return null;
   }, "Transação excluída.");
 }

@@ -4,7 +4,6 @@ import type { Category } from "@prisma/client";
 import type { ActionResult } from "@/lib/errors";
 import { type CategoryFormValues, categorySchema } from "@/lib/validations";
 import { createCategory, deleteCategory, updateCategory } from "../categories";
-import { prisma } from "../db";
 import { INVALID_ID, isId, parseInput, runMutation } from "./run";
 
 export async function createCategoryAction(
@@ -12,7 +11,7 @@ export async function createCategoryAction(
 ): Promise<ActionResult<Category>> {
   const parsed = parseInput(categorySchema, input);
   if (!parsed.ok) return parsed.result;
-  return runMutation(() => createCategory(prisma, parsed.data), "Categoria criada.");
+  return runMutation((ctx) => createCategory(ctx, parsed.data), "Categoria criada.");
 }
 
 export async function updateCategoryAction(
@@ -22,7 +21,7 @@ export async function updateCategoryAction(
   if (!isId(id)) return INVALID_ID;
   const parsed = parseInput(categorySchema, input);
   if (!parsed.ok) return parsed.result;
-  return runMutation(() => updateCategory(prisma, id, parsed.data), "Categoria atualizada.");
+  return runMutation((ctx) => updateCategory(ctx, id, parsed.data), "Categoria atualizada.");
 }
 
 /** Bloqueia se tiver transações. Os orçamentos dela são apagados junto. */
@@ -30,5 +29,5 @@ export async function deleteCategoryAction(
   id: string,
 ): Promise<ActionResult<{ deletedBudgets: number }>> {
   if (!isId(id)) return INVALID_ID;
-  return runMutation(() => deleteCategory(prisma, id), "Categoria excluída.");
+  return runMutation((ctx) => deleteCategory(ctx, id), "Categoria excluída.");
 }

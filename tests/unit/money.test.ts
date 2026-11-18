@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { centsToInput, formatBRL, parseBRLToCents } from "@/lib/money";
+import { centsToInput, formatBRL, parseBRLToCents, parseSignedBRLToCents } from "@/lib/money";
 
 describe("parseBRLToCents", () => {
   it.each([
@@ -23,6 +23,25 @@ describe("parseBRLToCents", () => {
 
   it("não sofre com erro de float (0,1 + 0,2)", () => {
     expect(parseBRLToCents("0,1")! + parseBRLToCents("0,2")!).toBe(30);
+  });
+});
+
+describe("parseSignedBRLToCents (saldo inicial)", () => {
+  it("aceita positivo e negativo", () => {
+    expect(parseSignedBRLToCents("1.500,00")).toBe(150000);
+    expect(parseSignedBRLToCents("-200")).toBe(-20000);
+    expect(parseSignedBRLToCents("R$ -10,50")).toBe(-1050);
+    expect(parseSignedBRLToCents("0")).toBe(0);
+  });
+
+  it("rejeita lixo", () => {
+    expect(parseSignedBRLToCents("--5")).toBeNull();
+    expect(parseSignedBRLToCents("abc")).toBeNull();
+  });
+
+  it("centsToInput mostra o sinal e volta igual", () => {
+    expect(centsToInput(-20050)).toBe("-200,50");
+    expect(parseSignedBRLToCents(centsToInput(-123456))).toBe(-123456);
   });
 });
 
