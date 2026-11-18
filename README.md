@@ -67,10 +67,11 @@ Pra testar a importação, use os extratos fictícios em `public/exemplos/` (`ex
 
 ## Deploy (Vercel + Neon)
 
-1. Crie um banco no [Neon](https://neon.tech) (plano grátis) e copie a connection string **direta** (sem `-pooler`).
-2. Importe o repositório na [Vercel](https://vercel.com). Ela usa o script `vercel-build`, que aplica as migrations antes do build.
-3. Variáveis de ambiente na Vercel: `DATABASE_URL` (Neon) e `AUTH_SECRET` (gere com `npx auth secret`). Pro login com GitHub: um OAuth App novo com o callback `https://SEU-APP.vercel.app/api/auth/callback/github`, mais `AUTH_GITHUB_ID` e `AUTH_GITHUB_SECRET`.
-4. Depois do primeiro deploy, rode o seed uma vez apontando pro Neon (`DATABASE_URL=... npm run db:seed`) pra criar a conta demo. Ela também é criada sozinha no primeiro login demo.
+1. Suba o código pro GitHub e importe o repositório na [Vercel](https://vercel.com) (Add New → Project). Ela usa o script `vercel-build`, que aplica as migrations antes do build.
+2. No projeto da Vercel: **Storage → Create Database → Neon** (plano grátis) e conecte ao projeto. Isso cria sozinho as variáveis `DATABASE_URL` (com pooler, usada pelo app) e `DATABASE_URL_UNPOOLED` (direta, usada pelas migrations).
+3. Em **Settings → Environment Variables**, adicione `AUTH_SECRET` (gere com `npx auth secret` ou `openssl rand -base64 32`).
+4. Faça o redeploy. A conta demo é criada sozinha no primeiro "Entrar como visitante".
+5. Opcional, login com GitHub: um OAuth App novo com o callback `https://SEU-APP.vercel.app/api/auth/callback/github`, mais `AUTH_GITHUB_ID` e `AUTH_GITHUB_SECRET`.
 
 ## Arquitetura
 

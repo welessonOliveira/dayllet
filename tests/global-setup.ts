@@ -15,6 +15,6 @@ export default async function setup() {
   }
   execSync("npx prisma migrate deploy", {
     stdio: "pipe",
-    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL },
+    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL, DATABASE_URL_UNPOOLED: TEST_DATABASE_URL },
   });
 }
