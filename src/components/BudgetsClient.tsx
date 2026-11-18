@@ -66,10 +66,10 @@ export function BudgetsClient({
       {/* Cabeçalho + seletor de mês */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             Orçamentos
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Limites de gastos para{" "}
             <span className="font-medium text-slate-700">
               {formatMonthLabel(month)}
@@ -103,21 +103,21 @@ export function BudgetsClient({
       {/* Resumo rápido dos orçamentos do mês */}
       {budgets.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Total planejado
             </span>
-            <p className="mt-2 text-2xl font-bold text-slate-900 tabular-nums">
+            <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
               {formatBRL(totalLimitCents)}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Soma dos limites de {budgets.length}{" "}
               {budgets.length === 1 ? "categoria" : "categorias"}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Total comprometido
             </span>
             <p
@@ -129,7 +129,7 @@ export function BudgetsClient({
             >
               {formatBRL(totalSpentCents)}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Despesas pagas e pendentes nas categorias orçadas
             </p>
           </div>
@@ -172,7 +172,7 @@ export function BudgetsClient({
 
       {/* Lista de cards de orçamento */}
       {budgets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center shadow-xs">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center dark:bg-slate-900 shadow-xs">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
             <svg
               className="h-6 w-6"
@@ -189,7 +189,7 @@ export function BudgetsClient({
               />
             </svg>
           </div>
-          <h2 className="mt-4 text-base font-bold text-slate-900">
+          <h2 className="mt-4 text-base font-bold text-slate-900 dark:text-slate-100">
             Nenhum orçamento em {formatMonthLabel(month)}
           </h2>
           <p className="mt-1 max-w-sm text-sm text-slate-500">
@@ -234,12 +234,12 @@ export function BudgetsClient({
                         {category.name.charAt(0).toUpperCase()}
                       </span>
                       <div className="min-w-0">
-                        <h2 className="truncate text-base font-bold text-slate-900">
+                        <h2 className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
                           {category.name}
                         </h2>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           Limite:{" "}
-                          <strong className="font-semibold text-slate-700 tabular-nums">
+                          <strong className="font-semibold text-slate-700 dark:text-slate-300 tabular-nums">
                             {formatBRL(progress.limitCents)}
                           </strong>
                         </p>
@@ -282,7 +282,7 @@ export function BudgetsClient({
                       </span>
                       <span
                         className={`mt-0.5 block text-base font-bold tabular-nums ${
-                          progress.isOver ? "text-rose-600" : "text-slate-900"
+                          progress.isOver ? "text-rose-600" : "text-slate-900 dark:text-slate-100"
                         }`}
                       >
                         {formatBRL(progress.spentCents)}
@@ -329,7 +329,7 @@ export function BudgetsClient({
                         setFormOpen(true);
                       }}
                       aria-label={`Editar orçamento de ${category.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -337,7 +337,7 @@ export function BudgetsClient({
                       type="button"
                       onClick={() => setDeletingBudget(b)}
                       aria-label={`Excluir orçamento de ${category.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-100/70"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-100/70"
                     >
                       Excluir
                     </button>
@@ -373,11 +373,11 @@ export function BudgetsClient({
           deletingBudget ? (
             <>
               Deseja excluir o orçamento de{" "}
-              <strong className="font-semibold text-slate-900">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100">
                 {deletingBudget.category.name}
               </strong>{" "}
               para{" "}
-              <strong className="font-semibold text-slate-900">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100">
                 {formatMonthLabel(deletingBudget.month)}
               </strong>{" "}
               (limite de {formatBRL(deletingBudget.limitCents)})? Suas

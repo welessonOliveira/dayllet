@@ -23,23 +23,23 @@ export default async function RelatoriosPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
           Relatórios
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Exportação de lançamentos em CSV e análise real de gastos descontando
           a inflação
         </p>
       </div>
 
       {/* (a) Bloco Exportar */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
               Exportar lançamentos (CSV)
             </h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Baixe todas as receitas e despesas de{" "}
               <strong className="text-slate-700">
                 {formatMonthLabel(month)}
@@ -71,12 +71,12 @@ export default async function RelatoriosPage({
       </section>
 
       {/* (b) Gastos x inflação */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-5">
-          <h2 className="text-base font-bold text-slate-900">
+          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
             Gastos x inflação (últimos 12 meses)
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Compare quanto você gastou na época com o poder de compra
             equivalente em dinheiro de hoje
           </p>

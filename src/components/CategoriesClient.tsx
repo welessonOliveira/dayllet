@@ -69,10 +69,10 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
       {/* Cabeçalho */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             Categorias
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {totalCount === 1
               ? "1 categoria cadastrada"
               : `${totalCount} categorias cadastradas`}{" "}
@@ -100,7 +100,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
       {/* Duas listas separadas: Receitas e Despesas */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Lista de Receitas */}
-        <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -118,8 +118,8 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                 </svg>
               </span>
               <div>
-                <h2 className="text-base font-bold text-slate-900">Receitas</h2>
-                <p className="text-xs text-slate-500">
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Receitas</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {income.length}{" "}
                   {income.length === 1 ? "categoria" : "categorias"}
                 </p>
@@ -135,17 +135,17 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
           </div>
 
           {income.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center">
-              <p className="text-sm font-semibold text-slate-700">
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 dark:border-slate-700 px-6 py-10 text-center dark:bg-slate-800/40">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Nenhuma categoria de receita
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Crie categorias como Salário ou Freelance para organizar suas
                 entradas.
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {income.map((cat) => (
                 <li
                   key={cat.id}
@@ -153,16 +153,16 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <span
-                      className="h-4 w-4 shrink-0 rounded-full ring-2 ring-slate-100"
+                      className="h-4 w-4 shrink-0 rounded-full ring-2 ring-slate-100 dark:ring-slate-700"
                       style={{ backgroundColor: cat.color || "#16a34a" }}
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                         {cat.name}
                       </p>
                       <Link
                         href={`/transacoes?type=INCOME&categoryId=${cat.id}`}
-                        className="-mx-1.5 inline-flex min-h-9 items-center rounded-lg px-1.5 py-1 text-xs text-slate-500 transition motion-reduce:transition-none hover:text-violet-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-0 md:py-0"
+                        className="-mx-1.5 inline-flex min-h-9 items-center rounded-lg px-1.5 py-1 text-xs text-slate-500 dark:text-slate-400 transition motion-reduce:transition-none hover:text-violet-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-0 md:py-0"
                       >
                         {cat.transactionCount === 1
                           ? "1 transação"
@@ -176,7 +176,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       type="button"
                       onClick={() => openEdit(cat)}
                       aria-label={`Editar categoria ${cat.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -184,7 +184,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       type="button"
                       onClick={() => setDeletingCat(cat)}
                       aria-label={`Excluir categoria ${cat.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
                     >
                       Excluir
                     </button>
@@ -196,7 +196,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
         </section>
 
         {/* Lista de Despesas */}
-        <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
@@ -214,8 +214,8 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                 </svg>
               </span>
               <div>
-                <h2 className="text-base font-bold text-slate-900">Despesas</h2>
-                <p className="text-xs text-slate-500">
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Despesas</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {expense.length}{" "}
                   {expense.length === 1 ? "categoria" : "categorias"}
                 </p>
@@ -224,23 +224,23 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
             <button
               type="button"
               onClick={() => openCreate("EXPENSE")}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2 md:min-h-9 md:py-1.5"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2 md:min-h-9 md:py-1.5"
             >
               + Despesa
             </button>
           </div>
 
           {expense.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center">
-              <p className="text-sm font-semibold text-slate-700">
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 dark:border-slate-700 px-6 py-10 text-center dark:bg-slate-800/40">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Nenhuma categoria de despesa
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Crie categorias como Moradia, Alimentação ou Transporte.
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {expense.map((cat) => (
                 <li
                   key={cat.id}
@@ -248,14 +248,14 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <span
-                      className="h-4 w-4 shrink-0 rounded-full ring-2 ring-slate-100"
+                      className="h-4 w-4 shrink-0 rounded-full ring-2 ring-slate-100 dark:ring-slate-700"
                       style={{ backgroundColor: cat.color || "#7c3aed" }}
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                         {cat.name}
                       </p>
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                         <Link
                           href={`/transacoes?type=EXPENSE&categoryId=${cat.id}`}
                           className="-mx-1.5 inline-flex min-h-9 items-center rounded-lg px-1.5 py-1 transition motion-reduce:transition-none hover:text-violet-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-0 md:py-0"
@@ -283,7 +283,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       type="button"
                       onClick={() => openEdit(cat)}
                       aria-label={`Editar categoria ${cat.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -291,7 +291,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                       type="button"
                       onClick={() => setDeletingCat(cat)}
                       aria-label={`Excluir categoria ${cat.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
                     >
                       Excluir
                     </button>
@@ -337,11 +337,11 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
             blockedByTransactions ? (
               <>
                 A categoria{" "}
-                <strong className="font-semibold text-slate-900">
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
                   {deletingCat.name}
                 </strong>{" "}
                 possui{" "}
-                <strong className="font-semibold text-slate-900">
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
                   {deletingCat.transactionCount === 1
                     ? "1 transação vinculada"
                     : `${deletingCat.transactionCount} transações vinculadas`}
@@ -351,7 +351,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
             ) : (
               <>
                 Tem certeza de que deseja excluir a categoria{" "}
-                <strong className="font-semibold text-slate-900">
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
                   {deletingCat.name}
                 </strong>
                 ? Essa ação não pode ser desfeita.

@@ -88,7 +88,7 @@ function SvgBarChart({
             y1={y}
             x2={width - padX}
             y2={y}
-            stroke={step === 0 ? "#cbd5e1" : "#f1f5f9"}
+            stroke={step === 0 ? "var(--chart-axis, #cbd5e1)" : "var(--chart-grid, #f1f5f9)"}
             strokeWidth={step === 0 ? "1.5" : "1"}
           />
         );
@@ -122,7 +122,7 @@ function SvgBarChart({
                 width={slotW - 4}
                 height={chartH + 34}
                 rx="10"
-                fill="rgba(124, 58, 237, 0.05)"
+                className="fill-violet-500/10 dark:fill-violet-400/15"
               />
             )}
 
@@ -134,8 +134,7 @@ function SvgBarChart({
                 width={barW}
                 height={pIncH}
                 rx="3"
-                fill="#d1fae5"
-                stroke="#10b981"
+                className="fill-emerald-100 stroke-emerald-500 dark:fill-emerald-950/80 dark:stroke-emerald-400"
                 strokeWidth="1"
                 strokeDasharray="2 2"
               />
@@ -149,7 +148,7 @@ function SvgBarChart({
                 width={barW}
                 height={rIncH}
                 rx="3"
-                fill="#059669"
+                className="fill-emerald-600 dark:fill-emerald-500"
               />
             )}
 
@@ -161,8 +160,7 @@ function SvgBarChart({
                 width={barW}
                 height={pExpH}
                 rx="3"
-                fill="#ffe4e6"
-                stroke="#f43f5e"
+                className="fill-rose-100 stroke-rose-500 dark:fill-rose-950/80 dark:stroke-rose-400"
                 strokeWidth="1"
                 strokeDasharray="2 2"
               />
@@ -176,7 +174,7 @@ function SvgBarChart({
                 width={barW}
                 height={rExpH}
                 rx="3"
-                fill="#e11d48"
+                className="fill-rose-600 dark:fill-rose-500"
               />
             )}
 
@@ -186,8 +184,8 @@ function SvgBarChart({
               textAnchor="middle"
               className={`text-[11px] ${
                 isCurrent
-                  ? "fill-violet-700 font-bold"
-                  : "fill-slate-500 font-medium"
+                  ? "fill-violet-700 font-bold dark:fill-violet-400"
+                  : "fill-slate-500 font-medium dark:fill-slate-400"
               }`}
             >
               {shortMonth(m.month)}
@@ -220,26 +218,26 @@ export function CashflowBarChart({ items }: CashflowBarChartProps) {
   return (
     <div className="space-y-5">
       {/* Legenda clara do que é Previsto vs. Realizado */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-50/90 p-3.5 text-xs ring-1 ring-slate-200/70">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-50/90 p-3.5 text-xs ring-1 ring-slate-200/70 dark:bg-slate-800/50 dark:ring-slate-700/60">
         <div className="flex flex-wrap items-center gap-4">
-          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-            <span className="h-3.5 w-3.5 rounded-sm border border-dashed border-emerald-600 bg-emerald-100" />
+          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+            <span className="h-3.5 w-3.5 rounded-sm border border-dashed border-emerald-600 bg-emerald-100 dark:border-emerald-500 dark:bg-emerald-950" />
             Receita prevista (pagos + a receber)
           </span>
-          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-            <span className="h-3.5 w-3.5 rounded-sm bg-emerald-600" />
+          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+            <span className="h-3.5 w-3.5 rounded-sm bg-emerald-600 dark:bg-emerald-500" />
             Receita realizada (já recebida)
           </span>
-          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-            <span className="h-3.5 w-3.5 rounded-sm border border-dashed border-rose-500 bg-rose-100" />
+          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+            <span className="h-3.5 w-3.5 rounded-sm border border-dashed border-rose-500 bg-rose-100 dark:border-rose-500 dark:bg-rose-950" />
             Despesa prevista (pagas + a pagar)
           </span>
-          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-            <span className="h-3.5 w-3.5 rounded-sm bg-rose-600" />
+          <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+            <span className="h-3.5 w-3.5 rounded-sm bg-rose-600 dark:bg-rose-500" />
             Despesa realizada (já paga)
           </span>
         </div>
-        <span className="text-slate-500">
+        <span className="text-slate-500 dark:text-slate-400">
           <span className="sm:hidden">Exibindo os 6 meses mais próximos. </span>
           Meses futuros mostram apenas valores previstos.
         </span>
@@ -279,14 +277,14 @@ export function CashflowBarChart({ items }: CashflowBarChartProps) {
       </div>
 
       {/* Tabela acessível com todos os valores */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-200/80">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-slate-800">
         <table className="w-full border-collapse text-left text-xs sm:text-sm">
           <caption className="sr-only">
             Tabela mensal de receitas, despesas e resultado previstos e
             realizados
           </caption>
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/90 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-slate-200 bg-slate-50/90 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-400">
               <th scope="col" className="px-4 py-3">
                 Mês
               </th>
@@ -310,7 +308,7 @@ export function CashflowBarChart({ items }: CashflowBarChartProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 bg-white tabular-nums">
+          <tbody className="divide-y divide-slate-100 bg-white tabular-nums dark:divide-slate-800 dark:bg-slate-900">
             {items.map((m) => {
               const isCurrent = m.month === thisMonth;
               const isFuture = m.month > thisMonth;
@@ -320,43 +318,43 @@ export function CashflowBarChart({ items }: CashflowBarChartProps) {
                   key={m.month}
                   className={
                     isCurrent
-                      ? "bg-violet-50/40 font-medium"
-                      : "hover:bg-slate-50/60"
+                      ? "bg-violet-50/40 font-medium dark:bg-violet-950/30"
+                      : "hover:bg-slate-50/60 dark:hover:bg-slate-800/60"
                   }
                 >
                   <th
                     scope="row"
-                    className="whitespace-nowrap px-4 py-3 font-semibold text-slate-900"
+                    className="whitespace-nowrap px-4 py-3 font-semibold text-slate-900 dark:text-slate-100"
                   >
                     <Link
                       href={`/transacoes?month=${m.month}`}
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg hover:text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg hover:text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:hover:text-violet-400"
                     >
                       <span>
                         {capitalizeFirst(formatMonthLabel(m.month))}
                       </span>
                       {isCurrent && (
-                        <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+                        <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
                           Atual
                         </span>
                       )}
                     </Link>
                   </th>
-                  <td className="whitespace-nowrap px-3 py-3 text-right text-emerald-700">
+                  <td className="whitespace-nowrap px-3 py-3 text-right text-emerald-700 dark:text-emerald-400">
                     {formatBRL(m.plannedIncomeCents)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-emerald-600">
+                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
                     {isFuture ? "—" : formatBRL(m.realizedIncomeCents)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right text-rose-700">
+                  <td className="whitespace-nowrap px-3 py-3 text-right text-rose-700 dark:text-rose-400">
                     {formatBRL(m.plannedExpenseCents)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-rose-600">
+                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-rose-600 dark:text-rose-400">
                     {isFuture ? "—" : formatBRL(m.realizedExpenseCents)}
                   </td>
                   <td
                     className={`whitespace-nowrap px-3 py-3 text-right font-semibold ${
-                      m.plannedNetCents < 0 ? "text-rose-600" : "text-slate-800"
+                      m.plannedNetCents < 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-800 dark:text-slate-200"
                     }`}
                   >
                     {formatBRL(m.plannedNetCents)}
@@ -364,10 +362,10 @@ export function CashflowBarChart({ items }: CashflowBarChartProps) {
                   <td
                     className={`whitespace-nowrap px-4 py-3 text-right font-bold ${
                       isFuture
-                        ? "text-slate-400"
+                        ? "text-slate-400 dark:text-slate-500"
                         : m.realizedNetCents < 0
-                          ? "text-rose-600"
-                          : "text-slate-900"
+                          ? "text-rose-600 dark:text-rose-400"
+                          : "text-slate-900 dark:text-slate-100"
                     }`}
                   >
                     {isFuture ? "—" : formatBRL(m.realizedNetCents)}
@@ -445,6 +443,7 @@ function SvgLineProjection({
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
+        className={anyNegative ? "dark:stroke-rose-400" : "dark:stroke-violet-400"}
       />
       {coords.map((c) => {
         const neg = c.balanceCents < 0;
@@ -458,12 +457,13 @@ function SvgLineProjection({
               fill={neg ? "#e11d48" : "#7c3aed"}
               stroke="#ffffff"
               strokeWidth="2"
+              className={neg ? "dark:fill-rose-400 dark:stroke-slate-900" : "dark:fill-violet-400 dark:stroke-slate-900"}
             />
             <text
               x={c.x}
               y={height - 4}
               textAnchor="middle"
-              className="fill-slate-500 text-[11px] font-semibold"
+              className="fill-slate-500 text-[11px] font-semibold dark:fill-slate-400"
             >
               {shortMonth(c.month)}
             </text>
@@ -480,7 +480,7 @@ export function SixMonthProjectionSection({ points }: SixMonthProjectionProps) {
   return (
     <div className="space-y-5">
       {points.length > 1 && (
-        <div className="rounded-2xl bg-slate-50/75 p-3 sm:p-4 ring-1 ring-slate-200/60">
+        <div className="rounded-2xl bg-slate-50/75 p-3 sm:p-4 ring-1 ring-slate-200/60 dark:bg-slate-800/40 dark:ring-slate-700/60">
           {/* Versão celular (< 640px): cabe perfeitamente em 390px sem rolagem */}
           <div className="sm:hidden">
             <SvgLineProjection
@@ -517,30 +517,30 @@ export function SixMonthProjectionSection({ points }: SixMonthProjectionProps) {
               key={p.month}
               className={`rounded-2xl border p-4 ${
                 isNeg
-                  ? "border-rose-200 bg-rose-50/40"
+                  ? "border-rose-200 bg-rose-50/40 dark:border-rose-900/60 dark:bg-rose-950/40"
                   : isCurrent
-                    ? "border-violet-200 bg-violet-50/40"
-                    : "border-slate-200/80 bg-slate-50/40"
+                    ? "border-violet-200 bg-violet-50/40 dark:border-violet-900/60 dark:bg-violet-950/40"
+                    : "border-slate-200/80 bg-slate-50/40 dark:border-slate-800 dark:bg-slate-900/60"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-slate-600">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                   {capitalizeFirst(formatMonthLabel(p.month))}
                 </span>
                 {isCurrent && (
-                  <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+                  <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
                     Mês atual
                   </span>
                 )}
               </div>
               <p
                 className={`mt-2 text-xl font-extrabold tabular-nums ${
-                  isNeg ? "text-rose-600" : "text-slate-900"
+                  isNeg ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-slate-100"
                 }`}
               >
                 {formatBRL(p.balanceCents)}
               </p>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
                 Saldo projetado ao fim do mês
               </p>
             </li>

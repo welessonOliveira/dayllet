@@ -65,13 +65,13 @@ export function InflationReportSection({
     <div className="space-y-5">
       {/* Status do IPCA */}
       {report.lastIpcaMonth ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-50/90 p-3.5 text-xs ring-1 ring-slate-200/70">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-50/90 p-3.5 text-xs ring-1 ring-slate-200/70 dark:bg-slate-800/60 dark:ring-slate-700/60">
           <div className="flex flex-wrap items-center gap-4">
-            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
+            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
               <span className="h-3.5 w-3.5 rounded-sm border border-dashed border-slate-400 bg-slate-200" />
               Gasto nominal (valor da época)
             </span>
-            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
+            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
               <span className="h-3.5 w-3.5 rounded-sm bg-violet-600" />
               Gasto corrigido (em dinheiro de hoje)
             </span>
@@ -176,13 +176,13 @@ export function InflationReportSection({
       </div>
 
       {/* Tabela acessível */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-200/80">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-slate-700">
         <table className="w-full border-collapse text-left text-xs sm:text-sm">
           <caption className="sr-only">
             Gastos nominais e corrigidos pelo IPCA nos últimos 12 meses
           </caption>
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/90 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-slate-200 bg-slate-50/90 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
               <th scope="col" className="px-4 py-3">
                 Mês
               </th>
@@ -197,12 +197,12 @@ export function InflationReportSection({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 bg-white tabular-nums">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white tabular-nums dark:bg-slate-900">
             {report.rows.map((r) => (
-              <tr key={r.month} className="hover:bg-slate-50/60">
+              <tr key={r.month} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                 <th
                   scope="row"
-                  className="whitespace-nowrap px-4 py-3 font-semibold text-slate-900"
+                  className="whitespace-nowrap px-4 py-3 font-semibold text-slate-900 dark:text-slate-100"
                 >
                   <Link
                     href={`/transacoes?month=${r.month}&type=EXPENSE`}
@@ -211,13 +211,13 @@ export function InflationReportSection({
                     {capitalizeFirst(formatMonthLabel(r.month))}
                   </Link>
                 </th>
-                <td className="whitespace-nowrap px-4 py-3 text-right text-slate-700">
+                <td className="whitespace-nowrap px-4 py-3 text-right text-slate-700 dark:text-slate-300">
                   {formatBRL(r.expenseCents)}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-right text-slate-500">
+                <td className="whitespace-nowrap px-4 py-3 text-right text-slate-500 dark:text-slate-400">
                   {report.lastIpcaMonth ? formatBps(r.inflationBps) : "—"}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-right font-bold text-violet-700">
+                <td className="whitespace-nowrap px-4 py-3 text-right font-bold text-violet-700 dark:text-violet-400">
                   {formatBRL(r.adjustedCents)}
                 </td>
               </tr>

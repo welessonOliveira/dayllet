@@ -88,8 +88,10 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
   return (
     <section
       aria-label={isPast ? "Saldo no fim do mês" : "Previsão pro fim do mês"}
-      className={`rounded-3xl border bg-white p-6 shadow-xs ${
-        goesNegative ? "border-rose-200" : "border-slate-200/80"
+      className={`rounded-3xl border bg-white p-6 shadow-xs dark:bg-slate-900 ${
+        goesNegative
+          ? "border-rose-200 dark:border-rose-900/60"
+          : "border-slate-200/80 dark:border-slate-800"
       }`}
     >
       <div className="grid gap-6 lg:grid-cols-12 lg:items-center">
@@ -100,27 +102,29 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
               <span
                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                   isPast
-                    ? "bg-slate-100 text-slate-700"
+                    ? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                     : goesNegative
-                      ? "bg-rose-100 text-rose-800"
-                      : "bg-violet-50 text-violet-700"
+                      ? "bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300"
+                      : "bg-violet-50 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300"
                 }`}
               >
                 {isPast ? "Saldo no fim do mês" : "Previsão pro fim do mês"}
               </span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {capitalizeFirst(formatMonthLabel(forecast.month))}
               </span>
             </div>
 
             <p
               className={`mt-3 text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl ${
-                isNegativeEnd ? "text-rose-600" : "text-slate-900"
+                isNegativeEnd
+                  ? "text-rose-600 dark:text-rose-400"
+                  : "text-slate-900 dark:text-slate-100"
               }`}
             >
               {formatBRL(forecast.endOfMonthBalanceCents)}
             </p>
-            <p className="mt-1.5 text-xs text-slate-500">
+            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
               {isPast
                 ? `Saldo realizado das suas contas ao encerrar ${formatMonthLabel(forecast.month)}.`
                 : "Quanto deve restar somando o saldo atual das contas com tudo que falta receber e pagar até o fim do mês."}
@@ -128,20 +132,20 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
           </div>
 
           {!isPast && (
-            <div className="grid grid-cols-2 gap-3 rounded-2xl bg-slate-50/80 p-3.5 ring-1 ring-slate-200/60">
+            <div className="grid grid-cols-2 gap-3 rounded-2xl bg-slate-50/80 p-3.5 ring-1 ring-slate-200/60 dark:bg-slate-800/50 dark:ring-slate-700/60">
               <div>
-                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                   A receber no mês
                 </span>
-                <span className="mt-0.5 block text-base font-bold text-emerald-600 tabular-nums">
+                <span className="mt-0.5 block text-base font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
                   {formatBRL(forecast.pendingIncomeCents)}
                 </span>
               </div>
               <div>
-                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                   A pagar no mês
                 </span>
-                <span className="mt-0.5 block text-base font-bold text-amber-700 tabular-nums">
+                <span className="mt-0.5 block text-base font-bold text-amber-700 tabular-nums dark:text-amber-400">
                   {formatBRL(forecast.pendingExpenseCents)}
                 </span>
               </div>
@@ -154,10 +158,10 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
               {goesNegative && forecast.lowest && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs leading-relaxed text-rose-900"
+                  className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs leading-relaxed text-rose-900 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200"
                 >
                   <svg
-                    className="mt-0.5 h-4 w-4 shrink-0 text-rose-600"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                     aria-hidden="true"
@@ -169,7 +173,7 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
                     />
                   </svg>
                   <div>
-                    <p className="font-bold text-rose-950">
+                    <p className="font-bold text-rose-950 dark:text-rose-100">
                       Seu saldo fica negativo em {lowestDateLabel}
                     </p>
                     <p className="mt-0.5 tabular-nums">
@@ -182,19 +186,19 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
               )}
 
               {forecast.overdueExpenseCents > 0 && (
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-xs text-amber-950">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-xs text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
                   <div>
                     <strong className="font-bold">Contas atrasadas: </strong>
                     <span className="font-semibold tabular-nums">
                       {formatBRL(forecast.overdueExpenseCents)}
                     </span>{" "}
-                    <span className="text-amber-900/85">
+                    <span className="text-amber-900/85 dark:text-amber-300/85">
                       pendentes com vencimento antes de hoje.
                     </span>
                   </div>
                   <Link
                     href="/transacoes?type=EXPENSE"
-                    className="-my-1 inline-flex min-h-9 items-center rounded-lg px-2 font-bold text-amber-950 underline hover:text-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2"
+                    className="-my-1 inline-flex min-h-9 items-center rounded-lg px-2 font-bold text-amber-950 underline hover:text-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2 dark:text-amber-200 dark:hover:text-amber-100"
                   >
                     Regularizar →
                   </Link>
@@ -205,21 +209,21 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
         </div>
 
         {/* Coluna direita: mini gráfico de linha dia a dia em SVG puro */}
-        <div className="rounded-2xl bg-slate-50/70 p-4 ring-1 ring-slate-200/60 lg:col-span-5">
+        <div className="rounded-2xl bg-slate-50/70 p-4 ring-1 ring-slate-200/60 dark:bg-slate-800/40 dark:ring-slate-700/60 lg:col-span-5">
           <div className="mb-2 flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold text-slate-700 dark:text-slate-300">
               Evolução diária do saldo
             </span>
             <Link
               href="/fluxo"
-              className="-my-1 inline-flex min-h-9 items-center rounded-lg px-1.5 font-semibold text-violet-600 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              className="-my-1 inline-flex min-h-9 items-center rounded-lg px-1.5 font-semibold text-violet-600 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:text-violet-400 dark:hover:text-violet-300"
             >
               Ver fluxo →
             </Link>
           </div>
 
           {points.length === 0 ? (
-            <p className="py-8 text-center text-xs text-slate-400">
+            <p className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
               Sem dados diários para este período.
             </p>
           ) : (
@@ -241,10 +245,11 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
                     stroke="#fda4af"
                     strokeWidth="1.2"
                     strokeDasharray="4 4"
+                    className="dark:stroke-rose-700/80"
                   />
                 )}
 
-                <polygon points={areaPoints} fill={areaFill} />
+                <polygon points={areaPoints} fill={areaFill} className="dark:opacity-80" />
 
                 <polyline
                   points={polylinePoints}
@@ -253,6 +258,7 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  className={goesNegative ? "dark:stroke-rose-400" : "dark:stroke-violet-400"}
                 />
 
                 {minCoord && (
@@ -263,11 +269,12 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
                     fill="#e11d48"
                     stroke="#ffffff"
                     strokeWidth="1.5"
+                    className="dark:stroke-slate-900"
                   />
                 )}
               </svg>
 
-              <div className="mt-1 flex items-center justify-between text-[11px] font-medium text-slate-500 tabular-nums">
+              <div className="mt-1 flex items-center justify-between text-[11px] font-medium text-slate-500 tabular-nums dark:text-slate-400">
                 <span>
                   {shortDayMonth(points[0].date)}:{" "}
                   {formatBRL(points[0].balanceCents)}

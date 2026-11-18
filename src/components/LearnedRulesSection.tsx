@@ -44,35 +44,35 @@ export function LearnedRulesSection({ rules }: LearnedRulesSectionProps) {
       <div className="mb-4">
         <h2
           id="learned-rules-heading"
-          className="text-base font-bold text-slate-900"
+          className="text-base font-bold text-slate-900 dark:text-slate-100"
         >
           Regras aprendidas ({rules.length})
         </h2>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
           Padrões na descrição aprendidos automaticamente para sugerir
           categorias em novos lançamentos e na importação de extratos
         </p>
       </div>
 
       {rules.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center">
-          <p className="text-sm font-semibold text-slate-700">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 dark:border-slate-700 px-6 py-8 text-center dark:bg-slate-800/40">
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             Nenhuma regra aprendida ainda
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Ao cadastrar transações ou confirmar uma importação de extrato, o
             app aprende suas escolhas automaticamente.
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
           {rules.map((rule) => (
             <li
               key={rule.id}
               className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
             >
               <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs sm:text-sm">
-                <span className="rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold text-slate-800">
+                <span className="rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1 font-mono text-xs font-semibold text-slate-800">
                   {rule.pattern}
                 </span>
                 <span className="text-slate-400" aria-hidden="true">
@@ -97,7 +97,7 @@ export function LearnedRulesSection({ rules }: LearnedRulesSectionProps) {
                 type="button"
                 onClick={() => setDeletingRule(rule)}
                 aria-label={`Apagar regra ${rule.pattern}`}
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
               >
                 Apagar
               </button>
@@ -116,11 +116,11 @@ export function LearnedRulesSection({ rules }: LearnedRulesSectionProps) {
           deletingRule ? (
             <>
               Deseja apagar a regra automática{" "}
-              <strong className="font-semibold text-slate-900">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100">
                 {deletingRule.pattern}
               </strong>{" "}
               →{" "}
-              <strong className="font-semibold text-slate-900">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100">
                 {deletingRule.category.name}
               </strong>
               ? Os lançamentos já cadastrados não serão alterados.

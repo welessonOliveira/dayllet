@@ -51,7 +51,7 @@ export function ImportReviewClient({
     return (
       <div className="mx-auto max-w-lg py-10">
         <div className="rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xs">
-          <h1 className="text-xl font-bold text-slate-900">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
             {batch.status === "COMMITTED"
               ? "Esta importação já foi confirmada"
               : "Esta importação foi descartada"}
@@ -63,7 +63,7 @@ export function ImportReviewClient({
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               href="/importar"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             >
               Voltar para Importar
             </Link>
@@ -142,10 +142,10 @@ export function ImportReviewClient({
           >
             ← Voltar para Importar
           </Link>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             Revisar extrato
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Arquivo <strong className="text-slate-700">{batch.fileName}</strong>{" "}
             ({batch.format}) · Conta{" "}
             <strong className="text-slate-700">{batch.wallet.name}</strong>
@@ -195,7 +195,7 @@ export function ImportReviewClient({
           <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
             Total lido
           </span>
-          <p className="mt-1 text-xl font-bold text-slate-900 tabular-nums">
+          <p className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
             {summary.total}
           </p>
         </div>
@@ -268,12 +268,12 @@ export function ImportReviewClient({
       )}
 
       {/* Lista de linhas em revisão */}
-      <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs">
+      <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
         {/* Tabela Desktop */}
         <div className="hidden overflow-x-auto md:block">
           <table className="w-full border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <th className="px-5 py-3.5">Data</th>
                 <th className="px-4 py-3.5">Descrição</th>
                 <th className="px-4 py-3.5 text-right">Valor</th>
@@ -281,7 +281,7 @@ export function ImportReviewClient({
                 <th className="px-5 py-3.5 text-right">Decisão</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {batch.rows.map((row) => {
                 const isIncome = row.type === "INCOME";
                 const willImport = row.decision === "IMPORT";
@@ -301,11 +301,11 @@ export function ImportReviewClient({
                       !willImport ? "bg-slate-50/60 opacity-65" : ""
                     }`}
                   >
-                    <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium text-slate-500 tabular-nums">
+                    <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums">
                       {formatDate(new Date(row.date))}
                     </td>
                     <td className="px-4 py-3.5">
-                      <p className="font-semibold text-slate-900">
+                      <p className="font-semibold text-slate-900 dark:text-slate-100">
                         {row.description}
                       </p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -344,7 +344,7 @@ export function ImportReviewClient({
                             categoryId: e.target.value || null,
                           })
                         }
-                        className={`min-h-10 w-full min-w-[180px] rounded-xl border bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none transition motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-50 ${
+                        className={`min-h-10 w-full min-w-[180px] rounded-xl border bg-white px-3 py-2 text-xs font-medium text-slate-900 dark:text-slate-100 outline-none transition motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-50 ${
                           needsCategory
                             ? "border-rose-300 bg-rose-50/40"
                             : "border-slate-200"
@@ -362,7 +362,7 @@ export function ImportReviewClient({
                       </select>
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 text-right">
-                      <div className="inline-flex rounded-xl bg-slate-100 p-0.5">
+                      <div className="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5">
                         <button
                           type="button"
                           disabled={isBusy}
@@ -374,7 +374,7 @@ export function ImportReviewClient({
                           className={`min-h-9 rounded-lg px-3 py-1.5 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
                             willImport
                               ? "bg-violet-600 text-white shadow-xs"
-                              : "text-slate-600 hover:text-slate-900"
+                              : "text-slate-600 hover:text-slate-900 dark:hover:text-slate-100"
                           }`}
                         >
                           Importar
@@ -390,7 +390,7 @@ export function ImportReviewClient({
                           className={`min-h-9 rounded-lg px-3 py-1.5 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
                             !willImport
                               ? "bg-white text-slate-800 shadow-xs"
-                              : "text-slate-600 hover:text-slate-900"
+                              : "text-slate-600 hover:text-slate-900 dark:hover:text-slate-100"
                           }`}
                         >
                           Pular
@@ -405,7 +405,7 @@ export function ImportReviewClient({
         </div>
 
         {/* Lista Mobile (cards empilhados com alvos >= 44px) */}
-        <ul className="divide-y divide-slate-100 md:hidden">
+        <ul className="divide-y divide-slate-100 dark:divide-slate-800 md:hidden">
           {batch.rows.map((row) => {
             const isIncome = row.type === "INCOME";
             const willImport = row.decision === "IMPORT";
@@ -425,10 +425,10 @@ export function ImportReviewClient({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-semibold text-slate-900 dark:text-slate-100">
                       {row.description}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500 tabular-nums">
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                       {formatDate(new Date(row.date))}
                     </p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -468,7 +468,7 @@ export function ImportReviewClient({
                       categoryId: e.target.value || null,
                     })
                   }
-                  className={`min-h-11 w-full rounded-xl border bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
+                  className={`min-h-11 w-full rounded-xl border bg-white px-3 py-2 text-xs font-medium text-slate-900 dark:text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
                     needsCategory
                       ? "border-rose-300 bg-rose-50/40"
                       : "border-slate-200"
@@ -483,7 +483,7 @@ export function ImportReviewClient({
                   ))}
                 </select>
 
-                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 dark:bg-slate-800 p-1">
                   <button
                     type="button"
                     disabled={isBusy}
@@ -534,7 +534,7 @@ export function ImportReviewClient({
         description={
           <>
             Deseja descartar a revisão do arquivo{" "}
-            <strong className="font-semibold text-slate-900">
+            <strong className="font-semibold text-slate-900 dark:text-slate-100">
               {batch.fileName}
             </strong>
             ? Nenhum lançamento será gravado na conta {batch.wallet.name}.

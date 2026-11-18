@@ -113,10 +113,10 @@ export function GoalsClient({ goals }: GoalsClientProps) {
       {/* Cabeçalho */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             Metas
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Planeje seus objetivos, guarde aos poucos e veja quanto falta por
             mês
           </p>
@@ -163,7 +163,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
 
       {/* Lista de metas */}
       {visibleGoals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center shadow-xs">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center dark:bg-slate-900 shadow-xs">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
             <svg
               className="h-6 w-6"
@@ -178,7 +178,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
               <circle cx="12" cy="12" r="1.5" fill="currentColor" />
             </svg>
           </div>
-          <h2 className="mt-4 text-base font-bold text-slate-900">
+          <h2 className="mt-4 text-base font-bold text-slate-900 dark:text-slate-100">
             Nenhuma meta ativa no momento
           </h2>
           <p className="mt-1 max-w-sm text-sm text-slate-500">
@@ -230,7 +230,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                       </span>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <h2 className="truncate text-base font-bold text-slate-900">
+                          <h2 className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
                             {g.name}
                           </h2>
                           {g.archived && (
@@ -239,7 +239,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 text-xs text-slate-500 tabular-nums">
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                           {g.targetDate
                             ? `Prazo: ${formatDate(new Date(g.targetDate))}`
                             : "Sem prazo definido"}
@@ -263,7 +263,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                   {/* Valores R$ X de R$ Y + barra de progresso */}
                   <div className="mt-4">
                     <div className="flex items-baseline justify-between gap-2 text-sm tabular-nums">
-                      <span className="font-bold text-slate-900">
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
                         {formatBRL(progress.savedCents)}{" "}
                         <span className="font-normal text-slate-500">
                           de {formatBRL(progress.targetCents)}
@@ -276,7 +276,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                       )}
                     </div>
 
-                    <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                       <div
                         className="h-full rounded-full transition-all motion-reduce:transition-none"
                         style={{
@@ -303,7 +303,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                       </p>
                     ) : g.targetDate &&
                       progress.monthlyNeededCents !== null ? (
-                      <p className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 tabular-nums">
+                      <p className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 tabular-nums">
                         Guarde{" "}
                         <strong className="font-bold text-violet-700">
                           {formatBRL(progress.monthlyNeededCents)}
@@ -332,7 +332,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                         onClick={() =>
                           setContribTarget({ goal: g, kind: "WITHDRAW" })
                         }
-                        className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45"
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45"
                       >
                         − Retirar
                       </button>
@@ -346,7 +346,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                         Histórico de movimentações
                       </h3>
                       {g.contributions.length === 0 ? (
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                           Nenhuma movimentação registrada ainda.
                         </p>
                       ) : (
@@ -359,7 +359,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                                 className="flex items-center justify-between gap-2 py-2 text-xs first:pt-0 last:pb-0"
                               >
                                 <div className="min-w-0">
-                                  <span className="font-semibold text-slate-700 tabular-nums">
+                                  <span className="font-semibold text-slate-700 dark:text-slate-300 tabular-nums">
                                     {formatDate(new Date(c.date))}
                                   </span>
                                   {c.note && (
@@ -403,7 +403,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                 </div>
 
                 {/* Rodapé de gerenciamento */}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
                   <button
                     type="button"
                     aria-expanded={historyOpen}
@@ -422,7 +422,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                       type="button"
                       disabled={isArchiving}
                       onClick={() => handleToggleArchive(g)}
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-2.5 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 md:min-h-9 md:border-transparent md:bg-transparent md:py-1.5 md:text-slate-600"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-2.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 md:min-h-9 md:border-transparent md:bg-transparent md:py-1.5 md:text-slate-600"
                     >
                       {g.archived ? "Reativar" : "Arquivar"}
                     </button>
@@ -433,7 +433,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                         setFormOpen(true);
                       }}
                       aria-label={`Editar meta ${g.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -441,7 +441,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
                       type="button"
                       onClick={() => setDeletingGoal(g)}
                       aria-label={`Excluir meta ${g.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
                     >
                       Excluir
                     </button>
@@ -490,7 +490,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
           deletingGoal ? (
             <>
               Deseja excluir permanentemente a meta{" "}
-              <strong className="font-semibold text-slate-900">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100">
                 {deletingGoal.name}
               </strong>
               ?
@@ -523,7 +523,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
           deletingContrib ? (
             <>
               Deseja apagar esta movimentação de{" "}
-              <strong className="font-semibold text-slate-900 tabular-nums">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
                 {formatBRL(Math.abs(deletingContrib.contrib.amountCents))}
               </strong>{" "}
               na meta <strong>{deletingContrib.goalName}</strong>?

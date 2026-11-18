@@ -44,18 +44,18 @@ export function MyAccountClient({ user }: MyAccountClientProps) {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
           Minha conta
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Seus dados de acesso, portabilidade e privacidade (LGPD)
         </p>
       </div>
 
       {/* Dados do perfil */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-base font-bold text-slate-900">Identificação</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Identificação</h2>
           {user.isDemo && (
             <span className="rounded-full bg-amber-100 px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-amber-800">
               Conta Demo
@@ -64,26 +64,26 @@ export function MyAccountClient({ user }: MyAccountClientProps) {
         </div>
 
         <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl bg-slate-50/80 p-4 ring-1 ring-slate-200/60">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="rounded-2xl bg-slate-50/80 p-4 ring-1 ring-slate-200/60 dark:bg-slate-800/60 dark:ring-slate-700/60">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Nome
             </dt>
-            <dd className="mt-1 text-sm font-bold text-slate-900">
+            <dd className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
               {user.name || "Visitante"}
             </dd>
           </div>
-          <div className="rounded-2xl bg-slate-50/80 p-4 ring-1 ring-slate-200/60">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="rounded-2xl bg-slate-50/80 p-4 ring-1 ring-slate-200/60 dark:bg-slate-800/60 dark:ring-slate-700/60">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               E-mail
             </dt>
-            <dd className="mt-1 break-all text-sm font-semibold text-slate-700">
+            <dd className="mt-1 break-all text-sm font-semibold text-slate-700 dark:text-slate-300">
               {user.email || "Não informado"}
             </dd>
           </div>
         </dl>
 
         {user.isDemo && (
-          <p className="mt-4 rounded-2xl border border-amber-200/90 bg-amber-50/75 px-4 py-3 text-xs leading-relaxed text-amber-900">
+          <p className="mt-4 rounded-2xl border border-amber-200/90 bg-amber-50/75 px-4 py-3 text-xs leading-relaxed text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
             Você está usando uma conta de demonstração só sua, com dados de
             exemplo. Ela é apagada automaticamente em{" "}
             <strong>24 horas</strong>.
@@ -92,10 +92,10 @@ export function MyAccountClient({ user }: MyAccountClientProps) {
       </section>
 
       {/* Portabilidade: Baixar meus dados */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
               Seus dados (portabilidade LGPD)
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-slate-500">
@@ -126,7 +126,7 @@ export function MyAccountClient({ user }: MyAccountClientProps) {
       {/* Zona de perigo */}
       <section
         aria-labelledby="danger-zone-heading"
-        className="rounded-3xl border border-rose-200 bg-white p-6 shadow-xs"
+        className="rounded-3xl border border-rose-200 bg-white p-6 shadow-xs dark:border-rose-900/60 dark:bg-slate-900"
       >
         <h2 id="danger-zone-heading" className="text-base font-bold text-rose-700">
           Zona de perigo
@@ -149,7 +149,7 @@ export function MyAccountClient({ user }: MyAccountClientProps) {
                 ref={errorRef}
                 role="alert"
                 tabIndex={-1}
-                className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+                className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
               >
                 {serverError}
               </div>
@@ -158,7 +158,7 @@ export function MyAccountClient({ user }: MyAccountClientProps) {
             <div>
               <label
                 htmlFor="delete-account-confirm"
-                className="block text-xs font-semibold text-slate-700"
+                className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
               >
                 Digite <strong>EXCLUIR</strong> para confirmar:
               </label>
@@ -170,7 +170,7 @@ export function MyAccountClient({ user }: MyAccountClientProps) {
                   onChange={(e) => setConfirmation(e.target.value)}
                   placeholder="EXCLUIR"
                   autoComplete="off"
-                  className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 outline-none transition motion-reduce:transition-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/25 focus-visible:ring-2 focus-visible:ring-rose-500"
+                  className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none transition motion-reduce:transition-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/25 focus-visible:ring-2 focus-visible:ring-rose-500"
                 />
                 <button
                   type="submit"

@@ -1,9 +1,21 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f6f7fb;
   --foreground: #0f172a;
+  --chart-axis: #cbd5e1;
+  --chart-grid: #f1f5f9;
   color-scheme: light;
+}
+
+html.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --chart-axis: #334155;
+  --chart-grid: #1e293b;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -29,6 +41,11 @@ body {
   color: #4c1d95;
 }
 
+html.dark ::selection {
+  background-color: #5b21b6;
+  color: #f5f3ff;
+}
+
 /* Padroniza indicador de foco visível para navegação por teclado */
 a:focus-visible,
 button:focus-visible,
@@ -36,6 +53,13 @@ summary:focus-visible,
 [role="button"]:focus-visible {
   outline: 2px solid #7c3aed;
   outline-offset: 2px;
+}
+
+html.dark a:focus-visible,
+html.dark button:focus-visible,
+html.dark summary:focus-visible,
+html.dark [role="button"]:focus-visible {
+  outline-color: #a78bfa;
 }
 
 /* Números alinhados para valores monetários e tabelas */
@@ -59,4 +83,134 @@ summary:focus-visible,
     transition-duration: 0s !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+@layer utilities {
+/* ===== Modo escuro: rede de segurança (gerado por gen-dark-css.mjs) =====
+   Cada classe clara ganha uma cor escura, mas só quando o elemento não tem um dark: próprio
+   daquela propriedade (o :not cuida disso). Pra ajustar um caso, ponha dark:... no componente. */
+html.dark [class~="bg-amber-100"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #78350f 45%, transparent); }
+html.dark [class~="bg-amber-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #451a03 45%, transparent); }
+html.dark [class~="bg-amber-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #451a03 32%, transparent); }
+html.dark [class~="bg-amber-50/75"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #451a03 34%, transparent); }
+html.dark [class~="bg-amber-50/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #451a03 36%, transparent); }
+html.dark [class~="bg-amber-50/90"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #451a03 41%, transparent); }
+html.dark [class~="bg-emerald-100"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #064e3b 45%, transparent); }
+html.dark [class~="bg-emerald-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #022c22 45%, transparent); }
+html.dark [class~="bg-emerald-50/50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #022c22 23%, transparent); }
+html.dark [class~="bg-emerald-50/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #022c22 36%, transparent); }
+html.dark [class~="bg-rose-100"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #881337 45%, transparent); }
+html.dark [class~="bg-rose-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c0519 45%, transparent); }
+html.dark [class~="bg-rose-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c0519 18%, transparent); }
+html.dark [class~="bg-rose-50/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c0519 27%, transparent); }
+html.dark [class~="bg-rose-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c0519 32%, transparent); }
+html.dark [class~="bg-slate-100"]:not([class*="dark:bg-"]) { background-color: #1e293b; }
+html.dark [class~="bg-slate-100/85"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 85%, transparent); }
+html.dark [class~="bg-slate-200"]:not([class*="dark:bg-"]) { background-color: #334155; }
+html.dark [class~="bg-slate-200/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #334155 60%, transparent); }
+html.dark [class~="bg-slate-200/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #334155 70%, transparent); }
+html.dark [class~="bg-slate-200/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #334155 80%, transparent); }
+html.dark [class~="bg-slate-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 55%, transparent); }
+html.dark [class~="bg-slate-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 22%, transparent); }
+html.dark [class~="bg-slate-50/50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 28%, transparent); }
+html.dark [class~="bg-slate-50/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 33%, transparent); }
+html.dark [class~="bg-slate-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 39%, transparent); }
+html.dark [class~="bg-slate-50/75"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 41%, transparent); }
+html.dark [class~="bg-slate-50/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 44%, transparent); }
+html.dark [class~="bg-slate-50/90"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 50%, transparent); }
+html.dark [class~="bg-violet-100"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c1d95 45%, transparent); }
+html.dark [class~="bg-violet-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 45%, transparent); }
+html.dark [class~="bg-violet-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 18%, transparent); }
+html.dark [class~="bg-violet-50/50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 23%, transparent); }
+html.dark [class~="bg-violet-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 32%, transparent); }
+html.dark [class~="bg-violet-50/75"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 34%, transparent); }
+html.dark [class~="bg-white"]:not([class*="dark:bg-"]) { background-color: #0f172a; }
+html.dark [class~="bg-white/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #0f172a 80%, transparent); }
+html.dark [class~="bg-white/90"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #0f172a 90%, transparent); }
+html.dark [class~="bg-white/95"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #0f172a 95%, transparent); }
+html.dark [class~="border-amber-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #78350f 70%, transparent); }
+html.dark [class~="border-amber-200/90"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #78350f 63%, transparent); }
+html.dark [class~="border-amber-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #78350f 70%, transparent); }
+html.dark [class~="border-emerald-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #064e3b 70%, transparent); }
+html.dark [class~="border-emerald-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #064e3b 70%, transparent); }
+html.dark [class~="border-rose-100"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #881337 70%, transparent); }
+html.dark [class~="border-rose-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #881337 70%, transparent); }
+html.dark [class~="border-rose-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #881337 56%, transparent); }
+html.dark [class~="border-rose-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #881337 70%, transparent); }
+html.dark [class~="border-slate-100"]:not([class*="dark:border-"]) { border-color: #1e293b; }
+html.dark [class~="border-slate-200"]:not([class*="dark:border-"]) { border-color: #1e293b; }
+html.dark [class~="border-slate-200/60"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 60%, transparent); }
+html.dark [class~="border-slate-200/70"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 70%, transparent); }
+html.dark [class~="border-slate-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 80%, transparent); }
+html.dark [class~="border-slate-200/90"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 90%, transparent); }
+html.dark [class~="border-slate-300/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #334155 80%, transparent); }
+html.dark [class~="border-slate-400"]:not([class*="dark:border-"]) { border-color: #334155; }
+html.dark [class~="border-violet-100"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
+html.dark [class~="border-violet-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
+html.dark [class~="border-violet-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 56%, transparent); }
+html.dark [class~="border-violet-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
+html.dark [class~="divide-slate-100"]:not([class*="dark:divide-"]) > :not(:last-child) { border-color: #1e293b; }
+html.dark [class~="divide-slate-200/70"]:not([class*="dark:divide-"]) > :not(:last-child) { border-color: color-mix(in oklab, #1e293b 70%, transparent); }
+html.dark [class~="fill-emerald-100"]:not([class*="dark:fill-"]) { fill: #022c22; }
+html.dark [class~="fill-emerald-600"]:not([class*="dark:fill-"]) { fill: #34d399; }
+html.dark [class~="fill-rose-100"]:not([class*="dark:fill-"]) { fill: #4c0519; }
+html.dark [class~="fill-rose-600"]:not([class*="dark:fill-"]) { fill: #fb7185; }
+html.dark [class~="fill-slate-500"]:not([class*="dark:fill-"]) { fill: #94a3b8; }
+html.dark [class~="fill-violet-700"]:not([class*="dark:fill-"]) { fill: #a78bfa; }
+html.dark [class~="focus:bg-white"]:focus:not([class*="dark:focus:bg-"]) { background-color: #0f172a; }
+html.dark [class~="hover:bg-amber-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #78350f 45%, transparent); }
+html.dark [class~="hover:bg-emerald-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #064e3b 45%, transparent); }
+html.dark [class~="hover:bg-rose-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #881337 45%, transparent); }
+html.dark [class~="hover:bg-rose-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #4c0519 45%, transparent); }
+html.dark [class~="hover:bg-slate-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: #1e293b; }
+html.dark [class~="hover:bg-slate-200/70"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #334155 70%, transparent); }
+html.dark [class~="hover:bg-slate-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #1e293b 55%, transparent); }
+html.dark [class~="hover:bg-slate-50/60"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #1e293b 33%, transparent); }
+html.dark [class~="hover:bg-slate-50/70"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #1e293b 39%, transparent); }
+html.dark [class~="hover:bg-violet-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #4c1d95 45%, transparent); }
+html.dark [class~="hover:bg-violet-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #2e1065 45%, transparent); }
+html.dark [class~="hover:bg-violet-50/30"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #2e1065 14%, transparent); }
+html.dark [class~="hover:border-slate-300"]:hover:not([class*="dark:hover:border-"]) { border-color: #334155; }
+html.dark [class~="hover:border-violet-200"]:hover:not([class*="dark:hover:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
+html.dark [class~="hover:text-amber-800"]:hover:not([class*="dark:hover:text-"]) { color: #fcd34d; }
+html.dark [class~="hover:text-amber-950"]:hover:not([class*="dark:hover:text-"]) { color: #fcd34d; }
+html.dark [class~="hover:text-rose-600"]:hover:not([class*="dark:hover:text-"]) { color: #fb7185; }
+html.dark [class~="hover:text-rose-950"]:hover:not([class*="dark:hover:text-"]) { color: #fda4af; }
+html.dark [class~="hover:text-slate-600"]:hover:not([class*="dark:hover:text-"]) { color: #94a3b8; }
+html.dark [class~="hover:text-slate-700"]:hover:not([class*="dark:hover:text-"]) { color: #cbd5e1; }
+html.dark [class~="hover:text-slate-800"]:hover:not([class*="dark:hover:text-"]) { color: #e2e8f0; }
+html.dark [class~="hover:text-slate-900"]:hover:not([class*="dark:hover:text-"]) { color: #f1f5f9; }
+html.dark [class~="hover:text-violet-600"]:hover:not([class*="dark:hover:text-"]) { color: #a78bfa; }
+html.dark [class~="hover:text-violet-700"]:hover:not([class*="dark:hover:text-"]) { color: #a78bfa; }
+html.dark [class~="ring-slate-100"]:not([class*="dark:ring-"]) { --tw-ring-color: #1e293b; }
+html.dark [class~="ring-slate-200/60"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, #1e293b 60%, transparent); }
+html.dark [class~="ring-slate-200/70"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, #1e293b 70%, transparent); }
+html.dark [class~="ring-violet-100"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, #4c1d95 70%, transparent); }
+html.dark [class~="text-amber-700"]:not([class*="dark:text-"]) { color: #fbbf24; }
+html.dark [class~="text-amber-800"]:not([class*="dark:text-"]) { color: #fcd34d; }
+html.dark [class~="text-amber-800/80"]:not([class*="dark:text-"]) { color: color-mix(in oklab, #fcd34d 80%, transparent); }
+html.dark [class~="text-amber-900"]:not([class*="dark:text-"]) { color: #fcd34d; }
+html.dark [class~="text-amber-900/85"]:not([class*="dark:text-"]) { color: color-mix(in oklab, #fcd34d 85%, transparent); }
+html.dark [class~="text-amber-950"]:not([class*="dark:text-"]) { color: #fcd34d; }
+html.dark [class~="text-emerald-600"]:not([class*="dark:text-"]) { color: #34d399; }
+html.dark [class~="text-emerald-700"]:not([class*="dark:text-"]) { color: #34d399; }
+html.dark [class~="text-emerald-700/80"]:not([class*="dark:text-"]) { color: color-mix(in oklab, #34d399 80%, transparent); }
+html.dark [class~="text-emerald-800"]:not([class*="dark:text-"]) { color: #6ee7b7; }
+html.dark [class~="text-rose-600"]:not([class*="dark:text-"]) { color: #fb7185; }
+html.dark [class~="text-rose-700"]:not([class*="dark:text-"]) { color: #fb7185; }
+html.dark [class~="text-rose-700/80"]:not([class*="dark:text-"]) { color: color-mix(in oklab, #fb7185 80%, transparent); }
+html.dark [class~="text-rose-800"]:not([class*="dark:text-"]) { color: #fda4af; }
+html.dark [class~="text-rose-900"]:not([class*="dark:text-"]) { color: #fda4af; }
+html.dark [class~="text-rose-950"]:not([class*="dark:text-"]) { color: #fda4af; }
+html.dark [class~="text-slate-400"]:not([class*="dark:text-"]) { color: #64748b; }
+html.dark [class~="text-slate-500"]:not([class*="dark:text-"]) { color: #94a3b8; }
+html.dark [class~="text-slate-600"]:not([class*="dark:text-"]) { color: #94a3b8; }
+html.dark [class~="text-slate-700"]:not([class*="dark:text-"]) { color: #cbd5e1; }
+html.dark [class~="text-slate-800"]:not([class*="dark:text-"]) { color: #e2e8f0; }
+html.dark [class~="text-slate-900"]:not([class*="dark:text-"]) { color: #f1f5f9; }
+html.dark [class~="text-violet-600"]:not([class*="dark:text-"]) { color: #a78bfa; }
+html.dark [class~="text-violet-700"]:not([class*="dark:text-"]) { color: #a78bfa; }
+html.dark [class~="text-violet-800"]:not([class*="dark:text-"]) { color: #c4b5fd; }
+html.dark [class~="text-violet-900"]:not([class*="dark:text-"]) { color: #c4b5fd; }
+/* ===== fim da rede de segurança ===== */
 }

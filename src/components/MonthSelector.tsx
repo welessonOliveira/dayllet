@@ -43,14 +43,14 @@ export function MonthSelector({ month, extraParams }: MonthSelectorProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div
-        className={`inline-flex items-center gap-1 rounded-2xl border border-slate-200/90 bg-white p-1 shadow-xs transition-opacity motion-reduce:transition-none ${
+        className={`inline-flex items-center gap-1 rounded-2xl border border-slate-200/90 bg-white p-1 shadow-xs transition-opacity motion-reduce:transition-none dark:border-slate-800 dark:bg-slate-900 ${
           isPending ? "opacity-65" : ""
         }`}
       >
         <Link
           href={buildHref(pathname, prevMonth, extraParams)}
           aria-label="Mês anterior"
-          className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9"
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
         >
           <svg
             className="h-4 w-4"
@@ -66,9 +66,9 @@ export function MonthSelector({ month, extraParams }: MonthSelectorProps) {
           </svg>
         </Link>
 
-        <label className="relative flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-semibold text-slate-800 transition motion-reduce:transition-none hover:text-violet-700 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-500 has-[:focus-visible]:ring-offset-2 md:min-h-9">
+        <label className="relative flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-semibold text-slate-800 transition motion-reduce:transition-none hover:text-violet-700 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-500 has-[:focus-visible]:ring-offset-2 md:min-h-9 dark:text-slate-200 dark:hover:text-violet-400">
           <svg
-            className="h-4 w-4 text-violet-600"
+            className="h-4 w-4 text-violet-600 dark:text-violet-400"
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -99,7 +99,7 @@ export function MonthSelector({ month, extraParams }: MonthSelectorProps) {
         <Link
           href={buildHref(pathname, nextMonth, extraParams)}
           aria-label="Próximo mês"
-          className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9"
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
         >
           <svg
             className="h-4 w-4"
@@ -119,7 +119,7 @@ export function MonthSelector({ month, extraParams }: MonthSelectorProps) {
       {!isCurrent && (
         <Link
           href={buildHref(pathname, thisMonth, extraParams)}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-violet-50 px-3.5 py-2 text-xs font-semibold text-violet-700 transition motion-reduce:transition-none hover:bg-violet-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-violet-50 px-3.5 py-2 text-xs font-semibold text-violet-700 transition motion-reduce:transition-none hover:bg-violet-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 dark:bg-violet-950/60 dark:text-violet-300 dark:hover:bg-violet-900/80"
         >
           Mês atual
         </Link>

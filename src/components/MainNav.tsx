@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { signOutAction } from "@/server/actions/auth";
 import type { SessionUser } from "@/server/session";
 import { AuthSubmitButton } from "./AuthSubmitButton";
+import { ThemeSegmentedControl, ThemeToggleButton } from "./ThemeToggle";
 
 type NavItem = {
   href: string;
@@ -172,8 +173,8 @@ export function MainNav({ user }: MainNavProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 md:px-6">
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/90">
+        <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 md:px-6 xl:flex-nowrap xl:gap-3">
           <Link
             href="/"
             className="-mx-1.5 flex min-h-11 shrink-0 items-center gap-2.5 rounded-xl px-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
@@ -194,15 +195,15 @@ export function MainNav({ user }: MainNavProps) {
                 <circle cx="16.5" cy="14.5" r="1.25" fill="currentColor" stroke="none" />
               </svg>
             </span>
-            <span className="text-base font-bold tracking-tight text-slate-900">
+            <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100">
               Finanças
             </span>
           </Link>
 
-          {/* Menu Desktop */}
+          {/* Menu Desktop: Em 1280px+ (xl:) fica em linha única junto com o logo e o usuário */}
           <nav
             aria-label="Menu principal"
-            className="order-3 hidden w-full flex-wrap items-center gap-1 border-t border-slate-100 pt-2 md:flex lg:order-2 lg:w-auto lg:border-t-0 lg:pt-0"
+            className="order-3 hidden w-full flex-wrap items-center gap-1 border-t border-slate-100 pt-2 md:flex lg:order-2 lg:w-auto lg:border-t-0 lg:pt-0 dark:border-slate-800 xl:order-2 xl:flex-nowrap xl:gap-0.5"
           >
             {LINKS.map((item) => {
               const ativo = isActive(item.href);
@@ -211,83 +212,90 @@ export function MainNav({ user }: MainNavProps) {
                   key={item.href}
                   href={item.href}
                   aria-current={ativo ? "page" : undefined}
-                  className={`flex min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 xl:px-3.5 xl:text-sm ${
+                  className={`flex min-h-10 items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold whitespace-nowrap transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 xl:px-2.5 ${
                     ativo
                       ? "bg-violet-600 text-white shadow-xs"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                   }`}
                 >
-                  {item.icon}
+                  <span className="shrink-0 xl:hidden">{item.icon}</span>
                   <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Usuário logado + link Minha conta + selo Demo + botão Sair */}
-          {user && (
-            <div className="order-2 flex shrink-0 items-center gap-2 lg:order-3">
-              <Link
-                href="/minha-conta"
-                aria-current={pathname === "/minha-conta" ? "page" : undefined}
-                aria-label={`Minha conta (${displayName})`}
-                title={
-                  user.isDemo
-                    ? "Minha conta (demonstração exclusiva por 24h)"
-                    : "Minha conta"
-                }
-                className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 ${
-                  pathname === "/minha-conta"
-                    ? "border-violet-300 bg-violet-100 text-violet-900"
-                    : "border-slate-200/80 bg-slate-100/85 text-slate-700 hover:border-slate-300 hover:bg-slate-200/70"
-                }`}
-              >
-                <svg
-                  className="h-4 w-4 shrink-0 text-violet-600"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
-                </svg>
-                <span className="max-w-20 truncate text-xs font-semibold sm:max-w-28">
-                  {displayName}
-                </span>
-                {user.isDemo && (
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800">
-                    Demo
-                  </span>
-                )}
-                <span className="hidden border-l border-slate-300/80 pl-1.5 text-xs font-semibold text-violet-700 sm:inline">
-                  Minha conta
-                </span>
-              </Link>
+          {/* Botão de alternância de tema + usuário logado / minha conta / sair */}
+          <div className="order-2 flex shrink-0 items-center gap-1.5 sm:gap-2 lg:order-3 xl:order-3">
+            {/* No celular o tema fica no menu "Mais" (ThemeSegmentedControl). */}
+            <span className="hidden md:contents">
+              <ThemeToggleButton />
+            </span>
 
-              <form action={signOutAction}>
-                <AuthSubmitButton
-                  pendingLabel="Saindo..."
-                  ariaLabel="Sair da conta"
-                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 md:min-h-9 md:min-w-0 md:py-1.5"
+            {user && (
+              <>
+                <Link
+                  href="/minha-conta"
+                  aria-current={pathname === "/minha-conta" ? "page" : undefined}
+                  aria-label={`Minha conta (${displayName})`}
+                  title={
+                    user.isDemo
+                      ? "Minha conta (demonstração exclusiva por 24h)"
+                      : "Minha conta"
+                  }
+                  className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 ${
+                    pathname === "/minha-conta"
+                      ? "border-violet-300 bg-violet-100 text-violet-900 dark:border-violet-700 dark:bg-violet-950/70 dark:text-violet-200"
+                      : "border-slate-200/80 bg-slate-100/85 text-slate-700 hover:border-slate-300 hover:bg-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                  }`}
                 >
-                  Sair
-                </AuthSubmitButton>
-              </form>
-            </div>
-          )}
+                  <svg
+                    className="h-4 w-4 shrink-0 text-violet-600 dark:text-violet-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                  </svg>
+                  <span className="max-w-20 truncate text-xs font-semibold sm:max-w-28">
+                    {displayName}
+                  </span>
+                  {user.isDemo && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">
+                      Demo
+                    </span>
+                  )}
+                  <span className="hidden border-l border-slate-300/80 pl-1.5 text-xs font-semibold text-violet-700 sm:inline xl:hidden min-[1400px]:inline dark:border-slate-700 dark:text-violet-400">
+                    Minha conta
+                  </span>
+                </Link>
+
+                <form action={signOutAction}>
+                  <AuthSubmitButton
+                    pendingLabel="Saindo..."
+                    ariaLabel="Sair da conta"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 md:min-h-9 md:min-w-0 md:py-1.5 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-rose-400"
+                  >
+                    Sair
+                  </AuthSubmitButton>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Menu "Mais" no celular (acima da barra inferior) */}
       {moreOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[1px] md:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-[1px] md:hidden"
           onClick={() => setMoreOpen(false)}
         >
           <div
             role="dialog"
-            aria-label="Mais páginas"
+            aria-label="Mais opções e páginas"
             onClick={(e) => e.stopPropagation()}
-            className="fixed inset-x-3 bottom-20 rounded-3xl border border-slate-200 bg-white p-3 shadow-xl"
+            className="fixed inset-x-3 bottom-20 rounded-3xl border border-slate-200 bg-white p-3 shadow-xl dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="grid grid-cols-2 gap-2">
               {secondaryMobileLinks.map((item) => {
@@ -300,7 +308,7 @@ export function MainNav({ user }: MainNavProps) {
                     className={`flex min-h-12 items-center gap-2.5 rounded-2xl px-3.5 py-3 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
                       ativo
                         ? "bg-violet-600 text-white"
-                        : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                     }`}
                   >
                     {item.icon}
@@ -315,7 +323,7 @@ export function MainNav({ user }: MainNavProps) {
                   className={`col-span-2 flex min-h-12 items-center gap-2.5 rounded-2xl px-3.5 py-3 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
                     pathname === "/minha-conta"
                       ? "bg-violet-600 text-white"
-                      : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                   }`}
                 >
                   <svg
@@ -330,6 +338,14 @@ export function MainNav({ user }: MainNavProps) {
                 </Link>
               )}
             </div>
+
+            {/* Escolha rápida de tema visual no menu do celular */}
+            <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+              <span className="mb-2 block px-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                Tema visual
+              </span>
+              <ThemeSegmentedControl />
+            </div>
           </div>
         </div>
       )}
@@ -337,7 +353,7 @@ export function MainNav({ user }: MainNavProps) {
       {/* Menu fixo no rodapé do celular (4 abas principais + Mais = 5 alvos >= 44px) */}
       <nav
         aria-label="Menu inferior"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-1.5 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-1.5 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95"
       >
         <div className="mx-auto grid max-w-md grid-cols-5 gap-0.5">
           {primaryMobileLinks.map((item) => {
@@ -348,11 +364,13 @@ export function MainNav({ user }: MainNavProps) {
                 href={item.href}
                 aria-current={ativo ? "page" : undefined}
                 className={`relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-500 ${
-                  ativo ? "text-violet-600" : "text-slate-500 hover:text-slate-800"
+                  ativo
+                    ? "text-violet-600 dark:text-violet-400"
+                    : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 {ativo && (
-                  <span className="absolute top-0 h-0.5 w-7 rounded-full bg-violet-600" />
+                  <span className="absolute top-0 h-0.5 w-7 rounded-full bg-violet-600 dark:bg-violet-400" />
                 )}
                 {item.icon}
                 <span className="truncate">{item.mobileLabel}</span>
@@ -366,12 +384,12 @@ export function MainNav({ user }: MainNavProps) {
             onClick={() => setMoreOpen((v) => !v)}
             className={`relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-500 ${
               secondaryActive || moreOpen
-                ? "text-violet-600"
-                : "text-slate-500 hover:text-slate-800"
+                ? "text-violet-600 dark:text-violet-400"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
             }`}
           >
             {secondaryActive && (
-              <span className="absolute top-0 h-0.5 w-7 rounded-full bg-violet-600" />
+              <span className="absolute top-0 h-0.5 w-7 rounded-full bg-violet-600 dark:bg-violet-400" />
             )}
             <svg
               className="h-4 w-4"

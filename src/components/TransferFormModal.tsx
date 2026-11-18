@@ -158,7 +158,7 @@ export function TransferFormModal({
             ref={errorSummaryRef}
             role="alert"
             tabIndex={-1}
-            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
           >
             <p className="font-semibold text-rose-900">
               {serverError ?? "Confira os campos destacados antes de salvar:"}
@@ -188,7 +188,7 @@ export function TransferFormModal({
           <div>
             <label
               htmlFor="tr-from-wallet"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Conta de origem
             </label>
@@ -207,7 +207,7 @@ export function TransferFormModal({
                   }
                 },
               })}
-              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -228,7 +228,7 @@ export function TransferFormModal({
           <div>
             <label
               htmlFor="tr-to-wallet"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Conta de destino
             </label>
@@ -237,7 +237,7 @@ export function TransferFormModal({
               aria-invalid={Boolean(errors.toWalletId) || undefined}
               aria-describedby={errors.toWalletId ? "tr-to-error" : undefined}
               {...form.register("toWalletId")}
-              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               <option value="">Selecione...</option>
               {wallets
@@ -264,7 +264,7 @@ export function TransferFormModal({
           <div>
             <label
               htmlFor="tr-amount"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Valor (R$)
             </label>
@@ -281,7 +281,7 @@ export function TransferFormModal({
                 aria-invalid={Boolean(errors.amount) || undefined}
                 aria-describedby={errors.amount ? "tr-amount-error" : undefined}
                 {...form.register("amount")}
-                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
               />
             </div>
             {errors.amount?.message && (
@@ -297,7 +297,7 @@ export function TransferFormModal({
           <div>
             <label
               htmlFor="tr-date"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Data
             </label>
@@ -307,7 +307,7 @@ export function TransferFormModal({
               aria-invalid={Boolean(errors.date) || undefined}
               aria-describedby={errors.date ? "tr-date-error" : undefined}
               {...form.register("date")}
-              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             {errors.date?.message && (
               <p
@@ -324,7 +324,7 @@ export function TransferFormModal({
         <div>
           <label
             htmlFor="tr-note"
-            className="block text-sm font-semibold text-slate-700"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
             Observação{" "}
             <span className="font-normal text-slate-400">(opcional)</span>
@@ -336,7 +336,7 @@ export function TransferFormModal({
             aria-invalid={Boolean(errors.note) || undefined}
             aria-describedby={errors.note ? "tr-note-error" : undefined}
             {...form.register("note")}
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
           {errors.note?.message && (
             <p
@@ -354,7 +354,7 @@ export function TransferFormModal({
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             Cancelar
           </button>

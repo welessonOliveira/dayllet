@@ -174,7 +174,7 @@ export function CategoryFormModal({
             ref={errorSummaryRef}
             role="alert"
             tabIndex={-1}
-            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
           >
             <p className="font-semibold text-rose-900">
               {serverError ?? "Confira os campos destacados antes de salvar:"}
@@ -201,10 +201,10 @@ export function CategoryFormModal({
 
         {/* Tipo */}
         <div>
-          <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Tipo da categoria
           </span>
-          <div className="mt-1.5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+          <div className="mt-1.5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 dark:bg-slate-800 p-1">
             {(["EXPENSE", "INCOME"] as const).map((t) => {
               const active = selectedType === t;
               return (
@@ -222,7 +222,7 @@ export function CategoryFormModal({
                       ? t === "EXPENSE"
                         ? "bg-white text-rose-600 shadow-xs"
                         : "bg-white text-emerald-600 shadow-xs"
-                      : "text-slate-600 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-45"
+                      : "text-slate-600 hover:text-slate-900 dark:hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-45"
                   }`}
                 >
                   {CATEGORY_TYPE_LABEL[t]}
@@ -231,7 +231,7 @@ export function CategoryFormModal({
             })}
           </div>
           {typeLocked && (
-            <p className="mt-1.5 text-xs text-slate-500">
+            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
               O tipo não pode ser alterado porque esta categoria já possui
               transações ou orçamentos vinculados.
             </p>
@@ -250,7 +250,7 @@ export function CategoryFormModal({
         <div>
           <label
             htmlFor="cat-name"
-            className="block text-sm font-semibold text-slate-700"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
             Nome da categoria
           </label>
@@ -266,7 +266,7 @@ export function CategoryFormModal({
                 : "Ex.: Salário, Freelance, Reembolso"
             }
             {...form.register("name")}
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
           {errors.name?.message && (
             <p
@@ -282,7 +282,7 @@ export function CategoryFormModal({
         <div>
           <label
             htmlFor="cat-color"
-            className="block text-sm font-semibold text-slate-700"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
             Cor de identificação{" "}
             <span className="font-normal text-slate-400">(opcional)</span>
@@ -303,7 +303,7 @@ export function CategoryFormModal({
                       shouldValidate: true,
                     })
                   }
-                  className="flex h-11 w-11 items-center justify-center rounded-xl transition motion-reduce:transition-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9"
                 >
                   <span
                     className={`h-7 w-7 rounded-full transition motion-reduce:transition-none ${
@@ -342,7 +342,7 @@ export function CategoryFormModal({
               aria-invalid={Boolean(errors.color) || undefined}
               aria-describedby={errors.color ? "cat-color-error" : undefined}
               {...form.register("color")}
-              className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             />
             {selectedColor && (
               <button
@@ -353,7 +353,7 @@ export function CategoryFormModal({
                     shouldValidate: true,
                   })
                 }
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
               >
                 Limpar
               </button>
@@ -375,7 +375,7 @@ export function CategoryFormModal({
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             Cancelar
           </button>

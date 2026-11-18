@@ -158,15 +158,15 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
-        className={`flex max-h-[92dvh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl outline-none sm:rounded-3xl`}
+        className={`flex max-h-[92dvh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl outline-none sm:rounded-3xl dark:border-slate-800 dark:bg-slate-900`}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-4 dark:border-slate-800">
           <div>
-            <h2 id={titleId} className="text-lg font-bold text-slate-900">
+            <h2 id={titleId} className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
+              <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
             )}
           </div>
           <button
@@ -174,7 +174,7 @@ export function Modal({
             disabled={busy}
             onClick={onClose}
             aria-label="Fechar janela"
-            className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-400 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-40 md:mr-0 md:h-9 md:w-9"
+            className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-400 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-40 md:mr-0 md:h-9 md:w-9 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
           >
             <svg
               className="h-5 w-5"

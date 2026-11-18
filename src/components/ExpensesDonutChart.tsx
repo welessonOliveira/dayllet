@@ -21,8 +21,8 @@ type ExpensesDonutChartProps = {
 export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-12 text-center">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-900/60">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
           <svg
             className="h-6 w-6"
             viewBox="0 0 24 24"
@@ -35,10 +35,10 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
             <path d="M12 3v9l6.36 6.36" />
           </svg>
         </div>
-        <p className="mt-3 text-sm font-semibold text-slate-700">
+        <p className="mt-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
           Sem despesas neste mês
         </p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Quando houver gastos registrados, o gráfico por categoria aparecerá
           aqui.
         </p>
@@ -84,8 +84,9 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
             cy="94"
             r={radius}
             fill="none"
-            stroke="#f1f5f9"
+            stroke="currentColor"
             strokeWidth="24"
+            className="text-slate-100 dark:text-slate-800"
           />
           <g transform="rotate(-90 94 94)">
             {slices.map((slice) => (
@@ -107,10 +108,10 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
           </g>
         </svg>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-5 text-center">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
             Despesas
           </span>
-          <span className="mt-0.5 text-sm font-bold text-slate-900 tabular-nums">
+          <span className="mt-0.5 text-sm font-bold text-slate-900 tabular-nums dark:text-slate-100">
             {formatBRL(totalCents)}
           </span>
         </div>
@@ -122,7 +123,7 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
           <li key={slice.categoryId}>
             <Link
               href={`/transacoes?month=${month}&type=EXPENSE&categoryId=${slice.categoryId}`}
-              className="group -mx-2 flex min-h-11 flex-col justify-center rounded-xl p-2 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              className="group -mx-2 flex min-h-11 flex-col justify-center rounded-xl p-2 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:hover:bg-slate-800/60"
             >
               <div className="flex items-center justify-between gap-2 text-sm">
                 <div className="flex min-w-0 items-center gap-2.5">
@@ -130,20 +131,20 @@ export function ExpensesDonutChart({ items, month }: ExpensesDonutChartProps) {
                     className="h-3 w-3 shrink-0 rounded-full"
                     style={{ backgroundColor: slice.color }}
                   />
-                  <span className="truncate font-medium text-slate-700 group-hover:text-violet-700">
+                  <span className="truncate font-medium text-slate-700 group-hover:text-violet-700 dark:text-slate-300 dark:group-hover:text-violet-400">
                     {slice.name}
                   </span>
                 </div>
                 <div className="flex shrink-0 items-center gap-2 tabular-nums">
-                  <span className="text-xs font-semibold text-slate-400">
+                  <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
                     {slice.percent}%
                   </span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">
                     {formatBRL(slice.totalCents)}
                   </span>
                 </div>
               </div>
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 <div
                   className="h-full rounded-full transition-all motion-reduce:transition-none"
                   style={{

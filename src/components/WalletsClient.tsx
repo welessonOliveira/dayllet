@@ -159,10 +159,10 @@ export function WalletsClient({
       {/* Cabeçalho */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             Contas
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Saldos atuais e previstos das suas contas correntes, poupanças e
             carteiras
           </p>
@@ -215,26 +215,26 @@ export function WalletsClient({
       {/* Resumo consolidado das contas */}
       {wallets.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-3xl border border-violet-100 bg-white p-6 shadow-xs">
+          <div className="rounded-3xl border border-violet-100 bg-white p-6 shadow-xs dark:border-violet-900/40 dark:bg-slate-900">
             <span className="inline-flex items-center rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
               Saldo total atual
             </span>
             <p
               className={`mt-3 text-3xl font-extrabold tracking-tight tabular-nums ${
-                totalCurrentCents < 0 ? "text-rose-600" : "text-slate-900"
+                totalCurrentCents < 0 ? "text-rose-600" : "text-slate-900 dark:text-slate-100"
               }`}
             >
               {formatBRL(totalCurrentCents)}
             </p>
-            <p className="mt-1.5 text-xs text-slate-500">
+            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
               Soma do dinheiro disponível hoje em{" "}
               {wallets.length === 1 ? "1 conta" : `${wallets.length} contas`}{" "}
               (saldo inicial + recebido − pago).
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
               Saldo total previsto
             </span>
             <p
@@ -244,7 +244,7 @@ export function WalletsClient({
             >
               {formatBRL(totalProjectedCents)}
             </p>
-            <p className="mt-1.5 text-xs text-slate-500">
+            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
               Projeção se todas as receitas a receber e despesas pendentes forem
               quitadas.
             </p>
@@ -254,11 +254,11 @@ export function WalletsClient({
 
       {/* Lista de contas */}
       {wallets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center shadow-xs">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center dark:bg-slate-900 shadow-xs">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
             {KIND_ICON.WALLET}
           </div>
-          <h2 className="mt-4 text-base font-bold text-slate-900">
+          <h2 className="mt-4 text-base font-bold text-slate-900 dark:text-slate-100">
             Nenhuma conta cadastrada
           </h2>
           <p className="mt-1 max-w-sm text-sm text-slate-500">
@@ -288,7 +288,7 @@ export function WalletsClient({
                 key={w.id}
                 className={`flex flex-col justify-between rounded-3xl border bg-white p-6 shadow-xs transition motion-reduce:transition-none ${
                   w.isDefault
-                    ? "border-violet-200 ring-1 ring-violet-100"
+                    ? "border-violet-200 ring-1 ring-violet-100 dark:border-violet-900/60 dark:ring-violet-900/40"
                     : "border-slate-200/80"
                 }`}
               >
@@ -307,16 +307,16 @@ export function WalletsClient({
                       </span>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="truncate text-base font-bold text-slate-900">
+                          <h2 className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
                             {w.name}
                           </h2>
                           {w.isDefault && (
-                            <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-bold text-violet-700">
+                            <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-bold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
                               Padrão
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 text-xs font-medium text-slate-500">
+                        <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                           {WALLET_KIND_LABEL[w.kind]}
                         </p>
                       </div>
@@ -324,7 +324,7 @@ export function WalletsClient({
 
                     <Link
                       href={`/transacoes?walletId=${w.id}`}
-                      className="-my-1 -mr-2 inline-flex min-h-11 shrink-0 items-center rounded-xl px-2 text-xs font-semibold text-slate-500 transition motion-reduce:transition-none hover:text-violet-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-8"
+                      className="-my-1 -mr-2 inline-flex min-h-11 shrink-0 items-center rounded-xl px-2 text-xs font-semibold text-slate-500 dark:text-slate-400 transition motion-reduce:transition-none hover:text-violet-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-8"
                     >
                       {w.transactionCount === 1
                         ? "1 lançamento →"
@@ -333,14 +333,14 @@ export function WalletsClient({
                   </div>
 
                   {/* Saldo atual em destaque + Saldo previsto menor */}
-                  <div className="mt-5 rounded-2xl bg-slate-50/80 p-4 ring-1 ring-slate-200/60">
+                  <div className="mt-5 rounded-2xl bg-slate-50/80 p-4 ring-1 ring-slate-200/60 dark:bg-slate-800/60 dark:ring-slate-700/60">
                     <div>
                       <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                         Saldo atual
                       </span>
                       <span
                         className={`mt-0.5 block text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl ${
-                          isNegativeCurrent ? "text-rose-600" : "text-slate-900"
+                          isNegativeCurrent ? "text-rose-600" : "text-slate-900 dark:text-slate-100"
                         }`}
                       >
                         {formatBRL(w.balance.currentCents)}
@@ -368,7 +368,7 @@ export function WalletsClient({
                 </div>
 
                 {/* Rodapé de ações */}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
                   <div>
                     {!w.isDefault && (
                       <button
@@ -390,7 +390,7 @@ export function WalletsClient({
                         setFormOpen(true);
                       }}
                       aria-label={`Editar conta ${w.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-slate-600"
                     >
                       Editar
                     </button>
@@ -398,7 +398,7 @@ export function WalletsClient({
                       type="button"
                       onClick={() => setDeletingWallet(w)}
                       aria-label={`Excluir conta ${w.name}`}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
                     >
                       Excluir
                     </button>
@@ -411,13 +411,13 @@ export function WalletsClient({
       )}
 
       {/* Transferências do mês */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
               Transferências do mês
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
               Transferência não é receita nem despesa: apenas move dinheiro
               entre suas contas em{" "}
               <strong className="text-slate-700">
@@ -430,18 +430,18 @@ export function WalletsClient({
         </div>
 
         {transfers.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center">
-            <p className="text-sm font-semibold text-slate-700">
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 dark:border-slate-700 px-6 py-8 text-center dark:bg-slate-800/40">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Nenhuma transferência em {formatMonthLabel(month)}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               {wallets.length >= 2
                 ? "Use o botão Transferir acima para registrar saques ou movimentações entre suas contas."
                 : "Cadastre pelo menos duas contas para transferir valores entre elas."}
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
             {transfers.map((tr) => (
               <li
                 key={tr.id}
@@ -449,17 +449,17 @@ export function WalletsClient({
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2 text-sm">
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
                       {tr.fromWallet.name}
                     </span>
                     <span className="text-violet-600" aria-hidden="true">
                       →
                     </span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
                       {tr.toWallet.name}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-slate-500 tabular-nums">
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                     {formatDate(new Date(tr.date))}
                     {tr.note ? ` · ${tr.note}` : ""}
                   </p>
@@ -473,7 +473,7 @@ export function WalletsClient({
                     type="button"
                     onClick={() => setDeletingTransfer(tr)}
                     aria-label={`Apagar transferência de ${tr.fromWallet.name} para ${tr.toWallet.name}`}
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
                   >
                     Apagar
                   </button>
@@ -502,7 +502,7 @@ export function WalletsClient({
           deletingTransfer ? (
             <>
               Deseja apagar a transferência de{" "}
-              <strong className="font-semibold text-slate-900 tabular-nums">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
                 {formatBRL(deletingTransfer.amountCents)}
               </strong>{" "}
               ({deletingTransfer.fromWallet.name} →{" "}
@@ -543,11 +543,11 @@ export function WalletsClient({
             blockedByTransactions ? (
               <>
                 A conta{" "}
-                <strong className="font-semibold text-slate-900">
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
                   {deletingWallet.name}
                 </strong>{" "}
                 possui{" "}
-                <strong className="font-semibold text-slate-900">
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
                   {deletingWallet.transactionCount === 1
                     ? "1 lançamento vinculado"
                     : `${deletingWallet.transactionCount} lançamentos vinculados`}
@@ -557,7 +557,7 @@ export function WalletsClient({
             ) : isOnlyWallet ? (
               <>
                 A conta{" "}
-                <strong className="font-semibold text-slate-900">
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
                   {deletingWallet.name}
                 </strong>{" "}
                 é a sua única conta cadastrada e não pode ser excluída.
@@ -565,7 +565,7 @@ export function WalletsClient({
             ) : (
               <>
                 Tem certeza de que deseja excluir a conta{" "}
-                <strong className="font-semibold text-slate-900">
+                <strong className="font-semibold text-slate-900 dark:text-slate-100">
                   {deletingWallet.name}
                 </strong>
                 ? Essa ação não pode ser desfeita.

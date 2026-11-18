@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AuthSubmitButton } from "@/components/AuthSubmitButton";
+import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { signInDemoAction, signInGithubAction } from "@/server/actions/auth";
 import { githubEnabled } from "@/server/auth";
 import { getSessionUser } from "@/server/session";
@@ -10,7 +11,12 @@ export default async function LoginPage() {
   if (await getSessionUser()) redirect("/");
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-10">
+    <main className="relative flex min-h-dvh flex-col items-center justify-center px-4 py-10">
+      {/* Botão de alternância de tema no topo da tela de login */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggleButton />
+      </div>
+
       <div className="w-full max-w-md space-y-6">
         {/* Identidade do app */}
         <div className="flex flex-col items-center text-center">
@@ -36,10 +42,10 @@ export default async function LoginPage() {
               />
             </svg>
           </span>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
             Finanças
           </h1>
-          <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-600">
+          <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             Acompanhe suas contas, receitas, despesas e orçamentos mensais em um
             só lugar, de forma clara e sem complicação.
           </p>
@@ -48,7 +54,7 @@ export default async function LoginPage() {
         {/* Card de acesso */}
         <section
           aria-label="Opções de acesso"
-          className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8"
+          className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900"
         >
           <div className="space-y-4">
             <form action={signInDemoAction}>
@@ -73,8 +79,8 @@ export default async function LoginPage() {
             </form>
 
             {/* Aviso sobre a conta de demonstração individual */}
-            <div className="rounded-2xl border border-amber-200/90 bg-amber-50/75 p-3.5 text-xs leading-relaxed text-amber-900">
-              <p className="font-semibold text-amber-950">
+            <div className="rounded-2xl border border-amber-200/90 bg-amber-50/75 p-3.5 text-xs leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+              <p className="font-semibold text-amber-950 dark:text-amber-100">
                 Ambiente de demonstração
               </p>
               <p className="mt-0.5">
@@ -91,10 +97,10 @@ export default async function LoginPage() {
                     className="absolute inset-0 flex items-center"
                     aria-hidden="true"
                   >
-                    <div className="w-full border-t border-slate-200" />
+                    <div className="w-full border-t border-slate-200 dark:border-slate-800" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-white px-3 font-medium text-slate-400">
+                    <span className="bg-white px-3 font-medium text-slate-400 dark:bg-slate-900 dark:text-slate-500">
                       ou use sua conta pessoal
                     </span>
                   </div>
@@ -103,10 +109,10 @@ export default async function LoginPage() {
                 <form action={signInGithubAction}>
                   <AuthSubmitButton
                     pendingLabel="Redirecionando para o GitHub..."
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                   >
                     <svg
-                      className="h-5 w-5 text-slate-900"
+                      className="h-5 w-5 text-slate-900 dark:text-slate-100"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                       aria-hidden="true"
@@ -126,7 +132,7 @@ export default async function LoginPage() {
         </section>
 
         {/* Destaques rápidos */}
-        <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-slate-500">
+        <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
           <li className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
             <span>Contas e saldos</span>

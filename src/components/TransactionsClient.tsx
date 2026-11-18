@@ -145,10 +145,10 @@ export function TransactionsClient({
       {/* Cabeçalho */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             Transações
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Extrato de{" "}
             <span className="font-medium text-slate-700">
               {formatMonthLabel(filters.month)}
@@ -173,7 +173,7 @@ export function TransactionsClient({
           <a
             href={exportCsvHref}
             download
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition motion-reduce:transition-none hover:bg-slate-50 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 sm:text-sm"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition motion-reduce:transition-none hover:bg-slate-50 hover:text-violet-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 sm:text-sm"
           >
             <svg
               className="h-4 w-4 text-violet-600"
@@ -210,7 +210,7 @@ export function TransactionsClient({
       {/* Barra de filtros */}
       <section
         aria-label="Filtros de transações"
-        className={`rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs transition-opacity motion-reduce:transition-none sm:p-5 ${
+        className={`rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs transition-opacity motion-reduce:transition-none sm:p-5 dark:bg-slate-900 ${
           isFilterPending ? "opacity-70" : ""
         }`}
       >
@@ -242,13 +242,13 @@ export function TransactionsClient({
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Buscar na descrição..."
                 aria-label="Buscar na descrição"
-                className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pr-3 pl-9 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pr-3 pl-9 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
               />
             </div>
             <button
               type="submit"
               disabled={isFilterPending}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-900 px-3.5 py-2.5 text-xs font-semibold text-white transition motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-60"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-900 px-3.5 py-2.5 text-xs font-semibold text-white transition motion-reduce:transition-none hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-60"
             >
               Buscar
             </button>
@@ -264,7 +264,7 @@ export function TransactionsClient({
                   walletId: e.target.value || undefined,
                 });
               }}
-              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">Todas as contas</option>
               {wallets.map((w) => (
@@ -296,7 +296,7 @@ export function TransactionsClient({
                   categoryId: keepCat ? filters.categoryId : undefined,
                 });
               }}
-              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">Todos os tipos</option>
               <option value="EXPENSE">Despesas</option>
@@ -314,7 +314,7 @@ export function TransactionsClient({
                   categoryId: e.target.value || undefined,
                 });
               }}
-              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">Todas as categorias</option>
               {visibleFilterCategories.map((cat) => (
@@ -327,7 +327,7 @@ export function TransactionsClient({
         </div>
 
         {/* Resumo rápido dos resultados + botão limpar filtros */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800 pt-3 text-xs">
           <div className="flex flex-wrap items-center gap-4 tabular-nums">
             <span className="text-slate-500">
               Receitas na lista:{" "}
@@ -357,7 +357,7 @@ export function TransactionsClient({
 
       {/* Lista de transações */}
       {transactions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center shadow-xs">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center dark:bg-slate-900 shadow-xs">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
             <svg
               className="h-6 w-6"
@@ -374,7 +374,7 @@ export function TransactionsClient({
               />
             </svg>
           </div>
-          <h2 className="mt-4 text-base font-bold text-slate-900">
+          <h2 className="mt-4 text-base font-bold text-slate-900 dark:text-slate-100">
             {hasActiveFilters
               ? "Nenhuma transação encontrada com esses filtros"
               : `Nenhuma transação em ${formatMonthLabel(filters.month)}`}
@@ -388,7 +388,7 @@ export function TransactionsClient({
             <button
               type="button"
               onClick={clearFilters}
-              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             >
               Limpar filtros
             </button>
@@ -406,12 +406,12 @@ export function TransactionsClient({
           )}
         </div>
       ) : (
-        <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs">
+        <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
           {/* Tabela Desktop */}
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <th className="px-5 py-3.5">Data</th>
                   <th className="px-4 py-3.5">Descrição</th>
                   <th className="px-4 py-3.5">Conta</th>
@@ -422,7 +422,7 @@ export function TransactionsClient({
                   <th className="px-5 py-3.5 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {transactions.map((tx) => {
                   const isIncome = tx.type === "INCOME";
                   const isPaid = tx.status === "PAID";
@@ -431,14 +431,14 @@ export function TransactionsClient({
                   return (
                     <tr
                       key={tx.id}
-                      className="transition motion-reduce:transition-none hover:bg-slate-50/70"
+                      className="transition motion-reduce:transition-none hover:bg-slate-50/70 dark:hover:bg-slate-800/50"
                     >
-                      <td className="whitespace-nowrap px-5 py-4 text-xs font-medium text-slate-500 tabular-nums">
+                      <td className="whitespace-nowrap px-5 py-4 text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums">
                         {formatDate(new Date(tx.date))}
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <p className="font-semibold text-slate-900">
+                          <p className="font-semibold text-slate-900 dark:text-slate-100">
                             {tx.description}
                           </p>
                           {tx.recurringRuleId && (
@@ -450,16 +450,16 @@ export function TransactionsClient({
                           )}
                         </div>
                         {tx.notes && (
-                          <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">
+                          <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
                             {tx.notes}
                           </p>
                         )}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-4 text-xs font-medium text-slate-700">
+                      <td className="whitespace-nowrap px-4 py-4 text-xs font-medium text-slate-700 dark:text-slate-300">
                         {tx.wallet.name}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4">
-                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                           <span
                             className="h-2 w-2 rounded-full"
                             style={{
@@ -473,8 +473,8 @@ export function TransactionsClient({
                         <span
                           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                             isIncome
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-rose-50 text-rose-700"
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                              : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400"
                           }`}
                         >
                           {CATEGORY_TYPE_LABEL[tx.type]}
@@ -488,8 +488,8 @@ export function TransactionsClient({
                           title="Clique para alternar a situação"
                           className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50 ${
                             isPaid
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                              : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+                              : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
                           }`}
                         >
                           <span
@@ -521,7 +521,7 @@ export function TransactionsClient({
                               setFormOpen(true);
                             }}
                             aria-label={`Editar ${tx.description}`}
-                            className="inline-flex min-h-9 items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                            className="inline-flex min-h-9 items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
                           >
                             Editar
                           </button>
@@ -543,7 +543,7 @@ export function TransactionsClient({
           </div>
 
           {/* Lista Mobile (cards empilhados com alvos >= 44x44px) */}
-          <ul className="divide-y divide-slate-100 md:hidden">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800 md:hidden">
             {transactions.map((tx) => {
               const isIncome = tx.type === "INCOME";
               const isPaid = tx.status === "PAID";
@@ -554,7 +554,7 @@ export function TransactionsClient({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="font-semibold text-slate-900">
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">
                           {tx.description}
                         </p>
                         {tx.recurringRuleId && (
@@ -565,7 +565,7 @@ export function TransactionsClient({
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                         <span className="inline-flex items-center gap-1 font-medium text-slate-700">
                           <span
                             className="h-2 w-2 rounded-full"
@@ -587,7 +587,7 @@ export function TransactionsClient({
                         </span>
                       </div>
                       {tx.notes && (
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                           {tx.notes}
                         </p>
                       )}
@@ -634,7 +634,7 @@ export function TransactionsClient({
                           setFormOpen(true);
                         }}
                         aria-label={`Editar ${tx.description}`}
-                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
                       >
                         Editar
                       </button>
@@ -642,7 +642,7 @@ export function TransactionsClient({
                         type="button"
                         onClick={() => setDeletingTx(tx)}
                         aria-label={`Excluir ${tx.description}`}
-                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3.5 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-400 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                       >
                         Excluir
                       </button>
@@ -679,11 +679,11 @@ export function TransactionsClient({
           deletingTx ? (
             <>
               Tem certeza de que deseja excluir{" "}
-              <strong className="font-semibold text-slate-900">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100">
                 {deletingTx.description}
               </strong>{" "}
               no valor de{" "}
-              <strong className="font-semibold text-slate-900 tabular-nums">
+              <strong className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
                 {formatBRL(deletingTx.amountCents)}
               </strong>{" "}
               (conta {deletingTx.wallet.name})? Essa ação não pode ser desfeita.

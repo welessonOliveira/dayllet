@@ -3,14 +3,14 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <div className="mx-auto max-w-md py-16 text-center">
-      <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-xs">
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
           <span className="text-lg font-bold">404</span>
         </div>
-        <h1 className="mt-4 text-xl font-bold text-slate-900">
+        <h1 className="mt-4 text-xl font-bold text-slate-900 dark:text-slate-100">
           Página não encontrada
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           O endereço que você tentou acessar não existe no Finanças.
         </p>
         <Link

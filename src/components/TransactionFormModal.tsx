@@ -272,7 +272,7 @@ export function TransactionFormModal({
             ref={errorSummaryRef}
             role="alert"
             tabIndex={-1}
-            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
           >
             <p className="font-semibold text-rose-900">
               {serverError ?? "Confira os campos destacados antes de salvar:"}
@@ -299,10 +299,10 @@ export function TransactionFormModal({
 
         {/* Tipo: Despesa / Receita */}
         <div>
-          <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             Tipo de lançamento
           </span>
-          <div className="mt-1.5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+          <div className="mt-1.5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 dark:bg-slate-800 p-1">
             {(["EXPENSE", "INCOME"] as const).map((t) => {
               const active = selectedType === t;
               return (
@@ -317,7 +317,7 @@ export function TransactionFormModal({
                       ? t === "EXPENSE"
                         ? "bg-white text-rose-600 shadow-xs"
                         : "bg-white text-emerald-600 shadow-xs"
-                      : "text-slate-600 hover:text-slate-900"
+                      : "text-slate-600 hover:text-slate-900 dark:hover:text-slate-100"
                   }`}
                 >
                   {CATEGORY_TYPE_LABEL[t]}
@@ -339,7 +339,7 @@ export function TransactionFormModal({
         <div>
           <label
             htmlFor="tx-description"
-            className="block text-sm font-semibold text-slate-700"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
             Descrição
           </label>
@@ -361,7 +361,7 @@ export function TransactionFormModal({
                 void trySuggestOnBlur();
               },
             })}
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
           {errors.description?.message && (
             <p
@@ -378,7 +378,7 @@ export function TransactionFormModal({
           <div>
             <label
               htmlFor="tx-amount"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Valor (R$)
             </label>
@@ -394,7 +394,7 @@ export function TransactionFormModal({
                 aria-invalid={Boolean(errors.amount) || undefined}
                 aria-describedby={errors.amount ? "tx-amount-error" : undefined}
                 {...form.register("amount")}
-                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
               />
             </div>
             {errors.amount?.message && (
@@ -410,7 +410,7 @@ export function TransactionFormModal({
           <div>
             <label
               htmlFor="tx-date"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Data
             </label>
@@ -420,7 +420,7 @@ export function TransactionFormModal({
               aria-invalid={Boolean(errors.date) || undefined}
               aria-describedby={errors.date ? "tx-date-error" : undefined}
               {...form.register("date")}
-              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             {errors.date?.message && (
               <p
@@ -438,7 +438,7 @@ export function TransactionFormModal({
           <div>
             <label
               htmlFor="tx-wallet"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Conta
             </label>
@@ -447,7 +447,7 @@ export function TransactionFormModal({
               aria-invalid={Boolean(errors.walletId) || undefined}
               aria-describedby={errors.walletId ? "tx-wallet-error" : undefined}
               {...form.register("walletId")}
-              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -470,7 +470,7 @@ export function TransactionFormModal({
           <div>
             <label
               htmlFor="tx-category"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Categoria de {CATEGORY_TYPE_LABEL[selectedType].toLowerCase()}
             </label>
@@ -493,7 +493,7 @@ export function TransactionFormModal({
                   errors.categoryId ? "tx-category-error" : undefined
                 }
                 {...form.register("categoryId")}
-                className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="">Selecione...</option>
                 {filteredCategories.map((cat) => (
@@ -523,7 +523,7 @@ export function TransactionFormModal({
 
         {/* Status (Pago/Pendente ou Recebido/A receber conforme o tipo) */}
         <div>
-          <span className="block text-sm font-semibold text-slate-700">
+          <span className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
             Situação
           </span>
           <div className="mt-1.5 grid grid-cols-2 gap-2">
@@ -570,7 +570,7 @@ export function TransactionFormModal({
         <div>
           <label
             htmlFor="tx-notes"
-            className="block text-sm font-semibold text-slate-700"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
             Observações{" "}
             <span className="font-normal text-slate-400">(opcional)</span>
@@ -582,7 +582,7 @@ export function TransactionFormModal({
             aria-describedby={errors.notes ? "tx-notes-error" : undefined}
             placeholder="Detalhes adicionais, parcela, forma de pagamento..."
             {...form.register("notes")}
-            className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
           {errors.notes?.message && (
             <p
@@ -600,7 +600,7 @@ export function TransactionFormModal({
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             Cancelar
           </button>

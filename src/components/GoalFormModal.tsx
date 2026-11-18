@@ -166,7 +166,7 @@ export function GoalFormModal({
             ref={errorSummaryRef}
             role="alert"
             tabIndex={-1}
-            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+            className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
           >
             <p className="font-semibold text-rose-900">
               {serverError ?? "Confira os campos destacados antes de salvar:"}
@@ -195,7 +195,7 @@ export function GoalFormModal({
         <div>
           <label
             htmlFor="goal-name"
-            className="block text-sm font-semibold text-slate-700"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
             Nome da meta
           </label>
@@ -207,7 +207,7 @@ export function GoalFormModal({
             aria-describedby={errors.name ? "goal-name-error" : undefined}
             placeholder="Ex.: Reserva de emergência, Viagem, Notebook"
             {...form.register("name")}
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
           {errors.name?.message && (
             <p
@@ -224,7 +224,7 @@ export function GoalFormModal({
           <div>
             <label
               htmlFor="goal-target"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Valor da meta (R$)
             </label>
@@ -242,7 +242,7 @@ export function GoalFormModal({
                   errors.target ? "goal-target-error" : undefined
                 }
                 {...form.register("target")}
-                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-3.5 pl-10 text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
               />
             </div>
             {errors.target?.message && (
@@ -258,7 +258,7 @@ export function GoalFormModal({
           <div>
             <label
               htmlFor="goal-target-date"
-              className="block text-sm font-semibold text-slate-700"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
             >
               Prazo{" "}
               <span className="font-normal text-slate-400">(opcional)</span>
@@ -271,7 +271,7 @@ export function GoalFormModal({
                 errors.targetDate ? "goal-date-error" : undefined
               }
               {...form.register("targetDate")}
-              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             {errors.targetDate?.message && (
               <p
@@ -288,7 +288,7 @@ export function GoalFormModal({
         <div>
           <label
             htmlFor="goal-color"
-            className="block text-sm font-semibold text-slate-700"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
             Cor da meta{" "}
             <span className="font-normal text-slate-400">(opcional)</span>
@@ -308,7 +308,7 @@ export function GoalFormModal({
                       shouldValidate: true,
                     })
                   }
-                  className="flex h-11 w-11 items-center justify-center rounded-xl transition motion-reduce:transition-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl transition motion-reduce:transition-none hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:h-9 md:w-9"
                 >
                   <span
                     className={`h-7 w-7 rounded-full ${
@@ -327,7 +327,7 @@ export function GoalFormModal({
             aria-invalid={Boolean(errors.color) || undefined}
             aria-describedby={errors.color ? "goal-color-error" : undefined}
             {...form.register("color")}
-            className="mt-2.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="mt-2.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
           />
           {errors.color?.message && (
             <p
@@ -345,7 +345,7 @@ export function GoalFormModal({
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             Cancelar
           </button>

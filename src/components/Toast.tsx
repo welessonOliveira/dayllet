@@ -66,17 +66,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={item.id}
               role={isSuccess ? "status" : "alert"}
-              className={`pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl border bg-white p-4 shadow-lg transition-all motion-reduce:transition-none ${
+              className={`pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl border bg-white p-4 shadow-lg transition-all motion-reduce:transition-none dark:bg-slate-900 ${
                 isSuccess
-                  ? "border-emerald-200 text-slate-900"
-                  : "border-rose-200 text-slate-900"
+                  ? "border-emerald-200 text-slate-900 dark:border-emerald-800/80 dark:text-slate-100"
+                  : "border-rose-200 text-slate-900 dark:border-rose-800/80 dark:text-slate-100"
               }`}
             >
               <span
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
                   isSuccess
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-rose-100 text-rose-700"
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                    : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
                 }`}
               >
                 {isSuccess ? (
@@ -107,14 +107,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   </svg>
                 )}
               </span>
-              <p className="flex-1 text-sm font-medium leading-snug text-slate-800">
+              <p className="flex-1 text-sm font-medium leading-snug text-slate-800 dark:text-slate-200">
                 {item.message}
               </p>
               <button
                 type="button"
                 onClick={() => remove(item.id)}
                 aria-label="Fechar aviso"
-                className="-my-2 -mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-400 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:mr-0 md:h-8 md:w-8"
+                className="-my-2 -mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-400 transition motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:mr-0 md:h-8 md:w-8 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
                 <svg
                   className="h-4 w-4"
