@@ -3,18 +3,25 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { WALLET_KIND_LABEL, type WalletKind } from "@/lib/constants";
+import { formatDate, formatMonthLabel } from "@/lib/dates";
 import { formatBRL } from "@/lib/money";
+import { deleteTransferAction } from "@/server/actions/transfers";
 import {
   deleteWalletAction,
   setDefaultWalletAction,
 } from "@/server/actions/wallets";
+import type { TransferWithWallets } from "@/server/transfers";
 import type { WalletWithBalance } from "@/server/wallets";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { MonthSelector } from "./MonthSelector";
 import { useToast } from "./Toast";
+import { TransferFormModal } from "./TransferFormModal";
 import { WalletFormModal } from "./WalletFormModal";
 
 type WalletsClientProps = {
   wallets: WalletWithBalance[];
+  transfers: TransferWithWallets[];
+  month: string;
 };
 
 const KIND_ICON: Record<WalletKind, ReactNode> = {
@@ -65,10 +72,15 @@ const KIND_ICON: Record<WalletKind, ReactNode> = {
   ),
 };
 
-export function WalletsClient({ wallets }: WalletsClientProps) {
+export function WalletsClient({
+  wallets,
+  transfers,
+  month,
+}: WalletsClientProps) {
   const toast = useToast();
 
   const [formOpen, setFormOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [editingWallet, setEditingWallet] = useState<WalletWithBalance | null>(
     null,
   );
@@ -76,6 +88,25 @@ export function WalletsClient({ wallets }: WalletsClientProps) {
     useState<WalletWithBalance | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
+  const [deletingTransfer, setDeletingTransfer] =
+    useState<TransferWithWallets | null>(null);
+  const [isDeletingTransfer, setIsDeletingTransfer] = useState(false);
+
+  async function handleConfirmDeleteTransfer() {
+    if (!deletingTransfer) return;
+    setIsDeletingTransfer(true);
+    try {
+      const result = await deleteTransferAction(deletingTransfer.id);
+      if (result.ok) {
+        toast.success(result.message);
+        setDeletingTransfer(null);
+      } else {
+        toast.error(result.error);
+      }
+    } finally {
+      setIsDeletingTransfer(false);
+    }
+  }
 
   async function handleSetDefault(wallet: WalletWithBalance) {
     setSettingDefaultId(wallet.id);
@@ -137,24 +168,48 @@ export function WalletsClient({ wallets }: WalletsClientProps) {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setEditingWallet(null);
-            setFormOpen(true);
-          }}
-          className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 sm:self-auto"
-        >
-          <svg
-            className="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
+        <div className="flex flex-wrap items-center gap-2.5">
+          {wallets.length >= 2 && (
+            <button
+              type="button"
+              onClick={() => setTransferOpen(true)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-2.5 text-sm font-semibold text-violet-700 shadow-xs transition motion-reduce:transition-none hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M17 8l4 4-4 4M3 12h18" />
+              </svg>
+              <span>Transferir</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setEditingWallet(null);
+              setFormOpen(true);
+            }}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
-            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-          </svg>
-          <span>Nova conta</span>
-        </button>
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+            </svg>
+            <span>Nova conta</span>
+          </button>
+        </div>
       </div>
 
       {/* Resumo consolidado das contas */}
@@ -354,6 +409,110 @@ export function WalletsClient({ wallets }: WalletsClientProps) {
           })}
         </div>
       )}
+
+      {/* Transferências do mês */}
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">
+              Transferências do mês
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Transferência não é receita nem despesa: apenas move dinheiro
+              entre suas contas em{" "}
+              <strong className="text-slate-700">
+                {formatMonthLabel(month)}
+              </strong>
+              .
+            </p>
+          </div>
+          <MonthSelector month={month} />
+        </div>
+
+        {transfers.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center">
+            <p className="text-sm font-semibold text-slate-700">
+              Nenhuma transferência em {formatMonthLabel(month)}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {wallets.length >= 2
+                ? "Use o botão Transferir acima para registrar saques ou movimentações entre suas contas."
+                : "Cadastre pelo menos duas contas para transferir valores entre elas."}
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {transfers.map((tr) => (
+              <li
+                key={tr.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="font-semibold text-slate-900">
+                      {tr.fromWallet.name}
+                    </span>
+                    <span className="text-violet-600" aria-hidden="true">
+                      →
+                    </span>
+                    <span className="font-semibold text-slate-900">
+                      {tr.toWallet.name}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-slate-500 tabular-nums">
+                    {formatDate(new Date(tr.date))}
+                    {tr.note ? ` · ${tr.note}` : ""}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className="text-sm font-bold text-violet-700 tabular-nums">
+                    {formatBRL(tr.amountCents)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setDeletingTransfer(tr)}
+                    aria-label={`Apagar transferência de ${tr.fromWallet.name} para ${tr.toWallet.name}`}
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-semibold text-rose-700 transition motion-reduce:transition-none hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 md:min-h-9 md:min-w-0 md:rounded-lg md:border-transparent md:bg-transparent md:px-2.5 md:py-1.5 md:text-rose-600 md:hover:bg-rose-50"
+                  >
+                    Apagar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* Modal de transferência */}
+      <TransferFormModal
+        open={transferOpen}
+        onClose={() => setTransferOpen(false)}
+        wallets={wallets}
+      />
+
+      {/* Confirmação de exclusão de transferência */}
+      <ConfirmDialog
+        open={Boolean(deletingTransfer)}
+        onClose={() => setDeletingTransfer(null)}
+        onConfirm={handleConfirmDeleteTransfer}
+        loading={isDeletingTransfer}
+        title="Apagar esta transferência?"
+        description={
+          deletingTransfer ? (
+            <>
+              Deseja apagar a transferência de{" "}
+              <strong className="font-semibold text-slate-900 tabular-nums">
+                {formatBRL(deletingTransfer.amountCents)}
+              </strong>{" "}
+              ({deletingTransfer.fromWallet.name} →{" "}
+              {deletingTransfer.toWallet.name})? O saldo das duas contas será
+              recalculado imediatamente.
+            </>
+          ) : null
+        }
+        confirmLabel="Sim, apagar transferência"
+      />
 
       {/* Modal criar / editar conta */}
       <WalletFormModal
