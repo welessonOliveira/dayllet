@@ -72,15 +72,15 @@ export default async function LoginPage() {
               </AuthSubmitButton>
             </form>
 
-            {/* Aviso sobre o reset periódico da conta demo */}
+            {/* Aviso sobre a conta de demonstração individual */}
             <div className="rounded-2xl border border-amber-200/90 bg-amber-50/75 p-3.5 text-xs leading-relaxed text-amber-900">
               <p className="font-semibold text-amber-950">
                 Ambiente de demonstração
               </p>
               <p className="mt-0.5">
-                A conta demo já vem preenchida com contas, categorias e
-                lançamentos de exemplo, que são recriados automaticamente a cada{" "}
-                <strong>1 hora</strong>.
+                Você ganha uma conta de demonstração só sua, com dados de
+                exemplo. Ela é apagada automaticamente em{" "}
+                <strong>24 horas</strong>.
               </p>
             </div>
 

@@ -164,7 +164,9 @@ export function MainNav({ user }: MainNavProps) {
 
   const primaryMobileLinks = LINKS.filter((l) => l.primaryMobile);
   const secondaryMobileLinks = LINKS.filter((l) => !l.primaryMobile);
-  const secondaryActive = secondaryMobileLinks.some((l) => isActive(l.href));
+  const secondaryActive =
+    secondaryMobileLinks.some((l) => isActive(l.href)) ||
+    pathname === "/minha-conta";
 
   const displayName = user?.name || user?.email || "Usuário";
 
@@ -222,11 +224,33 @@ export function MainNav({ user }: MainNavProps) {
             })}
           </nav>
 
-          {/* Usuário logado + selo Demo + botão Sair */}
+          {/* Usuário logado + link Minha conta + selo Demo + botão Sair */}
           {user && (
             <div className="order-2 flex shrink-0 items-center gap-2 lg:order-3">
-              <div className="flex items-center gap-1.5 rounded-xl bg-slate-100/80 px-2.5 py-1.5">
-                <span className="max-w-24 truncate text-xs font-semibold text-slate-700 sm:max-w-32">
+              <Link
+                href="/minha-conta"
+                aria-current={pathname === "/minha-conta" ? "page" : undefined}
+                aria-label={`Minha conta (${displayName})`}
+                title={
+                  user.isDemo
+                    ? "Minha conta (demonstração exclusiva por 24h)"
+                    : "Minha conta"
+                }
+                className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 ${
+                  pathname === "/minha-conta"
+                    ? "border-violet-300 bg-violet-100 text-violet-900"
+                    : "border-slate-200/80 bg-slate-100/85 text-slate-700 hover:border-slate-300 hover:bg-slate-200/70"
+                }`}
+              >
+                <svg
+                  className="h-4 w-4 shrink-0 text-violet-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                </svg>
+                <span className="max-w-20 truncate text-xs font-semibold sm:max-w-28">
                   {displayName}
                 </span>
                 {user.isDemo && (
@@ -234,7 +258,10 @@ export function MainNav({ user }: MainNavProps) {
                     Demo
                   </span>
                 )}
-              </div>
+                <span className="hidden border-l border-slate-300/80 pl-1.5 text-xs font-semibold text-violet-700 sm:inline">
+                  Minha conta
+                </span>
+              </Link>
 
               <form action={signOutAction}>
                 <AuthSubmitButton
@@ -281,6 +308,27 @@ export function MainNav({ user }: MainNavProps) {
                   </Link>
                 );
               })}
+              {user && (
+                <Link
+                  href="/minha-conta"
+                  aria-current={pathname === "/minha-conta" ? "page" : undefined}
+                  className={`col-span-2 flex min-h-12 items-center gap-2.5 rounded-2xl px-3.5 py-3 text-xs font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
+                    pathname === "/minha-conta"
+                      ? "bg-violet-600 text-white"
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                  </svg>
+                  <span>Minha conta (LGPD)</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
