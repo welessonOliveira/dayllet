@@ -6,6 +6,7 @@ Este arquivo lista tudo que as telas podem usar. **Não edite** `src/lib/`, `src
 > - Toda função de leitura recebe o **contexto `ctx`**, não mais o `prisma`. Pegue com `const ctx = await getPageCtx()`.
 > - Entrou o conceito de **Conta** (`Wallet`): corrente, poupança ou carteira, com saldo. Toda transação é de uma conta.
 > - Telas novas: `/login` e `/contas`.
+> - **Etapas 4 e 5 (importação + categorização automática):** tela nova `/importar` (upload → revisão → confirmar). As categorias escolhidas viram regras, e a regra sugere a categoria na próxima importação e no formulário de transação (`suggestCategoryAction`).
 > - **Etapa 3 (projeção):** `getMonthForecast`, `getCashflow` e `getBalanceProjection` em `@/server/forecast`: "vai sobrar R$ X no fim do mês", previsto vs. realizado e saldo dos próximos meses.
 > - **Etapa 2 (contas fixas e parcelados):** tela nova `/recorrentes`. As ocorrências viram transações normais automaticamente (com `recurringRuleId`, e no parcelado `installmentNo`/`installmentOf`), então aparecem sozinhas na lista, no dashboard e nos orçamentos.
 
@@ -130,6 +131,9 @@ Todas recebem `ctx` (de `await getPageCtx()`) como 1º argumento e só enxergam 
 | `getBalanceProjection(ctx, months?)` | `@/server/forecast` | quantos meses a partir do atual (padrão 6, máx 24) | `{ month, balanceCents }[]` (saldo projetado no fim de cada mês) |
 | `listRecurringRules(ctx)` | `@/server/recurring` | — | `RecurringRuleView[]` (ativas primeiro, depois A-Z) |
 | `getRecurringRule(ctx, id)` | `@/server/recurring` | `id` | `(RecurringRule & { category; wallet }) \| null` |
+| `listImports(ctx)` | `@/server/imports` | — | últimas 30 importações: `ImportBatch & { wallet, rowCount, importedCount }` (em revisão primeiro) |
+| `getImport(ctx, id)` | `@/server/imports` | `id` | `ImportView \| null` (linhas em ordem + resumo) |
+| `listCategoryRules(ctx)` | `@/server/categoryRules` | — | `(CategoryRule & { category })[]` (mais usadas primeiro): tela "Regras aprendidas" |
 | `listWallets(ctx)` | `@/server/wallets` | — | `Wallet[]` (padrão primeiro, depois A-Z). Pro select de conta. |
 | `listWalletsWithBalance(ctx)` | `@/server/wallets` | — | `WalletWithBalance[]` |
 | `getSessionUser()` | `@/server/session` | — | `{ id, name, email, isDemo } \| null` (menu do usuário, selo "demo") |
@@ -139,6 +143,16 @@ Tipos:
 ```ts
 type TransactionWithCategory = Transaction & { category: Category; wallet: Wallet };
 type WalletWithBalance = Wallet & { balance: WalletBalance; transactionCount: number };
+type ImportSummary = { total; toImport; duplicates; possibleDuplicates; withoutCategory };  // todos number
+type ImportView = ImportBatch & {
+  wallet: Wallet;
+  // ImportBatch: { id, fileName, format: "OFX"|"CSV", status: "REVIEW"|"COMMITTED"|"DISCARDED", createdAt, committedAt }
+  rows: (ImportRow & { category: Category | null })[];
+  // ImportRow: { id, date, amountCents (sempre +), type, description, categoryId, suggestedCategoryId,
+  //              duplicateOfId (já importado = certeza), possibleDuplicate (parecido com manual), decision: "IMPORT"|"SKIP" }
+  summary: ImportSummary;
+};
+// CategoryRule: { id, pattern (ex.: "UBER TRIP"), categoryId, hits }
 type BalancePoint = { date: Date; balanceCents: number };
 type MonthForecast = {
   month: string;
@@ -241,6 +255,24 @@ Erros possíveis: campos inválidos, "Informe de 2 a 120 parcelas.", "O fim prec
 
 Erros novos em outras actions: excluir categoria ou conta usada numa regra → "... é usada em conta fixa ou parcelamento e não pode ser excluída."
 
+### `@/server/actions/imports`
+| Action | Entrada | `data` no sucesso | Mensagem |
+|---|---|---|---|
+| `createImportAction(formData)` | `FormData` com `walletId` e `file` (.ofx/.csv, até 1 MB) | `{ batchId, summary, errors }` | "Extrato lido. Revise os lançamentos antes de confirmar." |
+| `updateImportRowAction(rowId, { decision?, categoryId? })` | `string, { decision?: "IMPORT"\|"SKIP"; categoryId?: string\|null }` | `ImportRow` | "Atualizado." |
+| `commitImportAction(batchId)` | `string` | `{ imported, skipped }` | "Importação concluída." |
+| `discardImportAction(batchId)` | `string` | `null` | "Importação descartada." |
+| `undoImportAction(batchId)` | `string` | `{ deleted }` | "Importação desfeita." (apaga os lançamentos que ela criou) |
+| `deleteCategoryRuleAction(id)` | `string` | `null` | "Regra apagada." |
+| `suggestCategoryAction(description, type)` | `string, "INCOME"\|"EXPENSE"` | `{ categoryId: string \| null }` | (só leitura, sem toast) |
+
+Fluxo de tela da importação:
+1. `/importar`: escolher a conta + arquivo (`<input type="file" accept=".ofx,.csv">`) e enviar com `createImportAction(new FormData(form))`. Com sucesso, ir pra `/importar/[batchId]`. Mostrar `errors` (linhas que não deu pra ler) como aviso, se houver.
+2. `/importar/[batchId]` (revisão): tabela com data, descrição, valor (verde/vermelho pelo `type`), select de categoria (só do tipo da linha; marque "sugerida" quando `categoryId === suggestedCategoryId`) e um toggle Importar/Pular. Selos: "Já importado" (`duplicateOfId`) e "Possível duplicata" (`possibleDuplicate`). Resumo no topo (`summary`). Botões "Confirmar importação" (desabilitado se `summary.withoutCategory > 0`) e "Descartar".
+3. Lista de importações em `/importar` com status, conta e quantidade; nas confirmadas, um botão "Desfazer" com confirmação.
+- Arquivos de exemplo pra testar (dados fictícios): `/exemplos/extrato-exemplo.ofx` e `/exemplos/extrato-exemplo.csv`. Deixe um link "Baixar extrato de exemplo" na tela.
+- No formulário de transação: ao sair do campo descrição (ou com debounce), chame `suggestCategoryAction` e, **se a categoria ainda estiver vazia**, preencha com a sugerida (nunca sobrescreva a escolha do usuário).
+
 ### `@/server/actions/auth` (use em `<form action={...}>`)
 | Action | O que faz |
 |---|---|
@@ -267,6 +299,7 @@ Erros possíveis: "Já existe um orçamento dessa categoria nesse mês.", "Orça
 | `/login` | Login: "Entrar como visitante (demo)" e "Entrar com GitHub" (se `githubEnabled`). Hoje é **placeholder**. |
 | `/transacoes` | Transações (filtros via `?month=&type=&categoryId=&walletId=&q=`) |
 | `/contas` | Contas (**nova**, ainda não existe): lista com saldo, criar, editar, excluir e tornar padrão |
+| `/importar` e `/importar/[batchId]` | Importação de extrato (**nova**): upload, revisão e histórico |
 | `/recorrentes` | Contas fixas e parcelados (**nova**): lista com próxima data/valor, parcelas pagas, pausar/retomar, criar, editar e excluir |
 | `/categorias` | Categorias |
 | `/orcamentos` | Orçamentos (sugestão: `?month=` igual às transações) |
