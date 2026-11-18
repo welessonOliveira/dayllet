@@ -86,23 +86,20 @@ type DemoTx = {
   notes?: string;
 };
 
-// 18 transações avulsas espalhadas pelos últimos ~85 dias.
-// O aluguel, a internet e o celular parcelado vêm das regras (DEMO_RULES).
+// 15 transações avulsas espalhadas pelos últimos ~85 dias.
+// Salário, aluguel, internet, academia e o celular parcelado vêm das regras (DEMO_RULES).
 const DEMO_TRANSACTIONS: DemoTx[] = [
-  { description: "Salário", amountCents: 450000, category: "salario", daysAgo: 2 },
   { description: "Conta de luz", amountCents: 18990, category: "moradia", daysAgo: 0, status: "PENDING" },
   { description: "Supermercado", amountCents: 52340, category: "alimentacao", daysAgo: 3 },
   { description: "Lanche com a galera", amountCents: 4590, category: "alimentacao", daysAgo: 1, wallet: "carteira" },
   { description: "Ônibus (recarga)", amountCents: 12000, category: "transporte", daysAgo: 4 },
   { description: "Curso online", amountCents: 9700, category: "educacao", daysAgo: 5, notes: "Curso de React" },
   { description: "Site pra cliente", amountCents: 80000, category: "freelance", daysAgo: 6, status: "PENDING" },
-  { description: "Salário", amountCents: 450000, category: "salario", daysAgo: 32 },
   { description: "Supermercado", amountCents: 61220, category: "alimentacao", daysAgo: 35 },
   { description: "Uber", amountCents: 3850, category: "transporte", daysAgo: 38 },
   { description: "Farmácia", amountCents: 7480, category: "saude", daysAgo: 40, wallet: "carteira" },
   { description: "Cinema", amountCents: 6000, category: "lazer", daysAgo: 42, wallet: "carteira" },
   { description: "Freelance de design", amountCents: 35000, category: "freelance", daysAgo: 45 },
-  { description: "Salário", amountCents: 450000, category: "salario", daysAgo: 62 },
   { description: "Supermercado", amountCents: 48760, category: "alimentacao", daysAgo: 66 },
   { description: "Gasolina", amountCents: 25000, category: "transporte", daysAgo: 70 },
   { description: "Consulta médica", amountCents: 25000, category: "saude", daysAgo: 75 },
@@ -111,7 +108,11 @@ const DEMO_TRANSACTIONS: DemoTx[] = [
 
 /** Contas fixas e parcelado da demo. `monthsAgo` = em que mês começou; `day` = dia do mês. */
 const DEMO_RULES = [
+  // Receita fixa: sem ela, os meses futuros só teriam despesa e a projeção cairia até ficar negativa.
+  { description: "Salário", amountCents: 450000, category: "salario", monthsAgo: 2, day: 5 },
   { description: "Aluguel", amountCents: 140000, category: "moradia", monthsAgo: 2, day: 10 },
+  // Dia 25: dá uma queda prevista no gráfico do saldo do mês.
+  { description: "Academia", amountCents: 8990, category: "saude", monthsAgo: 2, day: 25 },
   { description: "Internet", amountCents: 9990, category: "moradia", monthsAgo: 2, day: 15 },
   // Parcelado: amountCents é o TOTAL (12x de R$ 200,00).
   { description: "Celular novo", amountCents: 240000, category: "outros", monthsAgo: 1, day: 5, installments: 12 },
@@ -152,7 +153,7 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
       data: { userId, name: "Conta corrente", kind: "CHECKING", openingBalanceCents: 120000, isDefault: true },
     });
     const carteira = await tx.wallet.create({
-      data: { userId, name: "Carteira", kind: "WALLET", openingBalanceCents: 15000 },
+      data: { userId, name: "Carteira", kind: "WALLET", openingBalanceCents: 30000 },
     });
 
     const cats = new Map<string, { id: string; type: "INCOME" | "EXPENSE" }>();

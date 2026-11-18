@@ -81,10 +81,10 @@ describe("meus dados (LGPD)", () => {
     const v1 = await createVisitorDemo(db, t0);
     const v2 = await createVisitorDemo(db, new Date(t0.getTime() + 60_000));
     expect(v1.id).not.toBe(v2.id);
-    expect(await db.transaction.count({ where: { userId: v1.id } })).toBe(26);
+    expect(await db.transaction.count({ where: { userId: v1.id } })).toBe(29);
     // Mexer na demo de um visitante não muda a do outro.
     await db.transaction.deleteMany({ where: { userId: v1.id } });
-    expect(await db.transaction.count({ where: { userId: v2.id } })).toBe(26);
+    expect(await db.transaction.count({ where: { userId: v2.id } })).toBe(29);
 
     // 24h e 1 min depois da primeira: só a v1 venceu.
     expect(await cleanupDemoUsers(db, new Date(t0.getTime() + DEMO_TTL_MS + 30_000))).toBe(1);
