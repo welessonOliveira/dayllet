@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ExpensesDonutChart } from "@/components/ExpensesDonutChart";
+import { MonthForecastCard } from "@/components/MonthForecastCard";
 import { MonthSelector } from "@/components/MonthSelector";
 import { WALLET_KIND_LABEL, statusLabel } from "@/lib/constants";
 import {
@@ -11,6 +12,7 @@ import {
 import { formatBRL } from "@/lib/money";
 import type { SearchParams } from "@/lib/validations";
 import { getDashboardData } from "@/server/dashboard";
+import { getMonthForecast } from "@/server/forecast";
 import { getPageCtx } from "@/server/session";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +30,8 @@ export default async function DashboardPage({
       ? rawMonth.trim()
       : currentMonth();
 
+  // getMonthForecast sincroniza ocorrências recorrentes do mês antes de ler o resumo
+  const forecast = await getMonthForecast(ctx, selectedMonth);
   const {
     month,
     summary,
@@ -183,6 +187,9 @@ export default async function DashboardPage({
           )}
         </div>
       </section>
+
+      {/* Projeção diária do mês (Previsão pro fim do mês / Saldo no fim do mês) */}
+      <MonthForecastCard forecast={forecast} />
 
       {/* Seção 2: Resultado do mês selecionado + Card separado "A pagar" */}
       <div className="grid gap-4 lg:grid-cols-3">
