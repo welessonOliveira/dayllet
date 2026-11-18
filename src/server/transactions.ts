@@ -21,8 +21,8 @@ export function listTransactions(
     date: { gte: start, lt: end },
     ...(filters.type && { type: filters.type }),
     ...(filters.categoryId && { categoryId: filters.categoryId }),
-    // SQLite: "contains" já ignora maiúsculas/minúsculas em letras sem acento.
-    ...(filters.q && { description: { contains: filters.q } }),
+    // Postgres diferencia maiúsculas: "insensitive" faz "feira" achar "Feira".
+    ...(filters.q && { description: { contains: filters.q, mode: "insensitive" } }),
   };
   return db.transaction.findMany({
     where,

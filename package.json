@@ -12,7 +12,10 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:start": "node scripts/db-local.mjs start",
+    "db:stop": "node scripts/db-local.mjs stop",
+    "db:status": "node scripts/db-local.mjs status"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.7",
