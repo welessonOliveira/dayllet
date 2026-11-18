@@ -213,7 +213,7 @@ type DashboardData = {
   topExpenses: TransactionWithCategory[];      // 5 maiores despesas (pagas e pendentes)
   budgets: BudgetWithProgress[];               // progresso dos orçamentos do mês
   expensesByCategory: CategoryTotal[];         // gráfico (SVG/CSS puro, sem lib)
-  wallets: WalletWithBalance[];                // contas com saldo atual e previsto
+  wallets: WalletWithBalance[];                // contas com saldo atual e previsto (previsto = até o fim do mês atual)
   totalBalanceCents: number;                   // soma do saldo atual de todas as contas
 };
 ```

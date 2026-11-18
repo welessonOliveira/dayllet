@@ -1,5 +1,6 @@
 // Contas financeiras (Wallet). Na tela: "Conta".
 import type { Wallet } from "@prisma/client";
+import { currentMonth, monthRange } from "@/lib/dates";
 import { DomainError } from "@/lib/errors";
 import { type WalletBalance, calcWalletBalance } from "@/lib/rules";
 import type { WalletData } from "@/lib/validations";
@@ -32,21 +33,26 @@ export function listWallets(ctx: Ctx): Promise<Wallet[]> {
   });
 }
 
-/** Contas com saldo atual, saldo previsto e quantidade de lançamentos. */
-export async function listWalletsWithBalance(ctx: Ctx): Promise<WalletWithBalance[]> {
+/**
+ * Contas com saldo atual, saldo previsto e quantidade de lançamentos.
+ * O previsto vai até o fim do mês atual (mesma regra da previsão do dashboard):
+ * contas fixas e parcelas de meses futuros não entram.
+ */
+export async function listWalletsWithBalance(ctx: Ctx, now: Date = new Date()): Promise<WalletWithBalance[]> {
   const [wallets, txs, transfers] = await Promise.all([
     listWallets(ctx),
     ctx.db.transaction.findMany({
       where: { userId: ctx.userId },
-      select: { walletId: true, type: true, status: true, amountCents: true },
+      select: { walletId: true, type: true, status: true, amountCents: true, date: true },
     }),
     netTransfersByWallet(ctx),
   ]);
+  const fimDoMes = monthRange(currentMonth(now)).end;
   return wallets.map((w) => {
     const daConta = txs.filter((t) => t.walletId === w.id);
     return {
       ...w,
-      balance: calcWalletBalance(w.openingBalanceCents, daConta, transfers.get(w.id) ?? 0),
+      balance: calcWalletBalance(w.openingBalanceCents, daConta, transfers.get(w.id) ?? 0, fimDoMes),
       transactionCount: daConta.length,
     };
   });

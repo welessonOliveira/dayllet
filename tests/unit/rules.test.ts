@@ -74,6 +74,17 @@ describe("saldo da conta (calcWalletBalance)", () => {
   it("conta sem lançamentos fica com o saldo inicial (pode ser negativo)", () => {
     expect(calcWalletBalance(-5000, [])).toEqual({ currentCents: -5000, projectedCents: -5000 });
   });
+
+  it("com `until`, pendentes de meses futuros ficam fora do previsto (pagos sempre contam)", () => {
+    const ate = new Date("2026-12-01T03:00:00Z"); // início de dezembro em São Paulo
+    const lista = [
+      { ...tx("EXPENSE", 1000, "PENDING"), date: new Date("2026-11-30T12:00:00Z") }, // entra
+      { ...tx("EXPENSE", 7000, "PENDING"), date: new Date("2026-12-01T12:00:00Z") }, // fora
+      { ...tx("INCOME", 9000, "PENDING"), date: new Date("2027-01-05T12:00:00Z") }, // fora
+      { ...tx("INCOME", 500), date: new Date("2026-12-10T12:00:00Z") }, // pago: conta no atual
+    ];
+    expect(calcWalletBalance(10000, lista, 0, ate)).toEqual({ currentCents: 10500, projectedCents: 9500 });
+  });
 });
 
 describe("progresso de orçamento", () => {
