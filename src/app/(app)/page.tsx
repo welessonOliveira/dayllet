@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ExpensesDonutChart } from "@/components/ExpensesDonutChart";
 import { MonthSelector } from "@/components/MonthSelector";
-import { statusLabel } from "@/lib/constants";
+import { WALLET_KIND_LABEL, statusLabel } from "@/lib/constants";
 import {
   currentMonth,
   formatDate,
@@ -28,10 +28,18 @@ export default async function DashboardPage({
       ? rawMonth.trim()
       : currentMonth();
 
-  const { month, summary, topExpenses, budgets, expensesByCategory } =
-    await getDashboardData(ctx, selectedMonth);
+  const {
+    month,
+    summary,
+    topExpenses,
+    budgets,
+    expensesByCategory,
+    wallets,
+    totalBalanceCents,
+  } = await getDashboardData(ctx, selectedMonth);
 
-  const isNegativeBalance = summary.balanceCents < 0;
+  const isNegativeTotal = totalBalanceCents < 0;
+  const isNegativeMonthBalance = summary.balanceCents < 0;
 
   return (
     <div className="space-y-6">
@@ -42,7 +50,7 @@ export default async function DashboardPage({
             Visão geral
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Resumo financeiro de{" "}
+            Saldos das contas hoje e resumo de{" "}
             <span className="font-medium text-slate-700">
               {formatMonthLabel(month)}
             </span>
@@ -67,28 +75,27 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {/* Destaque principal: Saldo do mês + Card separado "A pagar" */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Card Saldo do mês */}
-        <div className="relative overflow-hidden rounded-3xl border border-violet-100 bg-white p-6 shadow-xs lg:col-span-2">
+      {/* Seção 1: Dinheiro nas contas hoje (Saldo total + lista compacta de contas) */}
+      <section
+        aria-label="Saldo total e contas"
+        className="grid gap-4 lg:grid-cols-12"
+      >
+        {/* Card Saldo total (dinheiro disponível nas contas hoje) */}
+        <div className="flex flex-col justify-between rounded-3xl border border-violet-200/80 bg-white p-6 shadow-xs lg:col-span-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
-                Saldo do mês
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
+                Saldo total nas contas
               </span>
               <p
                 className={`mt-3 text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl ${
-                  isNegativeBalance ? "text-rose-600" : "text-slate-900"
+                  isNegativeTotal ? "text-rose-600" : "text-slate-900"
                 }`}
               >
-                {formatBRL(summary.balanceCents)}
-              </p>
-              <p className="mt-2 text-xs text-slate-500">
-                Calculado apenas sobre receitas recebidas e despesas já pagas em{" "}
-                {formatMonthLabel(month)}.
+                {formatBRL(totalBalanceCents)}
               </p>
             </div>
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-600 text-white shadow-xs">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
               <svg
                 className="h-6 w-6"
                 viewBox="0 0 24 24"
@@ -101,6 +108,122 @@ export default async function DashboardPage({
               >
                 <path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5z" />
                 <path d="M16 12h5" />
+              </svg>
+            </span>
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-slate-500">
+            Dinheiro disponível hoje somando todas as suas contas (saldo inicial
+            mais tudo que já foi recebido, menos tudo que já foi pago).
+          </p>
+        </div>
+
+        {/* Lista compacta das contas */}
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs lg:col-span-7">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">Suas contas</h2>
+              <p className="text-xs text-slate-500">
+                Saldo atual em cada conta
+              </p>
+            </div>
+            <Link
+              href="/contas"
+              className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-2 text-xs font-semibold text-violet-600 transition motion-reduce:transition-none hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:my-0 md:min-h-0"
+            >
+              Gerenciar contas →
+            </Link>
+          </div>
+
+          {wallets.length === 0 ? (
+            <p className="py-4 text-xs text-slate-500">
+              Nenhuma conta cadastrada ainda.
+            </p>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {wallets.map((w) => (
+                <li
+                  key={w.id}
+                  className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="truncate text-sm font-semibold text-slate-800">
+                        {w.name}
+                      </span>
+                      {w.isDefault && (
+                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+                          Padrão
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      {WALLET_KIND_LABEL[w.kind]}
+                    </p>
+                  </div>
+
+                  <div className="shrink-0 text-right tabular-nums">
+                    <p
+                      className={`text-sm font-bold ${
+                        w.balance.currentCents < 0
+                          ? "text-rose-600"
+                          : "text-slate-900"
+                      }`}
+                    >
+                      {formatBRL(w.balance.currentCents)}
+                    </p>
+                    {w.balance.projectedCents !== w.balance.currentCents && (
+                      <p className="text-[11px] text-slate-400">
+                        Previsto: {formatBRL(w.balance.projectedCents)}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      {/* Seção 2: Resultado do mês selecionado + Card separado "A pagar" */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Card Saldo do mês (resultado apenas do mês) */}
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs lg:col-span-2">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                Saldo do mês (resultado)
+              </span>
+              <p
+                className={`mt-3 text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl ${
+                  isNegativeMonthBalance
+                    ? "text-rose-600"
+                    : summary.balanceCents > 0
+                      ? "text-emerald-600"
+                      : "text-slate-900"
+                }`}
+              >
+                {summary.balanceCents > 0 ? "+ " : ""}
+                {formatBRL(summary.balanceCents)}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                Resultado apenas de <strong>{formatMonthLabel(month)}</strong>:
+                receitas recebidas no mês menos despesas pagas no mês (não soma
+                o saldo anterior das contas).
+              </p>
+            </div>
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 3v18h18" />
+                <path d="M7 14l4-4 4 4 5-5" />
               </svg>
             </span>
           </div>
@@ -141,7 +264,7 @@ export default async function DashboardPage({
               href={`/transacoes?month=${month}&type=EXPENSE`}
               className="-my-2 -mr-2 inline-flex min-h-11 items-center rounded-xl px-2 font-semibold text-amber-900 underline-offset-2 transition motion-reduce:transition-none hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2 md:my-0 md:min-h-0"
             >
-              Ver contas →
+              Ver pendentes →
             </Link>
           </div>
         </div>
@@ -152,7 +275,9 @@ export default async function DashboardPage({
         {/* Receitas */}
         <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500">Receitas</span>
+            <span className="text-sm font-medium text-slate-500">
+              Receitas do mês
+            </span>
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
               <svg
                 className="h-5 w-5"
@@ -181,7 +306,9 @@ export default async function DashboardPage({
         {/* Despesas */}
         <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500">Despesas</span>
+            <span className="text-sm font-medium text-slate-500">
+              Despesas do mês
+            </span>
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
               <svg
                 className="h-5 w-5"
@@ -317,6 +444,8 @@ export default async function DashboardPage({
                         </p>
                         <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
                           <span>{tx.category.name}</span>
+                          <span>·</span>
+                          <span>{tx.wallet.name}</span>
                           <span>·</span>
                           <span>{formatDate(tx.date)}</span>
                         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Category } from "@prisma/client";
+import type { Category, Wallet } from "@prisma/client";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import {
@@ -24,12 +24,14 @@ import { TransactionFormModal } from "./TransactionFormModal";
 type TransactionsClientProps = {
   transactions: TransactionWithCategory[];
   categories: Category[];
+  wallets: Wallet[];
   filters: TransactionFilters;
 };
 
 export function TransactionsClient({
   transactions,
   categories,
+  wallets,
   filters,
 }: TransactionsClientProps) {
   const router = useRouter();
@@ -57,6 +59,7 @@ export function TransactionsClient({
       month: next.month ?? filters.month,
       type: "type" in next ? next.type : filters.type,
       categoryId: "categoryId" in next ? next.categoryId : filters.categoryId,
+      walletId: "walletId" in next ? next.walletId : filters.walletId,
       q: "q" in next ? next.q : filters.q,
     };
 
@@ -64,6 +67,7 @@ export function TransactionsClient({
     sp.set("month", merged.month);
     if (merged.type) sp.set("type", merged.type);
     if (merged.categoryId) sp.set("categoryId", merged.categoryId);
+    if (merged.walletId) sp.set("walletId", merged.walletId);
     if (merged.q?.trim()) sp.set("q", merged.q.trim());
 
     startFilterTransition(() => {
@@ -81,7 +85,7 @@ export function TransactionsClient({
   }
 
   const hasActiveFilters = Boolean(
-    filters.type || filters.categoryId || filters.q,
+    filters.type || filters.categoryId || filters.walletId || filters.q,
   );
 
   const visibleFilterCategories = filters.type
@@ -153,6 +157,7 @@ export function TransactionsClient({
             extraParams={{
               type: filters.type,
               categoryId: filters.categoryId,
+              walletId: filters.walletId,
               q: filters.q,
             }}
           />
@@ -191,7 +196,7 @@ export function TransactionsClient({
               e.preventDefault();
               applyFilters({ q: searchText.trim() || undefined });
             }}
-            className="flex gap-2 lg:col-span-5"
+            className="flex gap-2 sm:col-span-2 lg:col-span-4"
           >
             <div className="relative flex-1">
               <svg
@@ -218,14 +223,36 @@ export function TransactionsClient({
             <button
               type="submit"
               disabled={isFilterPending}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-60"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-900 px-3.5 py-2.5 text-xs font-semibold text-white transition motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-60"
             >
               Buscar
             </button>
           </form>
 
-          {/* Filtro de Tipo */}
+          {/* Filtro de Conta */}
           <div className="lg:col-span-3">
+            <select
+              aria-label="Filtrar por conta"
+              value={filters.walletId ?? ""}
+              onChange={(e) => {
+                applyFilters({
+                  walletId: e.target.value || undefined,
+                });
+              }}
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+            >
+              <option value="">Todas as contas</option>
+              {wallets.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                  {w.isDefault ? " (Padrão)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro de Tipo */}
+          <div className="lg:col-span-2">
             <select
               aria-label="Filtrar por tipo"
               value={filters.type ?? ""}
@@ -247,13 +274,13 @@ export function TransactionsClient({
               className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:bg-white focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
               <option value="">Todos os tipos</option>
-              <option value="EXPENSE">Somente despesas</option>
-              <option value="INCOME">Somente receitas</option>
+              <option value="EXPENSE">Despesas</option>
+              <option value="INCOME">Receitas</option>
             </select>
           </div>
 
           {/* Filtro de Categoria */}
-          <div className="lg:col-span-4">
+          <div className="sm:col-span-2 lg:col-span-3">
             <select
               aria-label="Filtrar por categoria"
               value={filters.categoryId ?? ""}
@@ -362,6 +389,7 @@ export function TransactionsClient({
                 <tr className="border-b border-slate-100 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <th className="px-5 py-3.5">Data</th>
                   <th className="px-4 py-3.5">Descrição</th>
+                  <th className="px-4 py-3.5">Conta</th>
                   <th className="px-4 py-3.5">Categoria</th>
                   <th className="px-4 py-3.5">Tipo</th>
                   <th className="px-4 py-3.5">Situação</th>
@@ -392,6 +420,9 @@ export function TransactionsClient({
                             {tx.notes}
                           </p>
                         )}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-xs font-medium text-slate-700">
+                        {tx.wallet.name}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4">
                         <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
@@ -502,6 +533,10 @@ export function TransactionsClient({
                           {tx.category.name}
                         </span>
                         <span>·</span>
+                        <span className="font-medium text-violet-700">
+                          {tx.wallet.name}
+                        </span>
+                        <span>·</span>
                         <span>{CATEGORY_TYPE_LABEL[tx.type]}</span>
                         <span>·</span>
                         <span className="tabular-nums">
@@ -585,6 +620,7 @@ export function TransactionsClient({
           setEditingTx(null);
         }}
         categories={categories}
+        wallets={wallets}
         editingTransaction={editingTx}
         defaultMonth={filters.month}
       />
@@ -606,8 +642,8 @@ export function TransactionsClient({
               no valor de{" "}
               <strong className="font-semibold text-slate-900 tabular-nums">
                 {formatBRL(deletingTx.amountCents)}
-              </strong>
-              ? Essa ação não pode ser desfeita.
+              </strong>{" "}
+              (conta {deletingTx.wallet.name})? Essa ação não pode ser desfeita.
             </>
           ) : null
         }

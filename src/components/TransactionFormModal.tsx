@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Category } from "@prisma/client";
+import type { Category, Wallet } from "@prisma/client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import {
   CATEGORY_TYPE_LABEL,
   type CategoryType,
   TRANSACTION_STATUSES,
+  WALLET_KIND_LABEL,
   statusLabel,
 } from "@/lib/constants";
 import { currentMonth, toDateInput, todayInput } from "@/lib/dates";
@@ -30,6 +31,7 @@ type TransactionFormModalProps = {
   open: boolean;
   onClose: () => void;
   categories: Category[];
+  wallets: Wallet[];
   editingTransaction?: TransactionWithCategory | null;
   defaultMonth: string;
 };
@@ -49,6 +51,7 @@ export function TransactionFormModal({
   open,
   onClose,
   categories,
+  wallets,
   editingTransaction,
   defaultMonth,
 }: TransactionFormModalProps) {
@@ -58,6 +61,8 @@ export function TransactionFormModal({
 
   const defaultDate =
     defaultMonth === currentMonth() ? todayInput() : `${defaultMonth}-01`;
+  const defaultWalletId =
+    wallets.find((w) => w.isDefault)?.id ?? wallets[0]?.id ?? "";
 
   const form = useForm<TransactionFormValues, unknown, TransactionFormOutput>({
     resolver: zodResolver(transactionSchema),
@@ -69,6 +74,7 @@ export function TransactionFormModal({
       status: "PAID",
       date: defaultDate,
       categoryId: "",
+      walletId: defaultWalletId,
       notes: "",
     },
   });
@@ -76,6 +82,9 @@ export function TransactionFormModal({
   useEffect(() => {
     if (!open) return;
     setServerError(null);
+
+    const fallbackWalletId =
+      wallets.find((w) => w.isDefault)?.id ?? wallets[0]?.id ?? "";
 
     if (editingTransaction) {
       form.reset({
@@ -85,6 +94,7 @@ export function TransactionFormModal({
         status: editingTransaction.status,
         date: toDateInput(new Date(editingTransaction.date)),
         categoryId: editingTransaction.categoryId,
+        walletId: editingTransaction.walletId,
         notes: editingTransaction.notes ?? "",
       });
     } else {
@@ -96,10 +106,11 @@ export function TransactionFormModal({
         date:
           defaultMonth === currentMonth() ? todayInput() : `${defaultMonth}-01`,
         categoryId: "",
+        walletId: fallbackWalletId,
         notes: "",
       });
     }
-  }, [open, editingTransaction, defaultMonth, form]);
+  }, [open, editingTransaction, defaultMonth, wallets, form]);
 
   function focusErrorSummary() {
     window.requestAnimationFrame(() => {
@@ -152,6 +163,7 @@ export function TransactionFormModal({
         "status",
         "date",
         "categoryId",
+        "walletId",
         "notes",
       ];
       for (const [key, messages] of Object.entries(result.fieldErrors)) {
@@ -362,51 +374,85 @@ export function TransactionFormModal({
           </div>
         </div>
 
-        {/* Categoria filtrada pelo tipo escolhido */}
-        <div>
-          <label
-            htmlFor="tx-category"
-            className="block text-sm font-semibold text-slate-700"
-          >
-            Categoria de {CATEGORY_TYPE_LABEL[selectedType].toLowerCase()}
-          </label>
-          {filteredCategories.length === 0 ? (
-            <div className="mt-1.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-              Nenhuma categoria de{" "}
-              {CATEGORY_TYPE_LABEL[selectedType].toLowerCase()} cadastrada.{" "}
-              <Link
-                href="/categorias"
-                className="inline-flex min-h-9 items-center rounded-lg px-1 font-semibold underline hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2"
-              >
-                Criar categoria
-              </Link>
-            </div>
-          ) : (
+        {/* Conta e Categoria */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="tx-wallet"
+              className="block text-sm font-semibold text-slate-700"
+            >
+              Conta
+            </label>
             <select
-              id="tx-category"
-              aria-invalid={Boolean(errors.categoryId) || undefined}
-              aria-describedby={
-                errors.categoryId ? "tx-category-error" : undefined
-              }
-              {...form.register("categoryId")}
+              id="tx-wallet"
+              aria-invalid={Boolean(errors.walletId) || undefined}
+              aria-describedby={errors.walletId ? "tx-wallet-error" : undefined}
+              {...form.register("walletId")}
               className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
             >
-              <option value="">Selecione uma categoria...</option>
-              {filteredCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
+              {wallets.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                  {w.isDefault ? " (Padrão)" : ""} —{" "}
+                  {WALLET_KIND_LABEL[w.kind]}
                 </option>
               ))}
             </select>
-          )}
-          {errors.categoryId?.message && (
-            <p
-              id="tx-category-error"
-              className="mt-1 text-xs font-medium text-rose-600"
+            {errors.walletId?.message && (
+              <p
+                id="tx-wallet-error"
+                className="mt-1 text-xs font-medium text-rose-600"
+              >
+                {errors.walletId.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="tx-category"
+              className="block text-sm font-semibold text-slate-700"
             >
-              {errors.categoryId.message}
-            </p>
-          )}
+              Categoria de {CATEGORY_TYPE_LABEL[selectedType].toLowerCase()}
+            </label>
+            {filteredCategories.length === 0 ? (
+              <div className="mt-1.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                Nenhuma categoria de{" "}
+                {CATEGORY_TYPE_LABEL[selectedType].toLowerCase()} cadastrada.{" "}
+                <Link
+                  href="/categorias"
+                  className="inline-flex min-h-9 items-center rounded-lg px-1 font-semibold underline hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2"
+                >
+                  Criar categoria
+                </Link>
+              </div>
+            ) : (
+              <select
+                id="tx-category"
+                aria-invalid={Boolean(errors.categoryId) || undefined}
+                aria-describedby={
+                  errors.categoryId ? "tx-category-error" : undefined
+                }
+                {...form.register("categoryId")}
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 focus-visible:ring-2 focus-visible:ring-violet-500"
+              >
+                <option value="">Selecione...</option>
+                {filteredCategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {errors.categoryId?.message && (
+              <p
+                id="tx-category-error"
+                className="mt-1 text-xs font-medium text-rose-600"
+              >
+                {errors.categoryId.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Status (Pago/Pendente ou Recebido/A receber conforme o tipo) */}
