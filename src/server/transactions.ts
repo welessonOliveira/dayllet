@@ -6,6 +6,7 @@ import { DomainError } from "@/lib/errors";
 import { checkCategoryType } from "@/lib/rules";
 import type { TransactionData, TransactionFilters } from "@/lib/validations";
 import type { Ctx } from "./context";
+import { learnCategory } from "./categoryRules";
 import { syncRecurring } from "./recurring";
 import { getDefaultWalletId, getOwnWallet } from "./wallets";
 
@@ -72,7 +73,9 @@ async function prepare(ctx: Ctx, data: TransactionData) {
 }
 
 export async function createTransaction(ctx: Ctx, data: TransactionData): Promise<Transaction> {
-  return ctx.db.transaction.create({ data: await prepare(ctx, data) });
+  const tx = await ctx.db.transaction.create({ data: await prepare(ctx, data) });
+  await learnCategory(ctx, tx.description, tx.categoryId); // ensina a categorização automática
+  return tx;
 }
 
 export async function updateTransaction(
@@ -80,8 +83,14 @@ export async function updateTransaction(
   id: string,
   data: TransactionData,
 ): Promise<Transaction> {
-  await assertOwnTransaction(ctx, id);
-  return ctx.db.transaction.update({ where: { id }, data: await prepare(ctx, data) });
+  const antes = await ctx.db.transaction.findFirst({ where: { id, userId: ctx.userId } });
+  if (!antes) throw new DomainError(NAO_ENCONTRADA);
+  const tx = await ctx.db.transaction.update({ where: { id }, data: await prepare(ctx, data) });
+  // Corrigiu a categoria (ou a descrição)? A regra aprende a escolha nova.
+  if (antes.categoryId !== tx.categoryId || antes.description !== tx.description) {
+    await learnCategory(ctx, tx.description, tx.categoryId);
+  }
+  return tx;
 }
 
 /** Troca só o status (pago/pendente). Bom pra um botão rápido na lista. */

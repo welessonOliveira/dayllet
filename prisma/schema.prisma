@@ -27,6 +27,22 @@ enum Frequency {
   YEARLY
 }
 
+enum ImportFormat {
+  OFX
+  CSV
+}
+
+enum ImportStatus {
+  REVIEW // esperando o usuário revisar
+  COMMITTED // virou transações
+  DISCARDED // descartado
+}
+
+enum RowDecision {
+  IMPORT
+  SKIP
+}
+
 enum WalletKind {
   CHECKING // conta corrente
   SAVINGS // poupança
@@ -55,6 +71,8 @@ model User {
   transactions   Transaction[]
   budgets        Budget[]
   recurringRules RecurringRule[]
+  imports        ImportBatch[]
+  categoryRules  CategoryRule[]
 }
 
 /// Conta de LOGIN (ex.: GitHub). Nome exigido pelo Auth.js.
@@ -110,6 +128,7 @@ model Wallet {
   updatedAt           DateTime        @updatedAt
   transactions        Transaction[]
   recurringRules      RecurringRule[]
+  imports             ImportBatch[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -127,6 +146,7 @@ model Category {
   transactions   Transaction[]
   budgets        Budget[]
   recurringRules RecurringRule[]
+  categoryRules  CategoryRule[]
 
   // Nome único POR USUÁRIO (dois usuários podem ter "Lazer").
   @@unique([userId, name])
@@ -163,11 +183,18 @@ model Transaction {
   installmentNo   Int?
   installmentOf   Int?
 
+  // Origem: importado de extrato (Decisão 20).
+  importBatchId String?
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  /// FITID do OFX ou hash da linha do CSV. Importar o mesmo lançamento 2x na mesma conta é impossível.
+  externalId    String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Gerar 2x a mesma ocorrência (duas abas abertas, por exemplo) é impossível.
   @@unique([recurringRuleId, occurrenceDate])
+  @@unique([walletId, externalId])
   @@index([userId, date])
   @@index([categoryId])
   @@index([walletId])
@@ -203,6 +230,71 @@ model RecurringRule {
   transactions Transaction[]
   skips        RecurringSkip[]
 
+  @@index([userId])
+}
+
+/// Um upload de extrato. Fica em REVIEW até o usuário confirmar (Decisão 20).
+model ImportBatch {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId    String
+  wallet      Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  fileName    String
+  /// SHA-256 do arquivo: subir o mesmo arquivo de novo é barrado.
+  fileHash    String
+  format      ImportFormat
+  status      ImportStatus @default(REVIEW)
+  createdAt   DateTime     @default(now())
+  committedAt DateTime?
+
+  rows         ImportRow[]
+  transactions Transaction[]
+
+  @@index([userId, status])
+  @@index([walletId, fileHash])
+}
+
+/// Uma linha do extrato na área de revisão (antes de virar Transaction).
+model ImportRow {
+  id                  String       @id @default(cuid())
+  batchId             String
+  batch               ImportBatch  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  /// Posição no arquivo (pra manter a ordem).
+  position            Int
+  date                DateTime
+  /// Sempre positivo; o sinal vira o `type`.
+  amountCents         Int
+  type                CategoryType
+  description         String
+  externalId          String
+  /// Categoria sugerida pelas regras (ou null).
+  suggestedCategoryId String?
+  /// Categoria escolhida (começa igual à sugerida).
+  categoryId          String?
+  /// Já existe no extrato da conta? (mesmo externalId = certeza; parecido = possível)
+  duplicateOfId       String?
+  possibleDuplicate   Boolean      @default(false)
+  decision            RowDecision  @default(IMPORT)
+
+  @@index([batchId, position])
+}
+
+/// Regra aprendida: descrição com esse padrão -> essa categoria (Decisão 21).
+model CategoryRule {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Palavras normalizadas, ex.: "UBER TRIP".
+  pattern    String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  /// Quantas vezes a regra foi confirmada (desempate).
+  hits       Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, pattern])
   @@index([userId])
 }
 

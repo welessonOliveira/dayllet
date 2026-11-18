@@ -5,6 +5,7 @@ import type { TransactionStatus } from "@/lib/constants";
 import { currentMonth, dateInputToUtc, shiftMonth, todayInput } from "@/lib/dates";
 import type { Db } from "./db";
 import { DEFAULT_CATEGORIES } from "./defaults";
+import { learnCategory } from "./categoryRules";
 import { syncRecurring } from "./recurring";
 
 export const DEMO_EMAIL = "demo@financas.local";
@@ -90,6 +91,8 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
 
   await db.$transaction(async (tx) => {
     await tx.transaction.deleteMany({ where: { userId } });
+    await tx.importBatch.deleteMany({ where: { userId } });
+    await tx.categoryRule.deleteMany({ where: { userId } });
     await tx.recurringRule.deleteMany({ where: { userId } });
     await tx.budget.deleteMany({ where: { userId } });
     await tx.category.deleteMany({ where: { userId } });
@@ -158,5 +161,22 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
   });
 
   // Gera as ocorrências das regras (o que é antes de hoje entra como pago).
-  await syncRecurring({ db, userId }, undefined, now);
+  const ctx = { db, userId };
+  await syncRecurring(ctx, undefined, now);
+
+  // Ensina a categorização automática com os lançamentos de exemplo + descrições
+  // do extrato de exemplo (public/exemplos/extrato-exemplo.ofx).
+  const cats = new Map(
+    (await db.category.findMany({ where: { userId } })).map((c) => [c.name, c.id]),
+  );
+  const exemplos: [string, string][] = [
+    ...DEMO_TRANSACTIONS.map((t): [string, string] => [t.description, DEFAULT_CATEGORIES.find((c) => c.key === t.category)!.name]),
+    ["UBER *TRIP", "Transporte"],
+    ["IFOOD *PEDIDO", "Alimentação"],
+    ["DROGARIA SAO PAULO", "Saúde"],
+  ];
+  for (const [descricao, categoria] of exemplos) {
+    const id = cats.get(categoria);
+    if (id) await learnCategory(ctx, descricao, id);
+  }
 }
