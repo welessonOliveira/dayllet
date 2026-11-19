@@ -10,7 +10,7 @@
 ![Next.js 15](https://img.shields.io/badge/Next.js-15-000?logo=nextdotjs)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169e1?logo=postgresql&logoColor=white)
-![Testes](https://img.shields.io/badge/testes-173-22c55e)
+![Testes](https://img.shields.io/badge/testes-174%20%2B%20E2E-22c55e)
 
 ### [▶ Testar agora: dayllet.vercel.app](https://dayllet.vercel.app)
 
@@ -38,7 +38,7 @@ Clique em **"Entrar como visitante"**: você ganha uma conta só sua, com dados 
 - **Dinheiro em centavos inteiros** (nada de float) e correção pelo IPCA com `BigInt`; datas em UTC com mês calculado no fuso de São Paulo.
 - **Contas fixas idempotentes:** geradas "na leitura" com chave única por ocorrência, sem cron e sem duplicar.
 - **Importação com revisão:** OFX (inclusive SGML dos bancos brasileiros) e CSV, deduplicação por id do banco/hash, desfazer importação.
-- **Qualidade:** 173 testes (Vitest, unitários + integração em PostgreSQL de verdade) rodando no CI a cada push.
+- **Qualidade:** 174 testes (Vitest, unitários + integração em PostgreSQL de verdade) e testes E2E com Playwright (PC e celular), tudo rodando no CI a cada push.
 - **LGPD:** baixar todos os dados em JSON e excluir a conta na hora.
 
 > Especificação e decisões: [`docs/PROMPT.md`](docs/PROMPT.md). Funções e actions disponíveis pras telas: [`docs/CONTRATO.md`](docs/CONTRATO.md).
@@ -52,7 +52,7 @@ Clique em **"Entrar como visitante"**: você ganha uma conta só sua, com dados 
 | **Lançamentos** | Receitas e despesas pagas ou pendentes, com filtros por mês, tipo, categoria, conta e texto. |
 | **Contas fixas e parcelados** | Aluguel todo dia 10, assinatura anual, celular em 12x: os lançamentos são criados sozinhos, sem duplicar. Editar ou pausar vale só daqui pra frente. |
 | **Projeção** | "Vai sobrar R$ X no fim do mês", aviso de saldo negativo e de contas atrasadas, previsto vs. realizado mês a mês e saldo dos próximos meses. |
-| **Importação de extrato** | OFX (inclusive o SGML dos bancos brasileiros) e CSV (conta e fatura do Nubank), com área de revisão, detecção de duplicatas e opção de desfazer. |
+| **Importação de extrato** | OFX (inclusive o SGML dos bancos brasileiros) e CSV (conta e fatura do Nubank, extrato do PicPay), com área de revisão, detecção de duplicatas e opção de desfazer. |
 | **Categorização automática** | Aprende com as escolhas do usuário ("UBER TRIP" vira Transporte) e sugere na importação e no formulário. |
 | **Orçamentos** | Limite mensal por categoria, com alerta quando estoura. |
 | **Metas** | "Notebook: R$ 4.000 até março", com quanto guardar por mês. |
