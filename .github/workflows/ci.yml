@@ -35,6 +35,7 @@ jobs:
       DATABASE_URL_UNPOOLED: postgresql://financas:financas@localhost:5432/financas_test
       TEST_DATABASE_URL: postgresql://financas:financas@localhost:5432/financas_test
       AUTH_SECRET: ci-somente-para-o-build-nao-e-segredo
+      AUTH_TRUST_HOST: "true" # fora da Vercel o Auth.js exige isso pra aceitar localhost
       NEXT_TELEMETRY_DISABLED: 1
 
     steps:
