@@ -127,6 +127,27 @@ describe("CSV", () => {
     expect(parseCsv(csv).rows.map((x) => x.signedCents)).toEqual([-5234, 450000]);
   });
 
+  it("conta Nubank: ponto decimal e o Identificador vira id (não duplica na reimportação)", () => {
+    const csv = [
+      "Data,Valor,Identificador,Descrição",
+      "01/11/2026,-45.90,6543a1b2-0000-4000-8000-000000000001,Compra no débito - IFOOD",
+      "05/11/2026,2500.00,6543a1b2-0000-4000-8000-000000000002,Transferência recebida pelo Pix - EMPRESA",
+    ].join("\n");
+    const r = parseCsv(csv);
+    expect(r.rows.map((x) => [toDateInput(x.date), x.signedCents, x.description, x.fitId])).toEqual([
+      ["2026-11-01", -4590, "Compra no débito - IFOOD", "6543a1b2-0000-4000-8000-000000000001"],
+      ["2026-11-05", 250000, "Transferência recebida pelo Pix - EMPRESA", "6543a1b2-0000-4000-8000-000000000002"],
+    ]);
+  });
+
+  it("fatura do cartão Nubank (date,title,amount): compra positiva vira saída, pagamento vira entrada", () => {
+    const csv = "date,title,amount\n2026-11-03,Uber *Trip,23.45\n2026-11-10,Pagamento recebido,-500.00";
+    expect(parseCsv(csv).rows.map((x) => [x.description, x.signedCents])).toEqual([
+      ["Uber *Trip", -2345],
+      ["Pagamento recebido", 50000],
+    ]);
+  });
+
   it("sem cabeçalho reconhecível dá erro claro", () => {
     expect(parseCsv("a;b;c\n1;2;3").errors[0]).toMatch(/colunas de data, descrição e valor/);
   });

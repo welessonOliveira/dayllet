@@ -177,10 +177,12 @@ function semAcento(s: string): string {
 
 const COLUNAS = {
   date: /^(data|date|dt)( (do )?lancamento| mov(imento)?)?$/,
-  description: /^(descricao|historico|lancamento|description|memo|detalhe|estabelecimento)/,
+  description: /^(descricao|historico|lancamento|description|memo|detalhe|estabelecimento|title)/,
   amount: /^(valor|amount|quantia)( \(r\$\))?( r\$)?$/,
   credit: /^(credito|credit|entrada)/,
   debit: /^(debito|debit|saida)/,
+  /** Id único do lançamento (o Nubank manda na coluna "Identificador"): evita importar duas vezes. */
+  id: /^(identificador|id)$/,
 };
 
 /**
@@ -198,7 +200,9 @@ export function parseCsv(text: string): ParseResult {
 
   // Cabeçalho = primeira linha (das 10 primeiras) que tem coluna de data e de descrição.
   let headerIdx = -1;
-  let idx = { date: -1, description: -1, amount: -1, credit: -1, debit: -1 };
+  let idx = { date: -1, description: -1, amount: -1, credit: -1, debit: -1, id: -1 };
+  // Fatura do cartão Nubank ("date,title,amount"): valor positivo é compra, então o sinal é invertido.
+  let faturaCartao = false;
   for (let i = 0; i < Math.min(10, linhas.length); i++) {
     const cols = splitCsvLine(linhas[i], sep).map(semAcento);
     const achar = (re: RegExp) => cols.findIndex((c) => re.test(c));
@@ -208,10 +212,12 @@ export function parseCsv(text: string): ParseResult {
       amount: achar(COLUNAS.amount),
       credit: achar(COLUNAS.credit),
       debit: achar(COLUNAS.debit),
+      id: achar(COLUNAS.id),
     };
     if (tentativa.date >= 0 && tentativa.description >= 0 && (tentativa.amount >= 0 || tentativa.credit >= 0 || tentativa.debit >= 0)) {
       headerIdx = i;
       idx = tentativa;
+      faturaCartao = cols.join(",") === "date,title,amount";
       break;
     }
   }
@@ -242,7 +248,9 @@ export function parseCsv(text: string): ParseResult {
       continue;
     }
     if (signedCents === 0) continue;
-    rows.push({ date, signedCents, description: (descricao || "Sem descrição").slice(0, 120), fitId: null });
+    if (faturaCartao) signedCents = -signedCents;
+    const fitId = idx.id >= 0 ? (cols[idx.id] ?? "").trim() || null : null;
+    rows.push({ date, signedCents, description: (descricao || "Sem descrição").slice(0, 120), fitId });
   }
   return { format: "CSV", rows, errors };
 }
