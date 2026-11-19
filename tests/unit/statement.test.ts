@@ -148,6 +148,25 @@ describe("CSV", () => {
     ]);
   });
 
+  it("PicPay: BOM, menos tipográfico (−R$), descrição com o tipo e compra no cartão fica de fora", () => {
+    const csv = [
+      '﻿data,hora,tipo,"origem / destino",valor,"forma de pagamento"',
+      '2026-11-13,21:20,"Compra realizada",Uber,"−R$ 12,95","Com saldo"',
+      '2026-11-12,10:00,"Pix enviado","Maria Souza","−R$ 1.050,00",',
+      '2026-11-11,09:00,"Pix recebido","Joao Lima","R$ 300,00",',
+      '2026-11-10,08:00,"Compra realizada","Loja X","−R$ 99,90","Com cartão"',
+    ].join("\n");
+    const r = parseStatement(new TextEncoder().encode(csv));
+    expect(r.rows.map((x) => [toDateInput(x.date), x.description, x.signedCents])).toEqual([
+      ["2026-11-13", "Uber", -1295],
+      ["2026-11-12", "Pix enviado - Maria Souza", -105000],
+      ["2026-11-11", "Pix recebido - Joao Lima", 30000],
+    ]);
+    expect(r.errors).toEqual([
+      "1 compra(s) no cartão de crédito ficaram de fora: elas entram na fatura do cartão, não no saldo da conta.",
+    ]);
+  });
+
   it("sem cabeçalho reconhecível dá erro claro", () => {
     expect(parseCsv("a;b;c\n1;2;3").errors[0]).toMatch(/colunas de data, descrição e valor/);
   });

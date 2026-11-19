@@ -52,7 +52,8 @@ export function detectFormat(text: string): StatementFormat {
  * Decide o separador decimal pelo ÚLTIMO "," ou "." seguido de 1 ou 2 dígitos no fim.
  */
 export function parseStatementAmount(raw: string): number | null {
-  let s = raw.trim().replace(/R\$/i, "").replace(/\s/g, "");
+  // "\u2212" (−) é o sinal de menos tipográfico (o PicPay usa: "−R$ 12,95").
+  let s = raw.trim().replace(/[\u2212\u2013\u2014]/g, "-").replace(/R\$/i, "").replace(/\s/g, "");
   let negativo = false;
   if (/^\(.*\)$/.test(s)) {
     negativo = true;
@@ -177,12 +178,15 @@ function semAcento(s: string): string {
 
 const COLUNAS = {
   date: /^(data|date|dt)( (do )?lancamento| mov(imento)?)?$/,
-  description: /^(descricao|historico|lancamento|description|memo|detalhe|estabelecimento|title)/,
+  description: /^(descricao|historico|lancamento|description|memo|detalhe|estabelecimento|title|origem)/,
   amount: /^(valor|amount|quantia)( \(r\$\))?( r\$)?$/,
   credit: /^(credito|credit|entrada)/,
   debit: /^(debito|debit|saida)/,
   /** Id único do lançamento (o Nubank manda na coluna "Identificador"): evita importar duas vezes. */
   id: /^(identificador|id)$/,
+  /** PicPay: "tipo" (Pix enviado, Compra realizada...) e "forma de pagamento" (Com saldo / Com cartão). */
+  tipo: /^tipo$/,
+  forma: /^forma de pagamento$/,
 };
 
 /**
@@ -200,7 +204,7 @@ export function parseCsv(text: string): ParseResult {
 
   // Cabeçalho = primeira linha (das 10 primeiras) que tem coluna de data e de descrição.
   let headerIdx = -1;
-  let idx = { date: -1, description: -1, amount: -1, credit: -1, debit: -1, id: -1 };
+  let idx = { date: -1, description: -1, amount: -1, credit: -1, debit: -1, id: -1, tipo: -1, forma: -1 };
   // Fatura do cartão Nubank ("date,title,amount"): valor positivo é compra, então o sinal é invertido.
   let faturaCartao = false;
   for (let i = 0; i < Math.min(10, linhas.length); i++) {
@@ -213,6 +217,8 @@ export function parseCsv(text: string): ParseResult {
       credit: achar(COLUNAS.credit),
       debit: achar(COLUNAS.debit),
       id: achar(COLUNAS.id),
+      tipo: achar(COLUNAS.tipo),
+      forma: achar(COLUNAS.forma),
     };
     if (tentativa.date >= 0 && tentativa.description >= 0 && (tentativa.amount >= 0 || tentativa.credit >= 0 || tentativa.debit >= 0)) {
       headerIdx = i;
@@ -230,9 +236,20 @@ export function parseCsv(text: string): ParseResult {
   }
 
   const rows: StatementRow[] = [];
+  let noCartao = 0;
   for (let i = headerIdx + 1; i < linhas.length; i++) {
     const cols = splitCsvLine(linhas[i], sep);
-    const descricao = (cols[idx.description] ?? "").replace(/\s+/g, " ").trim();
+    // PicPay: compra "Com cartão" sai da fatura do cartão, não do saldo da conta. Fica de fora.
+    if (idx.forma >= 0 && semAcento(cols[idx.forma] ?? "") === "com cartao") {
+      noCartao++;
+      continue;
+    }
+    let descricao = (cols[idx.description] ?? "").replace(/\s+/g, " ").trim();
+    if (idx.tipo >= 0) {
+      // PicPay: "Pix enviado - Fulano"; compra fica só com o nome da loja ("Uber").
+      const tipo = (cols[idx.tipo] ?? "").replace(/\s+/g, " ").trim();
+      if (tipo && semAcento(tipo) !== "compra realizada") descricao = descricao ? `${tipo} - ${descricao}` : tipo;
+    }
     if (/^saldo\b/i.test(semAcento(descricao))) continue;
     const date = parseCsvDate(cols[idx.date] ?? "");
     let signedCents: number | null;
@@ -251,6 +268,9 @@ export function parseCsv(text: string): ParseResult {
     if (faturaCartao) signedCents = -signedCents;
     const fitId = idx.id >= 0 ? (cols[idx.id] ?? "").trim() || null : null;
     rows.push({ date, signedCents, description: (descricao || "Sem descrição").slice(0, 120), fitId });
+  }
+  if (noCartao > 0) {
+    errors.push(`${noCartao} compra(s) no cartão de crédito ficaram de fora: elas entram na fatura do cartão, não no saldo da conta.`);
   }
   return { format: "CSV", rows, errors };
 }
