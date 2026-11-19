@@ -1,4 +1,4 @@
-# Roda a cada push e pull request: tipos, lint, testes (com PostgreSQL de verdade) e build.
+# Roda a cada push e pull request: tipos, lint, testes (com PostgreSQL de verdade), build e E2E.
 name: CI
 
 on:
@@ -59,3 +59,17 @@ jobs:
 
       - name: Build de produção
         run: npm run build
+
+      - name: Navegador dos testes E2E
+        run: npx playwright install --with-deps chromium
+
+      - name: Testes E2E (Playwright, PC e celular)
+        run: npm run test:e2e
+
+      - name: Guardar o rastro se o E2E falhar
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright
+          path: test-results/
+          retention-days: 7

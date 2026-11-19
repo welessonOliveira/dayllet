@@ -15,3 +15,8 @@ npm-debug.log*
 .vercel
 prisma/*.db
 prisma/*.db-journal
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
