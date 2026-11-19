@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
 
@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   title: "Dayllet — Finanças pessoais do dia a dia",
   description:
     "Controle de contas, receitas, despesas, categorias e orçamentos mensais",
+  applicationName: "Dayllet",
+  // No iPhone, "Adicionar à Tela de Início" abre em tela cheia.
+  appleWebApp: { capable: true, title: "Dayllet", statusBarStyle: "default" },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f7fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#020617" },
+  ],
 };
 
 export default function RootLayout({
