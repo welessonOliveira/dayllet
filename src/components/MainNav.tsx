@@ -174,7 +174,7 @@ export function MainNav({ user }: MainNavProps) {
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/90">
-        <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 md:px-6 xl:flex-nowrap xl:gap-3">
+        <div className="mx-auto flex min-h-14 max-w-7xl flex-nowrap items-center justify-between gap-2 px-4 py-2 md:min-h-16 md:flex-wrap md:px-6 xl:flex-nowrap xl:gap-3">
           <Link
             href="/"
             className="-mx-1.5 flex min-h-11 shrink-0 items-center gap-2.5 rounded-xl px-1.5 transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
@@ -257,7 +257,7 @@ export function MainNav({ user }: MainNavProps) {
                   >
                     <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
                   </svg>
-                  <span className="max-w-20 truncate text-xs font-semibold sm:max-w-28">
+                  <span className="hidden max-w-24 truncate text-xs font-semibold min-[400px]:block sm:max-w-28">
                     {displayName}
                   </span>
                   {user.isDemo && (

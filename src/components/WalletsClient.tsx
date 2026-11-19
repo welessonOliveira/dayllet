@@ -345,7 +345,7 @@ export function WalletsClient({
             return (
               <article
                 key={w.id}
-                className={`flex flex-col justify-between rounded-3xl border bg-white p-6 shadow-xs transition motion-reduce:transition-none ${
+                className={`flex flex-col justify-between rounded-3xl border bg-white p-5 shadow-xs sm:p-6 transition motion-reduce:transition-none ${
                   w.isDefault
                     ? "border-violet-200 ring-1 ring-violet-100 dark:border-violet-900/60 dark:ring-violet-900/40"
                     : "border-slate-200/80"
@@ -353,7 +353,7 @@ export function WalletsClient({
               >
                 <div>
                   {/* Topo: ícone, nome, tipo e selo Padrão */}
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
                     <div className="flex min-w-0 items-center gap-3">
                       <span
                         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
