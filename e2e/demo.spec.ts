@@ -51,3 +51,31 @@ test("páginas públicas abrem sem login", async ({ page }) => {
     await expect(page.getByRole("heading", { level: 1, name: titulo })).toBeVisible();
   }
 });
+
+test("anexa um comprovante na transação e abre pelo clipe", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Entrar como visitante/ }).click();
+  await expect(page.getByText("Saldo total nas contas")).toBeVisible({ timeout: 30_000 });
+
+  await page.goto("/transacoes");
+  await page.getByRole("button", { name: "Nova transação" }).first().click();
+  const descricao = `Recibo E2E ${Date.now()}`;
+  await page.getByLabel(/Descrição/).fill(descricao);
+  await page.getByLabel(/Valor/).fill("15,00");
+  const categoria = page.locator("#tx-category");
+  if (!(await categoria.inputValue())) await categoria.selectOption({ index: 1 });
+  await page.locator("#tx-attachment").setInputFiles({
+    name: "recibo.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"),
+  });
+  await expect(page.getByText("será enviado ao salvar")).toBeVisible();
+  await page.getByRole("button", { name: "Criar transação" }).click();
+
+  const clipe = page.getByRole("link", { name: "Abrir comprovante: recibo.pdf" }).filter({ visible: true }).first();
+  await expect(clipe).toBeVisible();
+  const href = await clipe.getAttribute("href");
+  const resp = await page.request.get(href!);
+  expect(resp.status()).toBe(200);
+  expect(resp.headers()["content-type"]).toBe("application/pdf");
+});

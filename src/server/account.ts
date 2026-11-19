@@ -6,7 +6,7 @@ import type { Db } from "./db";
 /** Todos os dados do usuário num objeto (vira o JSON de "Baixar meus dados"). */
 export async function exportUserData(ctx: Ctx) {
   const where = { userId: ctx.userId };
-  const [user, wallets, categories, transactions, transfers, budgets, recurringRules, goals, categoryRules, imports] =
+  const [user, wallets, categories, transactions, transfers, budgets, recurringRules, goals, categoryRules, imports, attachments] =
     await Promise.all([
       ctx.db.user.findUnique({
         where: { id: ctx.userId },
@@ -21,6 +21,8 @@ export async function exportUserData(ctx: Ctx) {
       ctx.db.goal.findMany({ where, include: { contributions: true } }),
       ctx.db.categoryRule.findMany({ where }),
       ctx.db.importBatch.findMany({ where, select: { id: true, fileName: true, format: true, status: true, createdAt: true } }),
+      // Só a lista: o arquivo em si não cabe num JSON (abre pela tela de transações).
+      ctx.db.attachment.findMany({ where, select: { id: true, transactionId: true, fileName: true, mimeType: true, sizeBytes: true, createdAt: true } }),
     ]);
   if (!user) throw new DomainError("Usuário não encontrado.");
   return {
@@ -36,6 +38,7 @@ export async function exportUserData(ctx: Ctx) {
     goals,
     categoryRules,
     imports,
+    attachments,
   };
 }
 

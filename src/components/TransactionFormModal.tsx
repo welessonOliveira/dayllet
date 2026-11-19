@@ -12,6 +12,8 @@ import {
   WALLET_KIND_LABEL,
   statusLabel,
 } from "@/lib/constants";
+import { ATTACHMENT_ACCEPT, ATTACHMENT_MAX_BYTES, formatBytes } from "@/lib/attachments";
+import { compressImage } from "@/lib/compressImage";
 import { currentMonth, toDateInput, todayInput } from "@/lib/dates";
 import { centsToInput } from "@/lib/money";
 import {
@@ -19,6 +21,7 @@ import {
   type TransactionFormValues,
   transactionSchema,
 } from "@/lib/validations";
+import { deleteAttachmentAction, uploadAttachmentAction } from "@/server/actions/attachments";
 import { suggestCategoryAction } from "@/server/actions/imports";
 import {
   createTransactionAction,
@@ -60,6 +63,11 @@ export function TransactionFormModal({
   const [serverError, setServerError] = useState<string | null>(null);
   const [suggestedCatId, setSuggestedCatId] = useState<string | null>(null);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
+  // Comprovante: arquivo novo escolhido e/ou pedido pra tirar o atual.
+  const [file, setFile] = useState<File | null>(null);
+  const [removeAttachment, setRemoveAttachment] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const defaultDate =
     defaultMonth === currentMonth() ? todayInput() : `${defaultMonth}-01`;
@@ -85,6 +93,9 @@ export function TransactionFormModal({
     if (!open) return;
     setServerError(null);
     setSuggestedCatId(null);
+    setFile(null);
+    setRemoveAttachment(false);
+    setFileError(null);
 
     const fallbackWalletId =
       wallets.find((w) => w.isDefault)?.id ?? wallets[0]?.id ?? "";
@@ -202,7 +213,19 @@ export function TransactionFormModal({
       : await createTransactionAction(rawValues);
 
     if (result.ok) {
-      toast.success(result.message);
+      const txId = result.data.id;
+      let anexoErro: string | null = null;
+      if (file) {
+        const fd = new FormData();
+        fd.append("file", file);
+        const up = await uploadAttachmentAction(txId, fd);
+        if (!up.ok) anexoErro = up.error;
+      } else if (removeAttachment && editingTransaction?.attachment) {
+        const del = await deleteAttachmentAction(txId);
+        if (!del.ok) anexoErro = del.error;
+      }
+      if (anexoErro) toast.error(`${result.message} Mas o comprovante não foi salvo: ${anexoErro}`);
+      else toast.success(result.message);
       onClose();
       return;
     }
@@ -236,6 +259,22 @@ export function TransactionFormModal({
 
     focusErrorSummary();
   }
+
+  async function handleFileChosen(e: React.ChangeEvent<HTMLInputElement>) {
+    const escolhido = e.target.files?.[0];
+    e.target.value = ""; // deixa escolher o mesmo arquivo de novo
+    if (!escolhido) return;
+    const pronto = await compressImage(escolhido);
+    if (pronto.size > ATTACHMENT_MAX_BYTES) {
+      setFileError(`Arquivo muito grande (${formatBytes(pronto.size)}). O limite é ${formatBytes(ATTACHMENT_MAX_BYTES)}.`);
+      return;
+    }
+    setFileError(null);
+    setFile(pronto);
+    setRemoveAttachment(false);
+  }
+
+  const atual = editingTransaction?.attachment && !removeAttachment ? editingTransaction.attachment : null;
 
   function onInvalid() {
     focusErrorSummary();
@@ -592,6 +631,78 @@ export function TransactionFormModal({
               {errors.notes.message}
             </p>
           )}
+        </div>
+
+        {/* Comprovante */}
+        <div>
+          <span className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            Comprovante{" "}
+            <span className="font-normal text-slate-400">(opcional)</span>
+          </span>
+          <input
+            ref={fileInputRef}
+            id="tx-attachment"
+            type="file"
+            accept={ATTACHMENT_ACCEPT}
+            onChange={handleFileChosen}
+            className="sr-only"
+            aria-describedby="tx-attachment-hint"
+          />
+          {file || atual ? (
+            <div className="mt-1.5 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 dark:border-slate-700 dark:bg-slate-800/60">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  {file ? file.name : atual?.fileName}
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  {formatBytes(file ? file.size : (atual?.sizeBytes ?? 0))}
+                  {file ? " · será enviado ao salvar" : ""}
+                </span>
+              </span>
+              {!file && editingTransaction && (
+                <a
+                  href={`/api/comprovantes/${editingTransaction.id}`}
+                  target="_blank"
+                  rel="noopener"
+                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:text-violet-300"
+                >
+                  Ver
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-slate-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:text-slate-300"
+              >
+                Trocar
+              </button>
+              <button
+                type="button"
+                aria-label="Remover comprovante"
+                onClick={() => {
+                  setFile(null);
+                  if (editingTransaction?.attachment) setRemoveAttachment(true);
+                }}
+                className="inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-rose-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:text-rose-400"
+              >
+                Remover
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="mt-1.5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition motion-reduce:transition-none hover:border-violet-400 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+              </svg>
+              {removeAttachment ? "Anexar outro comprovante" : "Anexar foto ou PDF"}
+            </button>
+          )}
+          <p id="tx-attachment-hint" className={`mt-1 text-xs ${fileError ? "font-medium text-rose-600" : "text-slate-500 dark:text-slate-400"}`}>
+            {fileError ?? (removeAttachment ? "O comprovante atual será removido ao salvar." : `Foto do recibo ou PDF, até ${formatBytes(ATTACHMENT_MAX_BYTES)}.`)}
+          </p>
         </div>
 
         {/* Botões */}

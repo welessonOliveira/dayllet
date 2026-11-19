@@ -381,3 +381,16 @@ O menu atual fica em `src/components/MainNav.tsx` e as páginas são **placehold
 | `getWalletHistories(ctx, wallets, days = 30, now?)` (`@/server/wallets`) | `Record<walletId, number[]>`: saldo no fim de cada um dos últimos `days` dias (do mais antigo até hoje). Recebe as contas já com saldo (`listWalletsWithBalance`). Use com `<Sparkline values=... />`. |
 
 Helpers puros em `@/lib/insights`: `balanceHistory`, `biggestCategoryChanges`, `greeting` ("Bom dia/Boa tarde/Boa noite" no fuso de SP) e `addDaysInput`.
+
+## Comprovantes (2026-11-19)
+
+Um comprovante (foto JPG/PNG/WebP ou PDF) por lançamento, guardado no próprio banco (model `Attachment`, `onDelete: Cascade` com a transação). O tipo é detectado pelos primeiros bytes, não pelo nome.
+
+- `listTransactions` e `getTransaction` agora trazem `tx.attachment: { id, fileName, mimeType, sizeBytes } | null` (sem o arquivo).
+- Actions (`@/server/actions/attachments`):
+  - `uploadAttachmentAction(transactionId, formData)` → `ActionResult<AttachmentInfo>`. O `formData` tem o campo `"file"`. Anexa ou troca.
+  - `deleteAttachmentAction(transactionId)` → `ActionResult<null>`.
+- Abrir o arquivo: `GET /api/comprovantes/<transactionId>` (abre no navegador; `?baixar=1` baixa). 401 sem login, 404 se não for do usuário.
+- Limites (`@/lib/attachments`): 1,5 MB por arquivo; 50 MB por usuário (5 MB na demo). No navegador, `compressImage(file)` (`@/lib/compressImage`) reduz fotos grandes pra JPEG de até 1600 px antes de enviar.
+- Componentes: campo "Comprovante" no `TransactionFormModal` (envia depois de salvar a transação) e `AttachmentBadge` (clipe) na lista.
+- "Baixar meus dados" lista os comprovantes (nome, tipo, tamanho), sem o arquivo.

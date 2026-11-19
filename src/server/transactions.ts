@@ -5,12 +5,18 @@ import { monthRange } from "@/lib/dates";
 import { DomainError } from "@/lib/errors";
 import { checkCategoryType } from "@/lib/rules";
 import type { TransactionData, TransactionFilters } from "@/lib/validations";
+import { ATTACHMENT_INFO_SELECT, type AttachmentInfo } from "./attachments";
 import type { Ctx } from "./context";
 import { learnCategory } from "./categoryRules";
 import { syncRecurring } from "./recurring";
 import { getDefaultWalletId, getOwnWallet } from "./wallets";
 
-export type TransactionWithCategory = Transaction & { category: Category; wallet: Wallet };
+export type TransactionWithCategory = Transaction & {
+  category: Category;
+  wallet: Wallet;
+  /** Só vem na lista de transações (e em getTransaction). */
+  attachment?: AttachmentInfo | null;
+};
 
 const NAO_ENCONTRADA = "Transação não encontrada.";
 
@@ -35,7 +41,7 @@ export async function listTransactions(
   };
   return ctx.db.transaction.findMany({
     where,
-    include: { category: true, wallet: true },
+    include: { category: true, wallet: true, attachment: { select: ATTACHMENT_INFO_SELECT } },
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
   });
 }
@@ -43,7 +49,7 @@ export async function listTransactions(
 export function getTransaction(ctx: Ctx, id: string): Promise<TransactionWithCategory | null> {
   return ctx.db.transaction.findFirst({
     where: { id, userId: ctx.userId },
-    include: { category: true, wallet: true },
+    include: { category: true, wallet: true, attachment: { select: ATTACHMENT_INFO_SELECT } },
   });
 }
 

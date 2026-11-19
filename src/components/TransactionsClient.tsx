@@ -17,6 +17,7 @@ import {
   setTransactionStatusAction,
 } from "@/server/actions/transactions";
 import type { TransactionWithCategory } from "@/server/transactions";
+import { AttachmentBadge } from "./AttachmentBadge";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { MonthSelector } from "./MonthSelector";
 import { useToast } from "./Toast";
@@ -463,6 +464,7 @@ export function TransactionsClient({
                                 : "Fixa"}
                             </span>
                           )}
+                          {tx.attachment && <AttachmentBadge transactionId={tx.id} attachment={tx.attachment} />}
                         </div>
                         {tx.notes && (
                           <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
@@ -579,6 +581,7 @@ export function TransactionsClient({
                               : "Fixa"}
                           </span>
                         )}
+                        {tx.attachment && <AttachmentBadge transactionId={tx.id} attachment={tx.attachment} />}
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                         <span className="inline-flex items-center gap-1 font-medium text-slate-700">
