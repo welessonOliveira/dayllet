@@ -87,7 +87,7 @@ export default async function DashboardPage({
       {/* Seção 1: Dinheiro nas contas hoje (Saldo total + lista compacta de contas) */}
       <section
         aria-label="Saldo total e contas"
-        className="grid gap-4 lg:grid-cols-12"
+        className="grid grid-cols-1 gap-4 lg:grid-cols-12"
       >
         {/* Card Saldo total (dinheiro disponível nas contas hoje) */}
         <div className="flex flex-col justify-between rounded-3xl border border-violet-200/80 bg-white p-6 shadow-xs lg:col-span-5 dark:border-violet-900/60 dark:bg-slate-900">
@@ -197,7 +197,7 @@ export default async function DashboardPage({
       <MonthForecastCard forecast={forecast} />
 
       {/* Seção 2: Resultado do mês selecionado + Card separado "A pagar" */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Card Saldo do mês (resultado apenas do mês) */}
         <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-start justify-between gap-4">
@@ -283,7 +283,7 @@ export default async function DashboardPage({
       </div>
 
       {/* Cards de Receitas, Despesas e Quantidade de transações */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Receitas */}
         <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
@@ -380,7 +380,7 @@ export default async function DashboardPage({
       </div>
 
       {/* Gráfico de despesas por categoria + 5 maiores gastos */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Gráfico SVG */}
         <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-5 flex items-center justify-between gap-2">
@@ -522,7 +522,7 @@ export default async function DashboardPage({
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {budgets.map((b) => {
               const { progress, category } = b;
               const overAmountCents = Math.abs(progress.remainingCents);
@@ -625,7 +625,7 @@ export default async function DashboardPage({
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {topGoals.map((g) => {
               const color = g.color || "#a67c52";
               return (

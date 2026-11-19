@@ -214,7 +214,7 @@ export function TransactionsClient({
           isFilterPending ? "opacity-70" : ""
         }`}
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
           {/* Busca por texto */}
           <form
             onSubmit={(e) => {

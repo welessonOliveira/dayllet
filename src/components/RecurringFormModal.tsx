@@ -383,7 +383,7 @@ export function RecurringFormModal({
         </div>
 
         {/* Valor + (Parcelas se parcelado | Frequência se conta fixa) */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
               htmlFor="rec-amount"
@@ -500,7 +500,7 @@ export function RecurringFormModal({
 
         {/* Datas: Início e Fim opcional (só na conta fixa) */}
         <div
-          className={`grid gap-4 ${
+          className={`grid grid-cols-1 gap-4 ${
             selectedKind === "FIXED" ? "sm:grid-cols-2" : "sm:grid-cols-1"
           }`}
         >
@@ -567,7 +567,7 @@ export function RecurringFormModal({
         </div>
 
         {/* Conta e Categoria */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
               htmlFor="rec-wallet"

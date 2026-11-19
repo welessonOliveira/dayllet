@@ -374,7 +374,7 @@ export function TransactionFormModal({
         </div>
 
         {/* Valor e Data */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
               htmlFor="tx-amount"
@@ -434,7 +434,7 @@ export function TransactionFormModal({
         </div>
 
         {/* Conta e Categoria */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
               htmlFor="tx-wallet"

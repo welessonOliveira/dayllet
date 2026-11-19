@@ -94,7 +94,7 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
           : "border-slate-200/80 dark:border-slate-800"
       }`}
     >
-      <div className="grid gap-6 lg:grid-cols-12 lg:items-center">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
         {/* Coluna esquerda: valor principal, pendentes e alertas */}
         <div className="space-y-4 lg:col-span-7">
           <div>

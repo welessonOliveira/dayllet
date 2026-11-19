@@ -147,7 +147,7 @@ export function RecurringClient({
           </button>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {rules.map((r) => {
             const isIncome = r.type === "INCOME";
             const isInstallment = r.installments !== null;

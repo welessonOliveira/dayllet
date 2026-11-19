@@ -508,7 +508,7 @@ export function SixMonthProjectionSection({ points }: SixMonthProjectionProps) {
       )}
 
       {/* Lista de cards dos próximos 6 meses */}
-      <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {points.map((p) => {
           const isCurrent = p.month === thisMonth;
           const isNeg = p.balanceCents < 0;

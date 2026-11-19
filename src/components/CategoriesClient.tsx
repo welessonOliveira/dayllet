@@ -98,7 +98,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
       </div>
 
       {/* Duas listas separadas: Receitas e Despesas */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Lista de Receitas */}
         <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-5 flex items-center justify-between gap-3">

@@ -13,7 +13,7 @@ export default function Loading() {
         <div className="h-11 w-48 rounded-2xl bg-slate-200/70 dark:bg-slate-700/70" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((item) => (
           <div
             key={item}
@@ -25,7 +25,7 @@ export default function Loading() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="h-72 rounded-3xl border border-slate-100 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="h-5 w-44 rounded-lg bg-slate-200/70 dark:bg-slate-700/70" />
           <div className="mt-6 space-y-3">

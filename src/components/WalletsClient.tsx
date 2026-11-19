@@ -273,7 +273,7 @@ export function WalletsClient({
 
       {/* Resumo consolidado das contas */}
       {wallets.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-3xl border border-violet-100 bg-white p-6 shadow-xs dark:border-violet-900/40 dark:bg-slate-900">
             <span className="inline-flex items-center rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
               Saldo total atual
@@ -336,7 +336,7 @@ export function WalletsClient({
           </button>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {wallets.map((w) => {
             const isNegativeCurrent = w.balance.currentCents < 0;
             const isNegativeProjected = w.balance.projectedCents < 0;

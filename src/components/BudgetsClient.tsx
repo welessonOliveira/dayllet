@@ -102,7 +102,7 @@ export function BudgetsClient({
 
       {/* Resumo rápido dos orçamentos do mês */}
       {budgets.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Total planejado
@@ -208,7 +208,7 @@ export function BudgetsClient({
           </button>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {budgets.map((b) => {
             const { progress, category } = b;
             const overAmountCents = Math.abs(progress.remainingCents);
