@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { CountUp } from "@/components/CountUp";
 import { ExpensesDonutChart } from "@/components/ExpensesDonutChart";
+import { InsightsCard } from "@/components/InsightsCard";
 import { MonthForecastCard } from "@/components/MonthForecastCard";
 import { MonthSelector } from "@/components/MonthSelector";
+import { Sparkline, trendLabel } from "@/components/Sparkline";
 import { WALLET_KIND_LABEL, statusLabel } from "@/lib/constants";
 import {
   currentMonth,
@@ -9,12 +12,15 @@ import {
   formatMonthLabel,
   isValidMonth,
 } from "@/lib/dates";
+import { greeting } from "@/lib/insights";
 import { formatBRL } from "@/lib/money";
 import type { SearchParams } from "@/lib/validations";
 import { getDashboardData } from "@/server/dashboard";
 import { getMonthForecast } from "@/server/forecast";
 import { listGoals } from "@/server/goals";
-import { getPageCtx } from "@/server/session";
+import { getInsights } from "@/server/insights";
+import { getPageCtx, getSessionUser } from "@/server/session";
+import { getWalletHistories } from "@/server/wallets";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +50,16 @@ export default async function DashboardPage({
       totalBalanceCents,
     },
     goals,
-  ] = await Promise.all([getDashboardData(ctx, selectedMonth), listGoals(ctx)]);
+    insights,
+    user,
+  ] = await Promise.all([
+    getDashboardData(ctx, selectedMonth),
+    listGoals(ctx),
+    getInsights(ctx, selectedMonth),
+    getSessionUser(),
+  ]);
+  const historicos = await getWalletHistories(ctx, wallets, 30);
+  const primeiroNome = (user?.name || "").trim().split(/\s+/)[0];
   const topGoals = goals.slice(0, 2);
 
   const isNegativeTotal = totalBalanceCents < 0;
@@ -56,31 +71,21 @@ export default async function DashboardPage({
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
-            Visão geral
+            {greeting()}
+            {primeiroNome ? `, ${primeiroNome}` : ""}
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Saldos das contas hoje e resumo de{" "}
+            Em{" "}
             <span className="font-medium text-slate-700 dark:text-slate-300">
               {formatMonthLabel(month)}
-            </span>
+            </span>{" "}
+            você recebeu{" "}
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatBRL(summary.incomeCents)}</span> e
+            gastou <span className="font-semibold text-rose-600 dark:text-rose-400">{formatBRL(summary.expenseCents)}</span>.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <MonthSelector month={month} />
-          <Link
-            href={`/transacoes?month=${month}`}
-            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition motion-reduce:transition-none hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-          >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-            </svg>
-            <span>Transações</span>
-          </Link>
         </div>
       </div>
 
@@ -101,7 +106,7 @@ export default async function DashboardPage({
                   isNegativeTotal ? "text-rose-600" : "text-slate-900 dark:text-slate-100"
                 }`}
               >
-                {formatBRL(totalBalanceCents)}
+                <CountUp cents={totalBalanceCents} />
               </p>
             </div>
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
@@ -170,6 +175,13 @@ export default async function DashboardPage({
                     </p>
                   </div>
 
+                  <Sparkline
+                    values={historicos[w.id] ?? []}
+                    width={72}
+                    height={24}
+                    className="ml-auto hidden shrink-0 min-[420px]:block"
+                    label={trendLabel(historicos[w.id] ?? [], 30, formatBRL)}
+                  />
                   <div className="shrink-0 text-right tabular-nums">
                     <p
                       className={`text-sm font-bold ${
@@ -192,6 +204,9 @@ export default async function DashboardPage({
           )}
         </div>
       </section>
+
+      {/* Dicas do mês: contas vencendo, fatura, categoria que subiu/caiu */}
+      <InsightsCard insights={insights} />
 
       {/* Projeção diária do mês (Previsão pro fim do mês / Saldo no fim do mês) */}
       <MonthForecastCard forecast={forecast} />

@@ -11,7 +11,10 @@ export default async function TransacoesPage({
   searchParams: Promise<SearchParams>;
 }) {
   const ctx = await getPageCtx();
-  const filters = parseTransactionFilters(await searchParams);
+  const params = await searchParams;
+  const filters = parseTransactionFilters(params);
+  // "?nova=1": veio do botão "+" (ou da busca) e já abre o formulário de nova transação.
+  const openNew = params.nova === "1";
   const [transactions, categories, wallets] = await Promise.all([
     listTransactions(ctx, filters),
     listCategories(ctx),
@@ -24,6 +27,7 @@ export default async function TransacoesPage({
       categories={categories}
       wallets={wallets}
       filters={filters}
+      openNew={openNew}
     />
   );
 }

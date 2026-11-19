@@ -365,3 +365,19 @@ O menu atual fica em `src/components/MainNav.tsx` e as páginas são **placehold
 - `listCardInvoices(ctx, now?)` em `@/server/cards` → `{ wallet, invoices: { month, opensAt, closingDate, dueDate, totalCents, paidCents, status }[] }[]`. `status`: `OPEN | CLOSED | PAID | OVERDUE | FUTURE` (`INVOICE_STATUS_LABEL` em `@/lib/cards`). A fatura é identificada pelo mês em que fecha.
 - **Importação:** cada linha tem `looksLikeTransfer` (Pix pra si mesmo pelo nome do login, pagamento de fatura, cofrinho, "Pagamento recebido" no cartão), `transferWalletId` (outra conta sugerida quando não há dúvida) e `transferWallet` (no `getImport`). Linha resolvida = tem categoria OU `transferWalletId`. Transferência que já está no app (veio do extrato da outra conta) vem como "Pular" com aviso em `note`.
 - Importar o extrato do PicPay num **cartão** traz só as compras "Com cartão"; numa conta, elas ficam de fora.
+
+## Navegação nova, dicas e histórico de saldo (2026-11-19)
+
+**Navegação:** o mapa das 5 seções (Início, Transações, Contas, Planejamento, Relatórios) e das abas de cada uma fica em `src/components/navConfig.tsx`. Ele é usado pelo menu lateral do PC (`MainNav`, que dá pra recolher, salvo em `localStorage["nav-collapsed"]` + `html[data-nav="collapsed"]` e variante `nav-collapsed:`), pela barra do celular (com o botão **+**), pelas abas automáticas (`SectionTabs`, no layout) e pela busca Ctrl+K (`CommandPalette`). Página nova? Coloque ela no `SECTIONS`. As rotas antigas continuam as mesmas.
+
+- `/transacoes?nova=1`: abre direto o formulário de nova transação (o `?nova=1` some da URL depois).
+- `getSessionUser()` agora traz `image` (foto do Google/GitHub), usada no avatar (`UserMenu`).
+
+**Leitura nova (`src/server`):**
+
+| Função | O que devolve |
+|---|---|
+| `getInsights(ctx, month, now?)` (`@/server/insights`) | Até 4 `Insight { id, tone: "warning" \| "good" \| "info", title, detail, href }`: contas atrasadas, contas que vencem em 7 dias, fatura de cartão vencida/vencendo e a categoria que mais subiu/caiu em relação ao mês anterior (no mês atual, compara com o mesmo pedaço do mês passado). |
+| `getWalletHistories(ctx, wallets, days = 30, now?)` (`@/server/wallets`) | `Record<walletId, number[]>`: saldo no fim de cada um dos últimos `days` dias (do mais antigo até hoje). Recebe as contas já com saldo (`listWalletsWithBalance`). Use com `<Sparkline values=... />`. |
+
+Helpers puros em `@/lib/insights`: `balanceHistory`, `biggestCategoryChanges`, `greeting` ("Bom dia/Boa tarde/Boa noite" no fuso de SP) e `addDaysInput`.

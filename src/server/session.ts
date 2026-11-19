@@ -5,7 +5,7 @@ import type { Ctx } from "./context";
 import { prisma } from "./db";
 import { ensureDefaultWallet } from "./defaults";
 
-export type SessionUser = { id: string; name: string | null; email: string | null; isDemo: boolean };
+export type SessionUser = { id: string; name: string | null; email: string | null; image: string | null; isDemo: boolean };
 
 /** Usuário logado (ou null). */
 export async function getSessionUser(): Promise<SessionUser | null> {
@@ -14,7 +14,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!id) return null;
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) return null; // sessão de um usuário que não existe mais
-  return { id: user.id, name: user.name, email: user.email, isDemo: user.isDemo };
+  return { id: user.id, name: user.name, email: user.email, image: user.image, isDemo: user.isDemo };
 }
 
 /**

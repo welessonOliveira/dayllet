@@ -4,7 +4,7 @@ import type { SearchParams } from "@/lib/validations";
 import { listCardInvoices } from "@/server/cards";
 import { getPageCtx } from "@/server/session";
 import { listTransfers } from "@/server/transfers";
-import { listWalletsWithBalance } from "@/server/wallets";
+import { getWalletHistories, listWalletsWithBalance } from "@/server/wallets";
 
 export default async function ContasPage({
   searchParams,
@@ -24,8 +24,9 @@ export default async function ContasPage({
     listTransfers(ctx, month),
     listCardInvoices(ctx),
   ]);
+  const histories = await getWalletHistories(ctx, wallets, 30);
 
   return (
-    <WalletsClient wallets={wallets} transfers={transfers} month={month} cards={cards} />
+    <WalletsClient wallets={wallets} transfers={transfers} month={month} cards={cards} histories={histories} />
   );
 }

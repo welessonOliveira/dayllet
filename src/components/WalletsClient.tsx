@@ -16,6 +16,7 @@ import type { TransferWithWallets } from "@/server/transfers";
 import type { WalletWithBalance } from "@/server/wallets";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { MonthSelector } from "./MonthSelector";
+import { Sparkline, trendLabel } from "./Sparkline";
 import { useToast } from "./Toast";
 import { TransferFormModal } from "./TransferFormModal";
 import { WalletFormModal } from "./WalletFormModal";
@@ -26,6 +27,8 @@ type WalletsClientProps = {
   month: string;
   /** Faturas dos cartões de crédito (só cartão com dia de fechamento e vencimento). */
   cards?: CardWithInvoices[];
+  /** Saldo dia a dia dos últimos 30 dias de cada conta (mini gráfico). */
+  histories?: Record<string, number[]>;
 };
 
 /** "2026-11-03" -> "03/11". */
@@ -135,6 +138,7 @@ export function WalletsClient({
   transfers,
   month,
   cards = [],
+  histories = {},
 }: WalletsClientProps) {
   const toast = useToast();
 
@@ -393,7 +397,8 @@ export function WalletsClient({
 
                   {/* Saldo atual em destaque + Saldo previsto menor */}
                   <div className="mt-5 rounded-2xl bg-slate-50/80 p-4 ring-1 ring-slate-200/60 dark:bg-slate-800/60 dark:ring-slate-700/60">
-                    <div>
+                    <div className="flex items-end justify-between gap-3">
+                    <div className="min-w-0">
                       <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                         Saldo atual
                       </span>
@@ -404,6 +409,18 @@ export function WalletsClient({
                       >
                         {formatBRL(w.balance.currentCents)}
                       </span>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <Sparkline
+                        values={histories[w.id] ?? []}
+                        width={88}
+                        height={30}
+                        label={trendLabel(histories[w.id] ?? [], 30, formatBRL)}
+                      />
+                      {(histories[w.id]?.length ?? 0) > 1 && (
+                        <span className="mt-0.5 block text-[10px] text-slate-500 dark:text-slate-400">30 dias</span>
+                      )}
+                    </div>
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/70 pt-2.5 text-xs tabular-nums">

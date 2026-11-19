@@ -2,6 +2,7 @@
 import type { Wallet } from "@prisma/client";
 import { currentMonth, monthRange } from "@/lib/dates";
 import { DomainError } from "@/lib/errors";
+import { balanceHistory } from "@/lib/insights";
 import { type WalletBalance, calcWalletBalance } from "@/lib/rules";
 import type { WalletData } from "@/lib/validations";
 import type { Ctx } from "./context";
@@ -117,4 +118,41 @@ export async function deleteWallet(ctx: Ctx, id: string): Promise<void> {
   await ctx.db.wallet.delete({ where: { id } });
   // Se apagou a padrão, outra vira padrão.
   if (w.isDefault) await ensureDefaultWallet(ctx.db, ctx.userId);
+}
+
+/**
+ * Saldo de cada conta no fim de cada um dos últimos `days` dias (pro mini gráfico).
+ * Recebe as contas já com saldo (de listWalletsWithBalance) pra não recalcular.
+ */
+export async function getWalletHistories(
+  ctx: Ctx,
+  wallets: WalletWithBalance[],
+  days = 30,
+  now: Date = new Date(),
+): Promise<Record<string, number[]>> {
+  const desde = new Date(now.getTime() - (days + 1) * 86_400_000);
+  const ids = wallets.map((w) => w.id);
+  const [txs, transfers] = await Promise.all([
+    ctx.db.transaction.findMany({
+      where: { userId: ctx.userId, walletId: { in: ids }, status: "PAID", date: { gte: desde } },
+      select: { walletId: true, type: true, amountCents: true, date: true },
+    }),
+    ctx.db.transfer.findMany({
+      where: { userId: ctx.userId, date: { gte: desde } },
+      select: { fromWalletId: true, toWalletId: true, amountCents: true, date: true },
+    }),
+  ]);
+  const out: Record<string, number[]> = {};
+  for (const w of wallets) {
+    const events = [
+      ...txs
+        .filter((t) => t.walletId === w.id)
+        .map((t) => ({ date: t.date, deltaCents: t.type === "INCOME" ? t.amountCents : -t.amountCents })),
+      ...transfers
+        .filter((t) => t.toWalletId === w.id || t.fromWalletId === w.id)
+        .map((t) => ({ date: t.date, deltaCents: t.toWalletId === w.id ? t.amountCents : -t.amountCents })),
+    ];
+    out[w.id] = balanceHistory(w.balance.currentCents, events, days, now);
+  }
+  return out;
 }

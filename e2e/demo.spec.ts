@@ -6,7 +6,7 @@ test("visitante entra na demo, cria uma despesa e ela aparece na lista", async (
   await expect(page).toHaveURL(/\/login$/); // sem sessão, vai pro login
 
   await page.getByRole("button", { name: /Entrar como visitante/ }).click();
-  await expect(page.getByRole("heading", { name: "Visão geral" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { level: 1, name: /^(Bom dia|Boa tarde|Boa noite)/ })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("Saldo total nas contas")).toBeVisible();
 
   await page.goto("/transacoes");
@@ -21,6 +21,25 @@ test("visitante entra na demo, cria uma despesa e ela aparece na lista", async (
   // No celular a lista vira cartões e a tabela fica escondida: procura só o que está visível.
   await expect(page.getByText(descricao).filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByText("R$ 42,50").filter({ visible: true }).first()).toBeVisible();
+});
+
+test("busca rápida (Ctrl+K) leva pra página e as abas da seção aparecem", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Entrar como visitante/ }).click();
+  await expect(page.getByText("Saldo total nas contas")).toBeVisible({ timeout: 30_000 });
+
+  // O atalho só funciona depois que a página "acorda" (hidratação): tenta de novo até abrir.
+  const busca = page.getByRole("combobox", { name: "Buscar" });
+  await expect(async () => {
+    if (!(await busca.isVisible())) await page.keyboard.press("Control+k");
+    await expect(busca).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+  await busca.fill("metas");
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/metas$/);
+  const abas = page.getByRole("navigation", { name: "Abas de Planejamento" });
+  await expect(abas.getByRole("link", { name: "Metas" })).toHaveAttribute("aria-current", "page");
+  await expect(abas.getByRole("link", { name: "Orçamentos" })).toBeVisible();
 });
 
 test("páginas públicas abrem sem login", async ({ page }) => {

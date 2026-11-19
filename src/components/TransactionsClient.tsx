@@ -27,6 +27,8 @@ type TransactionsClientProps = {
   categories: Category[];
   wallets: Wallet[];
   filters: TransactionFilters;
+  /** Abre o formulário de nova transação assim que a tela carrega. */
+  openNew?: boolean;
 };
 
 export function TransactionsClient({
@@ -34,6 +36,7 @@ export function TransactionsClient({
   categories,
   wallets,
   filters,
+  openNew = false,
 }: TransactionsClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -54,6 +57,18 @@ export function TransactionsClient({
   useEffect(() => {
     setSearchText(filters.q ?? "");
   }, [filters.q]);
+
+  // Botão "+" (barra do celular / menu lateral): abre o formulário e limpa o "?nova=1" da URL,
+  // pra não abrir de novo ao atualizar a página.
+  useEffect(() => {
+    if (!openNew) return;
+    setEditingTx(null);
+    setFormOpen(true);
+    const sp = new URLSearchParams(window.location.search);
+    sp.delete("nova");
+    const resto = sp.toString();
+    router.replace(resto ? `${pathname}?${resto}` : pathname, { scroll: false });
+  }, [openNew, pathname, router]);
 
   function applyFilters(next: Partial<TransactionFilters>) {
     const merged: TransactionFilters = {
