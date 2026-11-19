@@ -38,11 +38,12 @@ export async function createImportAction(
 
 export async function updateImportRowAction(
   rowId: string,
-  change: { decision?: "IMPORT" | "SKIP"; categoryId?: string | null },
+  change: { decision?: "IMPORT" | "SKIP"; categoryId?: string | null; transferWalletId?: string | null },
 ): Promise<ActionResult<ImportRow & { similarUpdated: number }>> {
   if (!isId(rowId)) return INVALID_ID;
   if (change.decision && change.decision !== "IMPORT" && change.decision !== "SKIP") return INVALID_ID;
   if (change.categoryId !== undefined && change.categoryId !== null && !isId(change.categoryId)) return INVALID_ID;
+  if (change.transferWalletId !== undefined && change.transferWalletId !== null && !isId(change.transferWalletId)) return INVALID_ID;
   return runMutation((ctx) => updateImportRow(ctx, rowId, change), "Atualizado.");
 }
 

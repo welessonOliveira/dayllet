@@ -149,17 +149,42 @@ export const walletSchema = z.object({
     .min(1, "Informe o nome.")
     .max(40, "Use no máximo 40 caracteres."),
   kind: z.enum(WALLET_KINDS, { error: "Escolha o tipo da conta." }).default("CHECKING"),
-  /** Saldo antes do primeiro lançamento no app, ex.: "1.500,00" ou "-200". */
+  /** Saldo antes do primeiro lançamento no app, ex.: "1.500,00" ou "-200". No cartão: fatura em aberto, negativa. */
   openingBalance: signedMoneyField,
+  /** Só cartão de crédito: dia em que a fatura fecha e dia em que vence (1 a 31). */
+  closingDay: z.union([z.string(), z.number()]).optional().nullable(),
+  dueDay: z.union([z.string(), z.number()]).optional().nullable(),
+}).superRefine((v, ctx) => {
+  if (v.kind !== "CREDIT_CARD") return;
+  for (const campo of ["closingDay", "dueDay"] as const) {
+    const n = Number(v[campo]);
+    if (v[campo] === undefined || v[campo] === null || v[campo] === "" || !Number.isInteger(n) || n < 1 || n > 31) {
+      ctx.addIssue({ code: "custom", path: [campo], message: "Informe um dia de 1 a 31." });
+    }
+  }
 });
 
 export type WalletFormValues = z.input<typeof walletSchema>;
 /** O que o zodResolver entrega no handleSubmit (3º genérico do useForm). */
 export type WalletFormOutput = z.output<typeof walletSchema>;
-export type WalletData = { name: string; kind: (typeof WALLET_KINDS)[number]; openingBalanceCents: number };
+export type WalletData = {
+  name: string;
+  kind: (typeof WALLET_KINDS)[number];
+  openingBalanceCents: number;
+  /** Só cartão; nas outras contas fica null. */
+  closingDay?: number | null;
+  dueDay?: number | null;
+};
 
 export function toWalletData(parsed: WalletFormOutput): WalletData {
-  return { name: parsed.name, kind: parsed.kind, openingBalanceCents: parsed.openingBalance };
+  const cartao = parsed.kind === "CREDIT_CARD";
+  return {
+    name: parsed.name,
+    kind: parsed.kind,
+    openingBalanceCents: parsed.openingBalance,
+    closingDay: cartao ? Number(parsed.closingDay) : null,
+    dueDay: cartao ? Number(parsed.dueDay) : null,
+  };
 }
 
 // ---------- Recorrente / parcelado ----------

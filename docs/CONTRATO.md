@@ -282,7 +282,7 @@ Erros novos em outras actions: excluir categoria ou conta usada numa regra → "
 | Action | Entrada | `data` no sucesso | Mensagem |
 |---|---|---|---|
 | `createImportAction(formData)` | `FormData` com `walletId` e `file` (.ofx/.csv, até 1 MB) | `{ batchId, summary, errors }` | "Extrato lido. Revise os lançamentos antes de confirmar." |
-| `updateImportRowAction(rowId, { decision?, categoryId? })` | `string, { decision?: "IMPORT"\|"SKIP"; categoryId?: string\|null }` | `ImportRow & { similarUpdated: number }` (categoria escolhida também vai pras linhas parecidas não escolhidas na mão; `similarUpdated` = quantas) | "Atualizado." |
+| `updateImportRowAction(rowId, { decision?, categoryId? })` | `string, { decision?: "IMPORT"\|"SKIP"; categoryId?: string\|null }` | `ImportRow & { similarUpdated: number }` (categoria escolhida também vai pras linhas parecidas não escolhidas na mão; `similarUpdated` = quantas). Também aceita `transferWalletId`: a linha vira transferência com essa conta (limpa a categoria) | "Atualizado." |
 | `commitImportAction(batchId)` | `string` | `{ imported, skipped }` | "Importação concluída." |
 | `discardImportAction(batchId)` | `string` | `null` | "Importação descartada." |
 | `undoImportAction(batchId)` | `string` | `{ deleted }` | "Importação desfeita." (apaga os lançamentos que ela criou) |
@@ -358,3 +358,10 @@ Erros possíveis: "Já existe um orçamento dessa categoria nesse mês.", "Orça
 | `/orcamentos` | Orçamentos (sugestão: `?month=` igual às transações) |
 
 O menu atual fica em `src/components/MainNav.tsx` e as páginas são **placeholders**: pode substituir à vontade.
+
+## Cartão de crédito e transferências na importação (2026-11-19)
+
+- **Conta tipo `CREDIT_CARD`** (`WALLET_KIND_LABEL`: "Cartão de crédito") com `closingDay` e `dueDay` (1-31, obrigatórios só no cartão; `walletSchema` valida). Compra = despesa no cartão (saldo negativo = o que deve); pagar fatura = transferência da conta pro cartão.
+- `listCardInvoices(ctx, now?)` em `@/server/cards` → `{ wallet, invoices: { month, opensAt, closingDate, dueDate, totalCents, paidCents, status }[] }[]`. `status`: `OPEN | CLOSED | PAID | OVERDUE | FUTURE` (`INVOICE_STATUS_LABEL` em `@/lib/cards`). A fatura é identificada pelo mês em que fecha.
+- **Importação:** cada linha tem `looksLikeTransfer` (Pix pra si mesmo pelo nome do login, pagamento de fatura, cofrinho, "Pagamento recebido" no cartão), `transferWalletId` (outra conta sugerida quando não há dúvida) e `transferWallet` (no `getImport`). Linha resolvida = tem categoria OU `transferWalletId`. Transferência que já está no app (veio do extrato da outra conta) vem como "Pular" com aviso em `note`.
+- Importar o extrato do PicPay num **cartão** traz só as compras "Com cartão"; numa conta, elas ficam de fora.

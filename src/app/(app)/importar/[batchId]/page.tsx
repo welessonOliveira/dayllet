@@ -3,6 +3,7 @@ import { ImportReviewClient } from "@/components/ImportReviewClient";
 import { listCategories } from "@/server/categories";
 import { getImport } from "@/server/imports";
 import { getPageCtx } from "@/server/session";
+import { listWallets } from "@/server/wallets";
 
 export const dynamic = "force-dynamic";
 
@@ -14,12 +15,13 @@ export default async function ImportReviewPage({
   const ctx = await getPageCtx();
   const { batchId } = await params;
 
-  const [batch, categories] = await Promise.all([
+  const [batch, categories, wallets] = await Promise.all([
     getImport(ctx, batchId),
     listCategories(ctx),
+    listWallets(ctx),
   ]);
 
   if (!batch) notFound();
 
-  return <ImportReviewClient batch={batch} categories={categories} />;
+  return <ImportReviewClient batch={batch} categories={categories} wallets={wallets} />;
 }

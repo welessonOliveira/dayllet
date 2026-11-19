@@ -1,6 +1,6 @@
 "use client";
 
-import type { Category } from "@prisma/client";
+import type { Category, Wallet } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,11 +18,14 @@ import { useToast } from "./Toast";
 type ImportReviewClientProps = {
   batch: ImportView;
   categories: Category[];
+  /** Contas do usuário: a linha pode virar transferência com uma delas. */
+  wallets?: Wallet[];
 };
 
 export function ImportReviewClient({
   batch,
   categories,
+  wallets = [],
 }: ImportReviewClientProps) {
   const router = useRouter();
   const toast = useToast();
@@ -82,11 +85,16 @@ export function ImportReviewClient({
   }
 
   const { summary } = batch;
+  const outrasContas = wallets.filter((w) => w.id !== batch.walletId);
+  /** Valor do select -> mudança: "w:<id>" vira transferência; o resto é categoria. */
+  function escolhaDoSelect(v: string): { categoryId?: string | null; transferWalletId?: string | null } {
+    return v.startsWith("w:") ? { transferWalletId: v.slice(2) } : { categoryId: v || null };
+  }
   const linhasVisiveis = batch.rows.filter((r) =>
     aba === "revisar"
-      ? r.decision === "IMPORT" && !r.categoryId
+      ? r.decision === "IMPORT" && !r.categoryId && !r.transferWalletId
       : aba === "prontos"
-        ? r.decision === "IMPORT" && Boolean(r.categoryId)
+        ? r.decision === "IMPORT" && Boolean(r.categoryId || r.transferWalletId)
         : r.decision === "SKIP",
   );
   const canCommit =
@@ -94,7 +102,7 @@ export function ImportReviewClient({
 
   async function handleRowChange(
     rowId: string,
-    change: { decision?: "IMPORT" | "SKIP"; categoryId?: string | null },
+    change: { decision?: "IMPORT" | "SKIP"; categoryId?: string | null; transferWalletId?: string | null },
   ) {
     setUpdatingRowId(rowId);
     try {
@@ -282,8 +290,8 @@ export function ImportReviewClient({
       {/* Abas: a lista vai esvaziando conforme as linhas ganham categoria */}
       {(() => {
         const contagem = {
-          revisar: batch.rows.filter((r) => r.decision === "IMPORT" && !r.categoryId).length,
-          prontos: batch.rows.filter((r) => r.decision === "IMPORT" && r.categoryId).length,
+          revisar: batch.rows.filter((r) => r.decision === "IMPORT" && !r.categoryId && !r.transferWalletId).length,
+          prontos: batch.rows.filter((r) => r.decision === "IMPORT" && (r.categoryId || r.transferWalletId)).length,
           pulados: batch.rows.filter((r) => r.decision === "SKIP").length,
         };
         const abas = [
@@ -355,7 +363,7 @@ export function ImportReviewClient({
                     row.suggestedCategoryId &&
                     row.categoryId === row.suggestedCategoryId,
                 );
-                const needsCategory = willImport && !row.categoryId;
+                const needsCategory = willImport && !row.categoryId && !row.transferWalletId;
 
                 return (
                   <tr
@@ -406,11 +414,9 @@ export function ImportReviewClient({
                       <select
                         aria-label={`Categoria de ${row.description}`}
                         disabled={isBusy}
-                        value={row.categoryId ?? ""}
+                        value={row.transferWalletId ? `w:${row.transferWalletId}` : (row.categoryId ?? "")}
                         onChange={(e) =>
-                          handleRowChange(row.id, {
-                            categoryId: e.target.value || null,
-                          })
+                          handleRowChange(row.id, escolhaDoSelect(e.target.value))
                         }
                         className={`min-h-10 w-full min-w-[180px] rounded-xl border bg-white px-3 py-2 text-xs font-medium text-slate-900 dark:text-slate-100 outline-none transition motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-50 ${
                           needsCategory
@@ -427,6 +433,15 @@ export function ImportReviewClient({
                               : ""}
                           </option>
                         ))}
+                        {outrasContas.length > 0 && (
+                          <optgroup label="É transferência entre minhas contas">
+                            {outrasContas.map((w) => (
+                              <option key={w.id} value={`w:${w.id}`}>
+                                {row.type === "EXPENSE" ? "Foi para" : "Veio de"}: {w.name}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 text-right">
@@ -484,7 +499,7 @@ export function ImportReviewClient({
                 row.suggestedCategoryId &&
                 row.categoryId === row.suggestedCategoryId,
             );
-            const needsCategory = willImport && !row.categoryId;
+            const needsCategory = willImport && !row.categoryId && !row.transferWalletId;
 
             return (
               <li
@@ -535,11 +550,9 @@ export function ImportReviewClient({
                 <select
                   aria-label={`Categoria de ${row.description}`}
                   disabled={isBusy}
-                  value={row.categoryId ?? ""}
+                  value={row.transferWalletId ? `w:${row.transferWalletId}` : (row.categoryId ?? "")}
                   onChange={(e) =>
-                    handleRowChange(row.id, {
-                      categoryId: e.target.value || null,
-                    })
+                    handleRowChange(row.id, escolhaDoSelect(e.target.value))
                   }
                   className={`min-h-11 w-full rounded-xl border bg-white px-3 py-2 text-xs font-medium text-slate-900 dark:text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
                     needsCategory
@@ -554,6 +567,15 @@ export function ImportReviewClient({
                       {cat.id === row.suggestedCategoryId ? " (sugerida)" : ""}
                     </option>
                   ))}
+                  {outrasContas.length > 0 && (
+                    <optgroup label="É transferência entre minhas contas">
+                      {outrasContas.map((w) => (
+                        <option key={w.id} value={`w:${w.id}`}>
+                          {row.type === "EXPENSE" ? "Foi para" : "Veio de"}: {w.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
 
                 <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 dark:bg-slate-800 p-1">

@@ -194,7 +194,7 @@ const COLUNAS = {
  * por nome (data, descrição/histórico, valor — ou crédito e débito separados).
  * Linhas de saldo ("SALDO ...") são ignoradas.
  */
-export function parseCsv(text: string): ParseResult {
+export function parseCsv(text: string, opts: { cardMode?: boolean } = {}): ParseResult {
   const errors: string[] = [];
   const linhas = text.split(/\r?\n/).filter((l) => l.trim() !== "");
   if (linhas.length === 0) return { format: "CSV", rows: [], errors: ["Arquivo vazio."] };
@@ -239,10 +239,14 @@ export function parseCsv(text: string): ParseResult {
   let noCartao = 0;
   for (let i = headerIdx + 1; i < linhas.length; i++) {
     const cols = splitCsvLine(linhas[i], sep);
-    // PicPay: compra "Com cartão" sai da fatura do cartão, não do saldo da conta. Fica de fora.
-    if (idx.forma >= 0 && semAcento(cols[idx.forma] ?? "") === "com cartao") {
-      noCartao++;
-      continue;
+    // PicPay: compra "Com cartão" sai da fatura do cartão, não do saldo da conta.
+    // Importando numa conta: fica de fora. Importando num CARTÃO: só ela entra.
+    if (idx.forma >= 0) {
+      const doCartao = semAcento(cols[idx.forma] ?? "") === "com cartao";
+      if (doCartao !== Boolean(opts.cardMode)) {
+        noCartao++;
+        continue;
+      }
     }
     let descricao = (cols[idx.description] ?? "").replace(/\s+/g, " ").trim();
     if (idx.tipo >= 0) {
@@ -270,18 +274,22 @@ export function parseCsv(text: string): ParseResult {
     rows.push({ date, signedCents, description: (descricao || "Sem descrição").slice(0, 120), fitId });
   }
   if (noCartao > 0) {
-    errors.push(`${noCartao} compra(s) no cartão de crédito ficaram de fora: elas entram na fatura do cartão, não no saldo da conta.`);
+    errors.push(
+      opts.cardMode
+        ? `${noCartao} movimentação(ões) da conta (sem ser no cartão) ficaram de fora: importe esse arquivo também na conta pra elas.`
+        : `${noCartao} compra(s) no cartão de crédito ficaram de fora: elas entram na fatura do cartão, não no saldo da conta.`,
+    );
   }
   return { format: "CSV", rows, errors };
 }
 
 /** Lê o extrato inteiro (bytes do arquivo) e aplica os limites de tamanho. */
-export function parseStatement(bytes: Uint8Array): ParseResult {
+export function parseStatement(bytes: Uint8Array, opts: { cardMode?: boolean } = {}): ParseResult {
   if (bytes.byteLength > MAX_STATEMENT_BYTES) {
     return { format: "CSV", rows: [], errors: ["Arquivo grande demais (máximo 1 MB)."] };
   }
   const texto = decodeStatement(bytes);
-  const r = detectFormat(texto) === "OFX" ? parseOfx(texto) : parseCsv(texto);
+  const r = detectFormat(texto) === "OFX" ? parseOfx(texto) : parseCsv(texto, opts);
   if (r.rows.length > MAX_STATEMENT_ROWS) {
     return { ...r, rows: [], errors: [`Arquivo com lançamentos demais (máximo ${MAX_STATEMENT_ROWS}).`] };
   }

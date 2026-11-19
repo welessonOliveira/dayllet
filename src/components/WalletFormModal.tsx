@@ -28,6 +28,8 @@ const FIELD_DOM_IDS: Record<keyof WalletFormValues, string> = {
   name: "wallet-name",
   kind: "wallet-kind-CHECKING",
   openingBalance: "wallet-opening",
+  closingDay: "wallet-closing",
+  dueDay: "wallet-due",
 };
 
 export function WalletFormModal({
@@ -46,6 +48,8 @@ export function WalletFormModal({
       name: "",
       kind: "CHECKING",
       openingBalance: "",
+      closingDay: "",
+      dueDay: "",
     },
   });
 
@@ -58,12 +62,16 @@ export function WalletFormModal({
         name: editingWallet.name,
         kind: editingWallet.kind,
         openingBalance: centsToInput(editingWallet.openingBalanceCents),
+        closingDay: editingWallet.closingDay ? String(editingWallet.closingDay) : "",
+        dueDay: editingWallet.dueDay ? String(editingWallet.dueDay) : "",
       });
     } else {
       form.reset({
         name: "",
         kind: "CHECKING",
         openingBalance: "",
+        closingDay: "",
+        dueDay: "",
       });
     }
   }, [open, editingWallet, form]);
@@ -101,6 +109,8 @@ export function WalletFormModal({
         "name",
         "kind",
         "openingBalance",
+        "closingDay",
+        "dueDay",
       ];
       for (const [key, messages] of Object.entries(result.fieldErrors)) {
         if (
@@ -141,7 +151,7 @@ export function WalletFormModal({
       onClose={onClose}
       busy={isSubmitting}
       title={editingWallet ? "Editar conta" : "Nova conta"}
-      subtitle="Cadastre uma conta corrente, poupança ou carteira"
+      subtitle="Cadastre uma conta corrente, poupança, carteira ou cartão de crédito"
       maxWidthClass="max-w-md"
     >
       <form
@@ -212,7 +222,7 @@ export function WalletFormModal({
           <span className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
             Tipo da conta
           </span>
-          <div className="mt-1.5 grid grid-cols-3 gap-2">
+          <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {WALLET_KINDS.map((k) => {
               const active = selectedKind === k;
               return (
@@ -245,13 +255,46 @@ export function WalletFormModal({
           )}
         </div>
 
+        {/* Cartão: dias de fechamento e vencimento da fatura */}
+        {selectedKind === "CREDIT_CARD" && (
+          <div className="grid grid-cols-2 gap-3">
+            {(
+              [
+                ["closingDay", "wallet-closing", "Fecha no dia", "Compras a partir desse dia vão pra fatura seguinte."],
+                ["dueDay", "wallet-due", "Vence no dia", "Dia de pagar a fatura."],
+              ] as const
+            ).map(([campo, id, rotulo, dica]) => (
+              <div key={campo}>
+                <label htmlFor={id} className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {rotulo}
+                </label>
+                <input
+                  id={id}
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={31}
+                  placeholder="Ex.: 3"
+                  aria-invalid={Boolean(errors[campo]) || undefined}
+                  aria-describedby={`${id}-hint`}
+                  {...form.register(campo)}
+                  className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 tabular-nums outline-none transition motion-reduce:transition-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/25 dark:text-slate-100"
+                />
+                <p id={`${id}-hint`} className={`mt-1 text-xs ${errors[campo] ? "font-medium text-rose-600" : "text-slate-500 dark:text-slate-400"}`}>
+                  {errors[campo]?.message ?? dica}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Saldo inicial (pode ser zero ou negativo) */}
         <div>
           <label
             htmlFor="wallet-opening"
             className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
           >
-            Saldo inicial (R$){" "}
+            {selectedKind === "CREDIT_CARD" ? "Fatura em aberto hoje (R$)" : "Saldo inicial (R$)"}{" "}
             <span className="font-normal text-slate-400">(opcional)</span>
           </label>
           <div className="relative mt-1.5">
@@ -281,8 +324,9 @@ export function WalletFormModal({
             </p>
           ) : (
             <p id="wallet-opening-hint" className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Saldo antes dos lançamentos no app. Aceita zero ou valor negativo
-              (ex.: 1.500,00 ou -200,00).
+              {selectedKind === "CREDIT_CARD"
+                ? "O que você já deve no cartão, com sinal de menos (ex.: -350,00). Deixe zero se for importar a fatura."
+                : "Saldo antes dos lançamentos no app. Aceita zero ou valor negativo (ex.: 1.500,00 ou -200,00)."}
             </p>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { WalletsClient } from "@/components/WalletsClient";
 import { currentMonth, isValidMonth } from "@/lib/dates";
 import type { SearchParams } from "@/lib/validations";
+import { listCardInvoices } from "@/server/cards";
 import { getPageCtx } from "@/server/session";
 import { listTransfers } from "@/server/transfers";
 import { listWalletsWithBalance } from "@/server/wallets";
@@ -18,12 +19,13 @@ export default async function ContasPage({
       ? rawMonth.trim()
       : currentMonth();
 
-  const [wallets, transfers] = await Promise.all([
+  const [wallets, transfers, cards] = await Promise.all([
     listWalletsWithBalance(ctx),
     listTransfers(ctx, month),
+    listCardInvoices(ctx),
   ]);
 
   return (
-    <WalletsClient wallets={wallets} transfers={transfers} month={month} />
+    <WalletsClient wallets={wallets} transfers={transfers} month={month} cards={cards} />
   );
 }

@@ -49,6 +49,7 @@ enum WalletKind {
   CHECKING // conta corrente
   SAVINGS // poupança
   WALLET // carteira / dinheiro vivo
+  CREDIT_CARD // cartão de crédito: saldo negativo = fatura em aberto
 }
 
 // ---------- Usuário e login (tabelas no formato que o Auth.js espera) ----------
@@ -128,6 +129,10 @@ model Wallet {
   openingBalanceCents Int             @default(0)
   /// Conta usada quando o lançamento não diz qual (só uma por usuário).
   isDefault           Boolean         @default(false)
+  /// Cartão de crédito: dia em que a fatura fecha (1-31). Compras depois desse dia vão pra fatura seguinte.
+  closingDay          Int?
+  /// Cartão de crédito: dia do vencimento da fatura (1-31).
+  dueDay              Int?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   transactions        Transaction[]
@@ -143,17 +148,20 @@ model Wallet {
 /// Transferência entre contas do mesmo usuário (Decisão 18, ajustada).
 /// Não é receita nem despesa: só tira de uma conta e põe na outra.
 model Transfer {
-  id           String   @id @default(cuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fromWalletId String
-  fromWallet   Wallet   @relation("TransferFrom", fields: [fromWalletId], references: [id], onDelete: Restrict)
-  toWalletId   String
-  toWallet     Wallet   @relation("TransferTo", fields: [toWalletId], references: [id], onDelete: Restrict)
-  amountCents  Int
-  date         DateTime
-  note         String?
-  createdAt    DateTime @default(now())
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromWalletId  String
+  fromWallet    Wallet       @relation("TransferFrom", fields: [fromWalletId], references: [id], onDelete: Restrict)
+  toWalletId    String
+  toWallet      Wallet       @relation("TransferTo", fields: [toWalletId], references: [id], onDelete: Restrict)
+  amountCents   Int
+  date          DateTime
+  note          String?
+  /// Criada por uma importação de extrato (desfazer a importação apaga junto).
+  importBatchId String?
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now())
 
   @@index([userId, date])
 }
@@ -274,6 +282,7 @@ model ImportBatch {
 
   rows         ImportRow[]
   transactions Transaction[]
+  transfers    Transfer[]
 
   @@index([userId, status])
   @@index([walletId, fileHash])
@@ -300,6 +309,10 @@ model ImportRow {
   categoryChosen      Boolean      @default(false)
   /// Aviso curto pra revisão (ex.: "Estorno da compra de 13/11: as duas ficam de fora").
   note                String?
+  /// A linha parece dinheiro mudando de conta (Pix pra si mesmo, pagamento de fatura, cofrinho).
+  looksLikeTransfer   Boolean      @default(false)
+  /// Se preenchido, a linha vira Transferência com essa outra conta (em vez de receita/despesa).
+  transferWalletId    String?
   /// Já existe no extrato da conta? (mesmo externalId = certeza; parecido = possível)
   duplicateOfId       String?
   possibleDuplicate   Boolean      @default(false)

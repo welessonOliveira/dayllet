@@ -7,13 +7,14 @@ export type CategoryType = (typeof CATEGORY_TYPES)[number];
 export const TRANSACTION_STATUSES = ["PAID", "PENDING"] as const;
 export type TransactionStatus = (typeof TRANSACTION_STATUSES)[number];
 
-export const WALLET_KINDS = ["CHECKING", "SAVINGS", "WALLET"] as const;
+export const WALLET_KINDS = ["CHECKING", "SAVINGS", "WALLET", "CREDIT_CARD"] as const;
 export type WalletKind = (typeof WALLET_KINDS)[number];
 
 export const WALLET_KIND_LABEL: Record<WalletKind, string> = {
   CHECKING: "Conta corrente",
   SAVINGS: "Poupança",
   WALLET: "Carteira",
+  CREDIT_CARD: "Cartão de crédito",
 };
 
 export const CATEGORY_TYPE_LABEL: Record<CategoryType, string> = {

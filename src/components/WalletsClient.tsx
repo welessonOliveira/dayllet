@@ -10,6 +10,8 @@ import {
   deleteWalletAction,
   setDefaultWalletAction,
 } from "@/server/actions/wallets";
+import { INVOICE_STATUS_LABEL } from "@/lib/cards";
+import type { CardWithInvoices } from "@/server/cards";
 import type { TransferWithWallets } from "@/server/transfers";
 import type { WalletWithBalance } from "@/server/wallets";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -22,9 +24,65 @@ type WalletsClientProps = {
   wallets: WalletWithBalance[];
   transfers: TransferWithWallets[];
   month: string;
+  /** Faturas dos cartões de crédito (só cartão com dia de fechamento e vencimento). */
+  cards?: CardWithInvoices[];
 };
 
+/** "2026-11-03" -> "03/11". */
+function diaMes(d: Date | string): string {
+  const [, m, dia] = new Date(d).toISOString().slice(0, 10).split("-");
+  return `${dia}/${m}`;
+}
+
+const INVOICE_TONE: Record<string, string> = {
+  OPEN: "bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-300",
+  CLOSED: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
+  PAID: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
+  OVERDUE: "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300",
+  FUTURE: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+};
+
+/** Faturas que importam agora: a aberta, a última fechada e as futuras com parcela. */
+function CardInvoices({ card }: { card: CardWithInvoices }) {
+  const aberta = card.invoices.find((f) => f.status === "OPEN");
+  const fechadas = card.invoices.filter((f) => f.status === "CLOSED" || f.status === "OVERDUE" || f.status === "PAID");
+  const ultimaFechada = fechadas.filter((f) => f.totalCents > 0).at(-1);
+  const futuras = card.invoices.filter((f) => f.status === "FUTURE" && f.totalCents > 0);
+  const linhas = [ultimaFechada, aberta, ...futuras].filter(Boolean) as CardWithInvoices["invoices"];
+  return (
+    <ul className="mt-3 space-y-2 border-t border-slate-200/70 pt-3 dark:border-slate-700/60">
+      {linhas.map((f) => {
+        const falta = Math.max(0, f.totalCents - f.paidCents);
+        return (
+          <li key={f.month} className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${INVOICE_TONE[f.status]}`}>
+                {INVOICE_STATUS_LABEL[f.status]}
+              </span>
+              <span className="text-slate-500 dark:text-slate-400">
+                {f.status === "OPEN" ? `fecha ${diaMes(f.closingDate)}` : `vence ${diaMes(f.dueDate)}`}
+              </span>
+            </div>
+            <strong className="tabular-nums text-slate-900 dark:text-slate-100">
+              {formatBRL(f.totalCents)}
+              {f.paidCents > 0 && f.status !== "PAID" && (
+                <span className="ml-1 font-semibold text-slate-500 dark:text-slate-400">(falta {formatBRL(falta)})</span>
+              )}
+            </strong>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 const KIND_ICON: Record<WalletKind, ReactNode> = {
+  CREDIT_CARD: (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+      <path d="M2.5 9.5h19M6.5 15h4" />
+    </svg>
+  ),
   CHECKING: (
     <svg
       className="h-5 w-5"
@@ -76,6 +134,7 @@ export function WalletsClient({
   wallets,
   transfers,
   month,
+  cards = [],
 }: WalletsClientProps) {
   const toast = useToast();
 
@@ -364,6 +423,17 @@ export function WalletsClient({
                         Inicial: {formatBRL(w.openingBalanceCents)}
                       </span>
                     </div>
+                    {w.kind === "CREDIT_CARD" &&
+                      (() => {
+                        const card = cards.find((c) => c.wallet.id === w.id);
+                        return card ? (
+                          <CardInvoices card={card} />
+                        ) : (
+                          <p className="mt-3 border-t border-slate-200/70 pt-3 text-xs text-slate-500 dark:border-slate-700/60 dark:text-slate-400">
+                            Edite o cartão e informe o dia de fechamento e de vencimento pra ver as faturas.
+                          </p>
+                        );
+                      })()}
                   </div>
                 </div>
 
