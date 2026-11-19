@@ -1,0 +1,61 @@
+# Roda a cada push e pull request: tipos, lint, testes (com PostgreSQL de verdade) e build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: financas
+          POSTGRES_PASSWORD: financas
+          POSTGRES_DB: financas_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U financas"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Banco descartável do próprio CI (não é segredo).
+      DATABASE_URL: postgresql://financas:financas@localhost:5432/financas_test
+      DATABASE_URL_UNPOOLED: postgresql://financas:financas@localhost:5432/financas_test
+      TEST_DATABASE_URL: postgresql://financas:financas@localhost:5432/financas_test
+      AUTH_SECRET: ci-somente-para-o-build-nao-e-segredo
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Tipos (tsc)
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes (unitários + integração)
+        run: npm run test
+
+      - name: Build de produção
+        run: npm run build
