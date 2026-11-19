@@ -39,7 +39,7 @@ export async function createImportAction(
 export async function updateImportRowAction(
   rowId: string,
   change: { decision?: "IMPORT" | "SKIP"; categoryId?: string | null },
-): Promise<ActionResult<ImportRow>> {
+): Promise<ActionResult<ImportRow & { similarUpdated: number }>> {
   if (!isId(rowId)) return INVALID_ID;
   if (change.decision && change.decision !== "IMPORT" && change.decision !== "SKIP") return INVALID_ID;
   if (change.categoryId !== undefined && change.categoryId !== null && !isId(change.categoryId)) return INVALID_ID;

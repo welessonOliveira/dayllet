@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   // Conexão direta (sem pooler) pras migrations. Na Vercel+Neon vem pronta; no PC é igual à DATABASE_URL.
   directUrl = env("DATABASE_URL_UNPOOLED")
@@ -66,8 +66,8 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
+  accounts       Account[]
+  sessions       Session[]
   wallets        Wallet[]
   categories     Category[]
   transactions   Transaction[]
@@ -119,15 +119,15 @@ model VerificationToken {
 
 /// Conta FINANCEIRA (corrente, poupança, carteira). Na tela aparece como "Conta".
 model Wallet {
-  id                  String        @id @default(cuid())
+  id                  String          @id @default(cuid())
   userId              String
-  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   name                String
-  kind                WalletKind    @default(CHECKING)
+  kind                WalletKind      @default(CHECKING)
   /// Saldo que a conta já tinha antes do primeiro lançamento no app.
-  openingBalanceCents Int           @default(0)
+  openingBalanceCents Int             @default(0)
   /// Conta usada quando o lançamento não diz qual (só uma por usuário).
-  isDefault           Boolean       @default(false)
+  isDefault           Boolean         @default(false)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   transactions        Transaction[]
@@ -159,13 +159,13 @@ model Transfer {
 }
 
 model Category {
-  id           String        @id @default(cuid())
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name         String
-  type         CategoryType
-  color        String?
-  createdAt    DateTime      @default(now())
+  id             String          @id @default(cuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  type           CategoryType
+  color          String?
+  createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   transactions   Transaction[]
   budgets        Budget[]
@@ -296,6 +296,8 @@ model ImportRow {
   suggestedCategoryId String?
   /// Categoria escolhida (começa igual à sugerida).
   categoryId          String?
+  /// true quando o usuário escolheu a categoria desta linha na mão (a propagação não mexe nela)
+  categoryChosen      Boolean      @default(false)
   /// Já existe no extrato da conta? (mesmo externalId = certeza; parecido = possível)
   duplicateOfId       String?
   possibleDuplicate   Boolean      @default(false)

@@ -2,7 +2,7 @@
 // Aprende quando o usuário escolhe uma categoria (lançamento manual, edição ou importação)
 // e sugere pra descrições parecidas depois.
 import type { Category, CategoryRule } from "@prisma/client";
-import { type CategoryRuleLike, ruleKey, suggestCategory } from "@/lib/categorize";
+import { type CategoryRuleLike, builtinRules, ruleKey, suggestWithBuiltins } from "@/lib/categorize";
 import type { CategoryType } from "@/lib/constants";
 import { DomainError } from "@/lib/errors";
 import type { Ctx } from "./context";
@@ -16,13 +16,23 @@ export async function loadRules(ctx: Ctx): Promise<CategoryRuleLike[]> {
   return rules.map((r) => ({ pattern: r.pattern, categoryId: r.categoryId, categoryType: r.category.type, hits: r.hits }));
 }
 
-/** Sugestão de categoria pra uma descrição (ou null). */
+/** Regras do dicionário de estabelecimentos (Uber, iFood, farmácia...) pras categorias do usuário. */
+export async function loadBuiltinRules(ctx: Ctx): Promise<CategoryRuleLike[]> {
+  const cats = await ctx.db.category.findMany({
+    where: { userId: ctx.userId },
+    select: { id: true, name: true, type: true },
+  });
+  return builtinRules(cats);
+}
+
+/** Sugestão de categoria pra uma descrição (ou null): primeiro o que o usuário ensinou, depois o dicionário. */
 export async function suggestCategoryFor(
   ctx: Ctx,
   description: string,
   type: CategoryType,
 ): Promise<{ categoryId: string; pattern: string } | null> {
-  return suggestCategory(description, type, await loadRules(ctx));
+  const [learned, builtins] = await Promise.all([loadRules(ctx), loadBuiltinRules(ctx)]);
+  return suggestWithBuiltins(description, type, learned, builtins);
 }
 
 /**

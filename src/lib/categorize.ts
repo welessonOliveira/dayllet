@@ -13,6 +13,8 @@ const PALAVRAS_VAZIAS = new Set([
   "PIX", "TED", "DOC", "TEF", "TRANSF", "TRANSFERENCIA", "ENVIADO", "ENVIADA", "RECEBIDO", "RECEBIDA",
   "ELO", "VISA", "MASTER", "MASTERCARD", "INT", "NAC", "BR", "BRA", "SAO", "PAULO", "RIO", "DE", "DA", "DO",
   "DAS", "DOS", "E", "LTDA", "ME", "SA", "EIRELI", "COM", "WWW", "APLICACAO", "APP", "ONLINE", "PARC", "PARCELA",
+  // Palavras que o PicPay e outros bancos põem antes/depois do nome ("Compra estornada - Uber", "Uber Brasil Tecnologia").
+  "ESTORNADA", "ESTORNO", "REALIZADO", "REALIZADA", "BRASIL", "TECNOLOGIA", "SERVICOS", "INSTITUICAO", "PAGAMENTOS",
 ]);
 
 /** "Uber *Trip 8731 São Paulo" -> "UBER TRIP SAO PAULO" (só letras, sem acento). */
@@ -69,4 +71,71 @@ export function suggestCategory(
     if (!melhor || palavras > melhorPalavras || (palavras === melhorPalavras && r.hits > melhor.hits)) melhor = r;
   }
   return melhor ? { categoryId: melhor.categoryId, pattern: melhor.pattern } : null;
+}
+
+// ---------- Dicionário de estabelecimentos conhecidos ----------
+// Vale quando o usuário ainda não ensinou nada pra aquela descrição (o que ele ensina sempre ganha).
+// As palavras já estão no formato de `significantTokens` (maiúsculas, sem acento).
+// A categoria é achada pelo NOME (padrão do app); se o usuário apagou/renomeou, a regra some.
+export const BUILTIN_KEYWORDS: { category: string; type: CategoryType; patterns: string[] }[] = [
+  {
+    category: "Transporte",
+    type: "EXPENSE",
+    patterns: ["UBER", "CABIFY", "INDRIVE", "BUSER", "POSTO", "IPIRANGA", "SHELL", "PETROBRAS", "ESTACIONAMENTO", "PEDAGIO", "SEM PARAR", "VELOE", "CONECTCAR", "METRO", "ONIBUS"],
+  },
+  {
+    category: "Alimentação",
+    type: "EXPENSE",
+    patterns: [
+      "IFOOD", "RAPPI", "PADARIA", "PANIFICADORA", "SUPERMERCADO", "SUPERMERCADOS", "MERCADINHO", "ATACADAO", "ASSAI", "CARREFOUR",
+      "PAO ACUCAR", "BAHAMAS", "BRETAS", "EMPORIO", "ACOUGUE", "HORTIFRUTI", "SACOLAO", "RESTAURANTE", "LANCHONETE", "PIZZARIA", "PASTEIS",
+      "PASTELARIA", "SORVETERIA", "BURGER KING", "MCDONALDS", "MC DONALDS", "HABIBS", "SUBWAY", "BOBS", "OUTBACK", "STARBUCKS", "CACAU SHOW",
+    ],
+  },
+  {
+    category: "Saúde",
+    type: "EXPENSE",
+    patterns: ["FARMACIA", "DROGARIA", "DROGASIL", "RAIA", "PAGUE MENOS", "PACHECO", "HOSPITAL", "CLINICA", "LABORATORIO", "ODONTO", "UNIMED", "SMART FIT", "ACADEMIA"],
+  },
+  {
+    category: "Lazer",
+    type: "EXPENSE",
+    patterns: [
+      "NETFLIX", "SPOTIFY", "DISNEY", "PRIME VIDEO", "HBO", "YOUTUBE", "DEEZER", "GLOBOPLAY", "CRUNCHYROLL", "STEAM", "PLAYSTATION",
+      "XBOX", "NINTENDO", "HOYOVERSE", "CINEMA", "CINEMARK", "INGRESSO", "SYMPLA", "TWITCH",
+    ],
+  },
+  {
+    category: "Moradia",
+    type: "EXPENSE",
+    patterns: ["ALUGUEL", "CONDOMINIO", "CEMIG", "COPASA", "DMAE", "SABESP", "ENEL", "CPFL", "ALGAR", "VIVO", "TELEFONICA", "CLARO", "TIM", "NET VIRTUA", "GAS"],
+  },
+  {
+    category: "Educação",
+    type: "EXPENSE",
+    patterns: ["UDEMY", "ALURA", "ROCKETSEAT", "DIO", "SENAI", "SENAC", "ESCOLA", "FACULDADE", "UNIVERSIDADE", "LIVRARIA", "CURSO"],
+  },
+  { category: "Salário", type: "INCOME", patterns: ["SALARIO", "FOLHA", "PROVENTOS", "VENCIMENTOS"] },
+];
+
+/** Regras do dicionário pras categorias que o usuário tem (procuradas pelo nome, sem acento). */
+export function builtinRules(categories: { id: string; name: string; type: CategoryType }[]): CategoryRuleLike[] {
+  const porNome = new Map(categories.map((c) => [`${c.type}:${normalizeDescription(c.name)}`, c.id]));
+  const out: CategoryRuleLike[] = [];
+  for (const grupo of BUILTIN_KEYWORDS) {
+    const categoryId = porNome.get(`${grupo.type}:${normalizeDescription(grupo.category)}`);
+    if (!categoryId) continue;
+    for (const pattern of grupo.patterns) out.push({ pattern, categoryId, categoryType: grupo.type, hits: 0 });
+  }
+  return out;
+}
+
+/** O que o usuário ensinou primeiro; se nada casar, o dicionário. */
+export function suggestWithBuiltins(
+  desc: string,
+  type: CategoryType,
+  learned: CategoryRuleLike[],
+  builtins: CategoryRuleLike[],
+): { categoryId: string; pattern: string } | null {
+  return suggestCategory(desc, type, learned) ?? suggestCategory(desc, type, builtins);
 }

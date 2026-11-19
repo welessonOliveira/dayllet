@@ -2,12 +2,12 @@
 // Nada entra no extrato do usuário antes de ele confirmar.
 import { createHash } from "node:crypto";
 import type { Category, ImportBatch, ImportRow, Wallet } from "@prisma/client";
-import { normalizeDescription, suggestCategory } from "@/lib/categorize";
+import { normalizeDescription, ruleKey, suggestWithBuiltins } from "@/lib/categorize";
 import { checkCategoryType } from "@/lib/rules";
 import { DomainError } from "@/lib/errors";
 import { type StatementRow, parseStatement } from "@/lib/statement";
 import { toDateInput } from "@/lib/dates";
-import { learnCategory, loadRules } from "./categoryRules";
+import { learnCategory, loadBuiltinRules, loadRules } from "./categoryRules";
 import type { Ctx } from "./context";
 import { getOwnWallet } from "./wallets";
 
@@ -89,7 +89,7 @@ export async function createImport(
 
   const ids = externalIds(parsed.rows);
   const datas = parsed.rows.map((r) => r.date.getTime());
-  const [jaImportados, manuais, rules] = await Promise.all([
+  const [jaImportados, manuais, rules, builtins] = await Promise.all([
     ctx.db.transaction.findMany({
       where: { userId: ctx.userId, walletId: wallet.id, externalId: { in: ids } },
       select: { id: true, externalId: true },
@@ -107,6 +107,7 @@ export async function createImport(
       select: { id: true, date: true, amountCents: true, type: true },
     }),
     loadRules(ctx),
+    loadBuiltinRules(ctx),
   ]);
   const porExternalId = new Map(jaImportados.map((t) => [t.externalId!, t.id]));
   const manuaisUsados = new Set<string>();
@@ -129,7 +130,7 @@ export async function createImport(
         manuaisUsados.add(parecido.id); // um manual só "explica" uma linha
       }
     }
-    const sugestao = suggestCategory(r.description, type, rules);
+    const sugestao = suggestWithBuiltins(r.description, type, rules, builtins);
     return {
       position: i,
       date: r.date,
@@ -185,12 +186,18 @@ export async function listImports(ctx: Ctx) {
   return batches.map(({ _count, ...b }) => ({ ...b, rowCount: _count.rows, importedCount: _count.transactions }));
 }
 
-/** Muda a decisão (importar/pular) e/ou a categoria de uma linha em revisão. */
+/**
+ * Muda a decisão (importar/pular) e/ou a categoria de uma linha em revisão.
+ * Ao escolher a categoria, ela vale também pras linhas PARECIDAS do mesmo arquivo
+ * (mesmo estabelecimento/pessoa e mesmo tipo): marcou um Uber, todos os Uber vão junto.
+ * Só mexe nas parecidas que o usuário ainda não escolheu na mão (`categoryChosen`).
+ * Já aprende a regra, pra próxima importação vir certa.
+ */
 export async function updateImportRow(
   ctx: Ctx,
   rowId: string,
   change: { decision?: "IMPORT" | "SKIP"; categoryId?: string | null },
-): Promise<ImportRow> {
+): Promise<ImportRow & { similarUpdated: number }> {
   const row = await ctx.db.importRow.findFirst({
     where: { id: rowId, batch: { userId: ctx.userId } },
     include: { batch: true },
@@ -204,13 +211,32 @@ export async function updateImportRow(
     const erro = checkCategoryType(row.type, cat.type);
     if (erro) throw new DomainError(erro);
   }
-  return ctx.db.importRow.update({
+  const atualizada = await ctx.db.importRow.update({
     where: { id: rowId },
     data: {
       ...(change.decision && { decision: change.decision }),
-      ...(change.categoryId !== undefined && { categoryId: change.categoryId }),
+      ...(change.categoryId !== undefined && { categoryId: change.categoryId, categoryChosen: change.categoryId !== null }),
     },
   });
+
+  let similarUpdated = 0;
+  const chave = change.categoryId ? ruleKey(row.description) : null;
+  if (change.categoryId && chave) {
+    const irmas = await ctx.db.importRow.findMany({
+      // Só as que o usuário não escolheu na mão.
+      where: { batchId: row.batchId, type: row.type, id: { not: row.id }, categoryChosen: false },
+      select: { id: true, description: true, categoryId: true },
+    });
+    const ids = irmas
+      .filter((o) => ruleKey(o.description) === chave && o.categoryId !== change.categoryId)
+      .map((o) => o.id);
+    if (ids.length > 0) {
+      const res = await ctx.db.importRow.updateMany({ where: { id: { in: ids } }, data: { categoryId: change.categoryId } });
+      similarUpdated = res.count;
+    }
+    await learnCategory(ctx, row.description, change.categoryId);
+  }
+  return { ...atualizada, similarUpdated };
 }
 
 /**

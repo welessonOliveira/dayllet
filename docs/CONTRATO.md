@@ -282,7 +282,7 @@ Erros novos em outras actions: excluir categoria ou conta usada numa regra → "
 | Action | Entrada | `data` no sucesso | Mensagem |
 |---|---|---|---|
 | `createImportAction(formData)` | `FormData` com `walletId` e `file` (.ofx/.csv, até 1 MB) | `{ batchId, summary, errors }` | "Extrato lido. Revise os lançamentos antes de confirmar." |
-| `updateImportRowAction(rowId, { decision?, categoryId? })` | `string, { decision?: "IMPORT"\|"SKIP"; categoryId?: string\|null }` | `ImportRow` | "Atualizado." |
+| `updateImportRowAction(rowId, { decision?, categoryId? })` | `string, { decision?: "IMPORT"\|"SKIP"; categoryId?: string\|null }` | `ImportRow & { similarUpdated: number }` (categoria escolhida também vai pras linhas parecidas não escolhidas na mão; `similarUpdated` = quantas) | "Atualizado." |
 | `commitImportAction(batchId)` | `string` | `{ imported, skipped }` | "Importação concluída." |
 | `discardImportAction(batchId)` | `string` | `null` | "Importação descartada." |
 | `undoImportAction(batchId)` | `string` | `{ deleted }` | "Importação desfeita." (apaga os lançamentos que ela criou) |

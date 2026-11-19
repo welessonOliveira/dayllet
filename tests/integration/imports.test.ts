@@ -59,11 +59,12 @@ afterAll(async () => {
 describe("fluxo de importação", () => {
   it("arquivo -> revisão -> categorizar -> confirmar vira transações pagas, e aprende", async () => {
     const { batchId, summary } = await createImport(ana, { walletId: banco, fileName: "nov.ofx", bytes: bytes(OFX()) });
-    expect(summary).toEqual({ total: 3, toImport: 3, duplicates: 0, possibleDuplicates: 0, withoutCategory: 3 });
+    // Uber e salário já vêm categorizados pelo dicionário; o mercado (nome qualquer) não.
+    expect(summary).toEqual({ total: 3, toImport: 3, duplicates: 0, possibleDuplicates: 0, withoutCategory: 1 });
 
     // Nada entrou ainda.
     expect(await db.transaction.count({ where: { userId: ana.userId } })).toBe(0);
-    await expect(commitImport(ana, batchId)).rejects.toThrow("Escolha a categoria de 3 lançamentos");
+    await expect(commitImport(ana, batchId)).rejects.toThrow("Escolha a categoria de 1 lançamento");
 
     const imp = (await getImport(ana, batchId))!;
     expect(imp.rows.map((r) => [r.type, r.amountCents, r.description])).toEqual([
@@ -154,6 +155,44 @@ describe("fluxo de importação", () => {
   });
 });
 
+describe("marcou um, marca os parecidos", () => {
+  it("categoria escolhida vale pras linhas do mesmo estabelecimento/pessoa, sem passar por cima do que foi escolhido na mão", async () => {
+    const csv = [
+      'data,hora,tipo,"origem / destino",valor,"forma de pagamento"',
+      '2026-11-01,10:00,"Pix enviado","Maria Souza","−R$ 10,00","Com saldo"',
+      '2026-11-02,10:00,"Pix enviado","Maria Souza","−R$ 20,00","Com saldo"',
+      '2026-11-03,10:00,"Pix enviado","Maria Souza","−R$ 30,00","Com saldo"',
+      '2026-11-04,10:00,"Pix recebido","Maria Souza","R$ 5,00",',
+      '2026-11-05,10:00,"Pix enviado","Joao Lima","−R$ 40,00","Com saldo"',
+    ].join("\n");
+    const { batchId } = await createImport(ana, { walletId: banco, fileName: "picpay.csv", bytes: bytes(csv) });
+    const linhas = () => getImport(ana, batchId).then((b) => b!.rows);
+    const [m1, m2, m3, , joao] = await linhas();
+
+    // Escolhe na mão a 3ª da Maria; depois marca a 1ª: vai pra 2ª, não pra 3ª, nem pra receita nem pro João.
+    await updateImportRow(ana, m3.id, { categoryId: transporte });
+    const r = await updateImportRow(ana, m1.id, { categoryId: mercado });
+    expect(r.similarUpdated).toBe(1);
+    const depois = await linhas();
+    expect(depois.map((x) => x.categoryId)).toEqual([mercado, mercado, transporte, null, null]);
+
+    // Trocar de novo a 1ª arrasta junto quem estava seguindo ela.
+    await updateImportRow(ana, m1.id, { categoryId: transporte });
+    expect((await linhas()).map((x) => x.categoryId)).toEqual([transporte, transporte, transporte, null, null]);
+    expect(m2.id).toBeTruthy();
+    expect(joao.categoryId).toBeNull();
+
+    // Já aprendeu: a próxima importação da Maria vem categorizada.
+    expect((await suggestCategoryFor(ana, "Pix enviado - Maria Souza", "EXPENSE"))?.categoryId).toBe(transporte);
+  });
+
+  it("não mexe em importação de outro usuário (IDOR)", async () => {
+    const { batchId } = await createImport(ana, { walletId: banco, fileName: "nov.ofx", bytes: bytes(OFX()) });
+    const [linha] = (await getImport(ana, batchId))!.rows;
+    await expect(updateImportRow(bruno, linha.id, { categoryId: transporte })).rejects.toThrow("Linha não encontrada");
+  });
+});
+
 describe("aprendizado com lançamentos manuais", () => {
   it("criar ensina, corrigir a categoria muda a regra", async () => {
     const lazer = await createCategory(ana, { name: "Lazer", type: "EXPENSE", color: null });
@@ -174,7 +213,9 @@ describe("aprendizado com lançamentos manuais", () => {
     expect((await suggestCategoryFor(ana, "NETFLIX.COM", "EXPENSE"))?.categoryId).toBe(lazer.id);
     const [regra] = await listCategoryRules(ana);
     await deleteCategoryRule(ana, regra.id);
-    expect(await suggestCategoryFor(ana, "NETFLIX.COM", "EXPENSE")).toBeNull();
+    // Sem a regra aprendida, volta o dicionário (Netflix -> Lazer); nome desconhecido não tem sugestão.
+    expect((await suggestCategoryFor(ana, "NETFLIX.COM", "EXPENSE"))?.categoryId).toBe(lazer.id);
+    expect(await suggestCategoryFor(ana, "LOJA DO ZE", "EXPENSE")).toBeNull();
   });
 });
 

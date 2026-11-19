@@ -92,6 +92,9 @@ export function ImportReviewClient({
       const result = await updateImportRowAction(rowId, change);
       if (!result.ok) {
         toast.error(result.error);
+      } else if (result.data.similarUpdated > 0) {
+        const n = result.data.similarUpdated;
+        toast.success(`Aplicado também em ${n} ${n === 1 ? "lançamento parecido" : "lançamentos parecidos"}.`);
       }
     } finally {
       setUpdatingRowId(null);
