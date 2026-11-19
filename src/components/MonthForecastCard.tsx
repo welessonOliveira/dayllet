@@ -80,10 +80,10 @@ export function MonthForecastCard({ forecast }: MonthForecastCardProps) {
     }
   }
 
-  const lineStroke = goesNegative ? "#e11d48" : "#7c3aed";
+  const lineStroke = goesNegative ? "#e11d48" : "var(--color-violet-600)";
   const areaFill = goesNegative
     ? "rgba(225, 29, 72, 0.10)"
-    : "rgba(124, 58, 237, 0.10)";
+    : "color-mix(in oklab, var(--color-violet-600) 12%, transparent)";
 
   return (
     <section

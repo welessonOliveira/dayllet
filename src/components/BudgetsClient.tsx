@@ -159,7 +159,7 @@ export function BudgetsClient({
             </p>
             <p
               className={`mt-1 text-xs ${
-                overCount > 0 ? "text-rose-700/80" : "text-emerald-700/80"
+                overCount > 0 ? "text-rose-700" : "text-emerald-700/80"
               }`}
             >
               {overCount > 0
@@ -228,7 +228,7 @@ export function BudgetsClient({
                     <div className="flex min-w-0 items-center gap-3">
                       <span
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white"
-                        style={{ backgroundColor: category.color || "#7c3aed" }}
+                        style={{ backgroundColor: category.color || "#a67c52" }}
                         aria-hidden="true"
                       >
                         {category.name.charAt(0).toUpperCase()}

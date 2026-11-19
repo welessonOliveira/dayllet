@@ -439,7 +439,7 @@ function SvgLineProjection({
       <polyline
         points={polyline}
         fill="none"
-        stroke={anyNegative ? "#e11d48" : "#7c3aed"}
+        stroke={anyNegative ? "#e11d48" : "var(--color-violet-600)"}
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -454,7 +454,7 @@ function SvgLineProjection({
               cx={c.x}
               cy={c.y}
               r="5"
-              fill={neg ? "#e11d48" : "#7c3aed"}
+              fill={neg ? "#e11d48" : "var(--color-violet-600)"}
               stroke="#ffffff"
               strokeWidth="2"
               className={neg ? "dark:fill-rose-400 dark:stroke-slate-900" : "dark:fill-violet-400 dark:stroke-slate-900"}

@@ -10,14 +10,14 @@ export function AppIconImage({ size, maskable = false, rounded = true }: { size:
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#7c3aed",
+        background: "#a67c52",
         borderRadius: rounded && !maskable ? Math.round(size * 0.22) : 0,
       }}
     >
-      <svg width={inner} height={inner} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <svg width={inner} height={inner} viewBox="0 0 24 24" fill="none" stroke="#fffcf5" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
         <rect x="2.5" y="6" width="19" height="13" rx="3" />
         <path d="M2.5 10.5h19" />
-        <circle cx="16.5" cy="14.5" r="1.25" fill="#ffffff" stroke="none" />
+        <circle cx="16.5" cy="14.5" r="1.25" fill="#fffcf5" stroke="none" />
       </svg>
     </div>
   );

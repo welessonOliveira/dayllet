@@ -7,7 +7,7 @@ export const DEFAULT_CATEGORIES: { key: string; name: string; type: CategoryType
   { key: "freelance", name: "Freelance", type: "INCOME", color: "#0d9488" },
   { key: "extras", name: "Extras", type: "INCOME", color: "#65a30d" }, // Pix de amigo, favor, presente, venda de algo usado
   { key: "reembolsos", name: "Reembolsos", type: "INCOME", color: "#0891b2" }, // estorno, devolução, dinheiro que voltou
-  { key: "moradia", name: "Moradia", type: "EXPENSE", color: "#7c3aed" },
+  { key: "moradia", name: "Moradia", type: "EXPENSE", color: "#a67c52" },
   { key: "alimentacao", name: "Alimentação", type: "EXPENSE", color: "#ea580c" },
   { key: "transporte", name: "Transporte", type: "EXPENSE", color: "#2563eb" },
   { key: "saude", name: "Saúde", type: "EXPENSE", color: "#dc2626" },

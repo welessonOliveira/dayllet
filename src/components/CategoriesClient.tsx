@@ -249,7 +249,7 @@ export function CategoriesClient({ income, expense }: CategoriesClientProps) {
                   <div className="flex min-w-0 items-center gap-3">
                     <span
                       className="h-4 w-4 shrink-0 rounded-full ring-2 ring-slate-100 dark:ring-slate-700"
-                      style={{ backgroundColor: cat.color || "#7c3aed" }}
+                      style={{ backgroundColor: cat.color || "#a67c52" }}
                     />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">

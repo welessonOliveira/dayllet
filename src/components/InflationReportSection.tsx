@@ -157,7 +157,7 @@ export function InflationReportSection({
                     width={barW}
                     height={adjH}
                     rx="3"
-                    fill="#7c3aed"
+                    fill="var(--color-violet-600)"
                   />
                 )}
 

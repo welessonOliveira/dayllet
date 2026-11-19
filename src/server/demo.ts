@@ -227,7 +227,7 @@ export async function resetDemoData(db: Db, userId: string, now = new Date()): P
         name: "Notebook novo",
         targetCents: 400000,
         targetDate: dateInputToUtc(`${shiftMonth(month, 4)}-28`),
-        color: "#7c3aed",
+        color: "#a67c52",
       },
     });
     const reserva = await tx.goal.create({

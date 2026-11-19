@@ -4,6 +4,7 @@ import type { Wallet } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { FileDropzone } from "./FileDropzone";
 import { WALLET_KIND_LABEL } from "@/lib/constants";
 import { formatDate } from "@/lib/dates";
 import {
@@ -147,7 +148,7 @@ export function ImportUploadClient({
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
             <div>
               <label
                 htmlFor="imp-wallet"
@@ -177,16 +178,11 @@ export function ImportUploadClient({
                 htmlFor="imp-file"
                 className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
               >
-                Arquivo do extrato (.ofx ou .csv)
+                Arquivo do extrato
               </label>
-              <input
-                id="imp-file"
-                name="file"
-                type="file"
-                accept=".ofx,.csv,.txt"
-                required
-                className="mt-1.5 block min-h-11 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-violet-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-              />
+              <div className="mt-1.5">
+                <FileDropzone id="imp-file" name="file" accept=".ofx,.csv,.txt" required disabled={isUploading} hint="OFX ou CSV do seu banco (Nubank, PicPay, Inter...), até 1 MB" />
+              </div>
             </div>
           </div>
 

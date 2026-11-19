@@ -18,7 +18,7 @@ import { Modal } from "./Modal";
 import { useToast } from "./Toast";
 
 const PRESET_COLORS = [
-  "#7c3aed",
+  "#a67c52",
   "#2563eb",
   "#0d9488",
   "#16a34a",
@@ -59,7 +59,7 @@ export function CategoryFormModal({
     defaultValues: {
       name: "",
       type: defaultType,
-      color: "#7c3aed",
+      color: "#a67c52",
     },
   });
 
@@ -77,7 +77,7 @@ export function CategoryFormModal({
       form.reset({
         name: "",
         type: defaultType,
-        color: defaultType === "INCOME" ? "#16a34a" : "#7c3aed",
+        color: defaultType === "INCOME" ? "#16a34a" : "#a67c52",
       });
     }
   }, [open, editingCategory, defaultType, form]);
@@ -325,7 +325,7 @@ export function CategoryFormModal({
               value={
                 /^#[0-9a-fA-F]{6}$/.test(selectedColor)
                   ? selectedColor
-                  : "#7c3aed"
+                  : "#a67c52"
               }
               onChange={(e) =>
                 form.setValue("color", e.target.value, {
@@ -338,7 +338,7 @@ export function CategoryFormModal({
             <input
               id="cat-color"
               type="text"
-              placeholder="#7c3aed"
+              placeholder="#a67c52"
               aria-invalid={Boolean(errors.color) || undefined}
               aria-describedby={errors.color ? "cat-color-error" : undefined}
               {...form.register("color")}

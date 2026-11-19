@@ -463,7 +463,7 @@ export function TransactionsClient({
                           <span
                             className="h-2 w-2 rounded-full"
                             style={{
-                              backgroundColor: tx.category.color || "#7c3aed",
+                              backgroundColor: tx.category.color || "#a67c52",
                             }}
                           />
                           {tx.category.name}
@@ -570,7 +570,7 @@ export function TransactionsClient({
                           <span
                             className="h-2 w-2 rounded-full"
                             style={{
-                              backgroundColor: tx.category.color || "#7c3aed",
+                              backgroundColor: tx.category.color || "#a67c52",
                             }}
                           />
                           {tx.category.name}

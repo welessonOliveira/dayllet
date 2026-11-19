@@ -82,7 +82,7 @@ export function LearnedRulesSection({ rules }: LearnedRulesSectionProps) {
                   <span
                     className="h-2 w-2 rounded-full"
                     style={{
-                      backgroundColor: rule.category.color || "#7c3aed",
+                      backgroundColor: rule.category.color || "#a67c52",
                     }}
                   />
                   {rule.category.name} ({CATEGORY_TYPE_LABEL[rule.category.type]}

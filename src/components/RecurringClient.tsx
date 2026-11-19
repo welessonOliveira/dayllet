@@ -168,7 +168,7 @@ export function RecurringClient({
                       <span
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white"
                         style={{
-                          backgroundColor: r.category.color || "#7c3aed",
+                          backgroundColor: r.category.color || "#a67c52",
                         }}
                         aria-hidden="true"
                       >

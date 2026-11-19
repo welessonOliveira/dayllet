@@ -200,7 +200,7 @@ export function GoalsClient({ goals }: GoalsClientProps) {
         <div className="grid gap-5 md:grid-cols-2">
           {visibleGoals.map((g) => {
             const { progress } = g;
-            const color = g.color || "#7c3aed";
+            const color = g.color || "#a67c52";
             const historyOpen = expandedHistoryId === g.id;
             const isArchiving = archivingId === g.id;
 

@@ -269,7 +269,7 @@ export default async function DashboardPage({
             </span>
           </div>
           <div className="mt-4 flex items-center justify-between gap-2 text-xs">
-            <span className="text-amber-800/80">
+            <span className="text-amber-800">
               Despesas pendentes no mês
             </span>
             <Link
@@ -444,7 +444,7 @@ export default async function DashboardPage({
                       <span
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white"
                         style={{
-                          backgroundColor: tx.category.color || "#7c3aed",
+                          backgroundColor: tx.category.color || "#a67c52",
                         }}
                         aria-hidden="true"
                       >
@@ -540,7 +540,7 @@ export default async function DashboardPage({
                     <div className="flex min-w-0 items-center gap-2">
                       <span
                         className="h-3 w-3 shrink-0 rounded-full"
-                        style={{ backgroundColor: category.color || "#7c3aed" }}
+                        style={{ backgroundColor: category.color || "#a67c52" }}
                       />
                       <span className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
                         {category.name}
@@ -627,7 +627,7 @@ export default async function DashboardPage({
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {topGoals.map((g) => {
-              const color = g.color || "#7c3aed";
+              const color = g.color || "#a67c52";
               return (
                 <Link
                   key={g.id}

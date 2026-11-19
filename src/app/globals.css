@@ -2,20 +2,100 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Paleta do Dayllet: tema "Vintage Paper" (papel creme no claro, marrom café no escuro,
+ * caramelo como cor principal, cantos pouco arredondados).
+ * As telas usam as classes do Tailwind (slate-*, violet-*, rounded-*); aqui a gente REDEFINE
+ * essas variáveis, então trocar a paleta muda o app inteiro sem mexer nos componentes.
+ * - slate  = tons neutros (fundo, cards, bordas, textos)
+ * - violet = cor principal (botões, links, destaques, gráficos)
+ * Verde, vermelho e âmbar continuam os do Tailwind (receita, despesa, aviso).
+ */
 :root {
-  --background: #f6f7fb;
-  --foreground: #0f172a;
-  --chart-axis: #cbd5e1;
-  --chart-grid: #f1f5f9;
+  --background: #f5f1e6;
+  --foreground: #3b3129;
+  --chart-axis: #dbd0ba;
+  --chart-grid: #ece5d8;
   color-scheme: light;
+
+  --color-slate-50: #f8f3ea;
+  --color-slate-100: #ece5d8;
+  --color-slate-200: #dbd0ba;
+  --color-slate-300: #c9bba1;
+  --color-slate-400: #776550;
+  --color-slate-500: #6e5d4a;
+  --color-slate-600: #66574a;
+  --color-slate-700: #55473b;
+  --color-slate-800: #4a3f35;
+  --color-slate-900: #3b3129;
+  --color-slate-950: #2d2621;
+
+  --color-violet-50: #f4ecdf;
+  --color-violet-100: #ebdfc9;
+  --color-violet-200: #dccaa8;
+  --color-violet-300: #c8ab83;
+  --color-violet-400: #a67c52;
+  --color-violet-500: #a67c52;
+  --color-violet-600: #835e3b;
+  --color-violet-700: #6f4f31;
+  --color-violet-800: #6b4f33;
+  --color-violet-900: #5c4430;
+  --color-violet-950: #4a3626;
+
+  /* Cantos: cards levemente arredondados, botões quase retos (como o tema). */
+  --radius-md: 0.25rem;
+  --radius-lg: 0.3rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.75rem;
+  --color-emerald-600: #047857;
+  --color-rose-600: #be123c;
 }
 
 html.dark {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --chart-axis: #334155;
-  --chart-grid: #1e293b;
+  --background: #2d2621;
+  --foreground: #ece5d8;
+  --chart-axis: #4a4039;
+  --chart-grid: #3a322c;
   color-scheme: dark;
+
+  --color-slate-50: #f5f1e6;
+  --color-slate-100: #ece5d8;
+  --color-slate-200: #e0d6c8;
+  --color-slate-300: #d3c8b8;
+  --color-slate-400: #c5bcac;
+  --color-slate-500: #b3a593;
+  --color-slate-600: #6b5a4d;
+  --color-slate-700: #59493e;
+  --color-slate-800: #4a4039;
+  --color-slate-900: #3a322c;
+  --color-slate-950: #2d2621;
+
+  --color-violet-50: #f3e9da;
+  --color-violet-100: #ead9c2;
+  --color-violet-200: #e0c9aa;
+  --color-violet-300: #d9bf9f;
+  --color-violet-400: #d4b896;
+  --color-violet-500: #8a7560;
+  --color-violet-600: #c0a080;
+  --color-violet-700: #b08e6c;
+  --color-violet-800: #59493e;
+  --color-violet-900: #4a4039;
+  --color-violet-950: #3a322c;
+  --color-rose-400: #fd8ea0;
+}
+
+/* Cards: papel mais claro que o fundo */
+html:not(.dark) .bg-white {
+  background-color: #fffcf5;
+}
+
+/* Botão principal: no escuro ele fica caramelo claro, então o texto vira marrom escuro. */
+html.dark :is(.bg-violet-600, .bg-violet-700) {
+  color: #2d2621;
+}
+html.dark :is(.bg-violet-600, .bg-violet-700) :is(.text-white, svg) {
+  color: #2d2621;
 }
 
 @theme inline {
@@ -37,13 +117,13 @@ body {
 }
 
 ::selection {
-  background-color: #ede9fe;
-  color: #4c1d95;
+  background-color: #dccaa8;
+  color: #2d2621;
 }
 
 html.dark ::selection {
-  background-color: #5b21b6;
-  color: #f5f3ff;
+  background-color: #59493e;
+  color: #ece5d8;
 }
 
 /* Padroniza indicador de foco visível para navegação por teclado */
@@ -51,7 +131,7 @@ a:focus-visible,
 button:focus-visible,
 summary:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid #7c3aed;
+  outline: 2px solid #a67c52;
   outline-offset: 2px;
 }
 
@@ -59,7 +139,25 @@ html.dark a:focus-visible,
 html.dark button:focus-visible,
 html.dark summary:focus-visible,
 html.dark [role="button"]:focus-visible {
-  outline-color: #a78bfa;
+  outline-color: #c0a080;
+}
+
+/* Rosca de gastos: cada fatia "desenha" ao abrir (ExpensesDonutChart) */
+@keyframes donut-draw {
+  from {
+    stroke-dasharray: 0 var(--circ);
+  }
+  to {
+    stroke-dasharray: var(--len) var(--circ);
+  }
+}
+.donut-slice {
+  animation: donut-draw 0.8s ease-in-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .donut-slice {
+    animation: none;
+  }
 }
 
 /* Números alinhados para valores monetários e tabelas */
@@ -104,30 +202,32 @@ html.dark [class~="bg-rose-50"]:not([class*="dark:bg-"]) { background-color: col
 html.dark [class~="bg-rose-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c0519 18%, transparent); }
 html.dark [class~="bg-rose-50/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c0519 27%, transparent); }
 html.dark [class~="bg-rose-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c0519 32%, transparent); }
-html.dark [class~="bg-slate-100"]:not([class*="dark:bg-"]) { background-color: #1e293b; }
-html.dark [class~="bg-slate-100/85"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 85%, transparent); }
-html.dark [class~="bg-slate-200"]:not([class*="dark:bg-"]) { background-color: #334155; }
-html.dark [class~="bg-slate-200/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #334155 60%, transparent); }
-html.dark [class~="bg-slate-200/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #334155 70%, transparent); }
-html.dark [class~="bg-slate-200/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #334155 80%, transparent); }
-html.dark [class~="bg-slate-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 55%, transparent); }
-html.dark [class~="bg-slate-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 22%, transparent); }
-html.dark [class~="bg-slate-50/50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 28%, transparent); }
-html.dark [class~="bg-slate-50/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 33%, transparent); }
-html.dark [class~="bg-slate-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 39%, transparent); }
-html.dark [class~="bg-slate-50/75"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 41%, transparent); }
-html.dark [class~="bg-slate-50/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 44%, transparent); }
-html.dark [class~="bg-slate-50/90"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #1e293b 50%, transparent); }
-html.dark [class~="bg-violet-100"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #4c1d95 45%, transparent); }
-html.dark [class~="bg-violet-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 45%, transparent); }
-html.dark [class~="bg-violet-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 18%, transparent); }
-html.dark [class~="bg-violet-50/50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 23%, transparent); }
-html.dark [class~="bg-violet-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 32%, transparent); }
-html.dark [class~="bg-violet-50/75"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #2e1065 34%, transparent); }
-html.dark [class~="bg-white"]:not([class*="dark:bg-"]) { background-color: #0f172a; }
-html.dark [class~="bg-white/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #0f172a 80%, transparent); }
-html.dark [class~="bg-white/90"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #0f172a 90%, transparent); }
-html.dark [class~="bg-white/95"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, #0f172a 95%, transparent); }
+html.dark [class~="bg-slate-100"]:not([class*="dark:bg-"]) { background-color: var(--color-slate-800); }
+html.dark [class~="bg-slate-100/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 70%, transparent); }
+html.dark [class~="bg-slate-100/85"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 85%, transparent); }
+html.dark [class~="bg-slate-200"]:not([class*="dark:bg-"]) { background-color: var(--color-slate-700); }
+html.dark [class~="bg-slate-200/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-700) 60%, transparent); }
+html.dark [class~="bg-slate-200/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-700) 70%, transparent); }
+html.dark [class~="bg-slate-200/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-700) 80%, transparent); }
+html.dark [class~="bg-slate-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 55%, transparent); }
+html.dark [class~="bg-slate-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 22%, transparent); }
+html.dark [class~="bg-slate-50/50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 28%, transparent); }
+html.dark [class~="bg-slate-50/60"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 33%, transparent); }
+html.dark [class~="bg-slate-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 39%, transparent); }
+html.dark [class~="bg-slate-50/75"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 41%, transparent); }
+html.dark [class~="bg-slate-50/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 44%, transparent); }
+html.dark [class~="bg-slate-50/90"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 50%, transparent); }
+html.dark [class~="bg-violet-100"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-900) 45%, transparent); }
+html.dark [class~="bg-violet-50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-950) 45%, transparent); }
+html.dark [class~="bg-violet-50/40"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-950) 18%, transparent); }
+html.dark [class~="bg-violet-50/50"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-950) 23%, transparent); }
+html.dark [class~="bg-violet-50/70"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-950) 32%, transparent); }
+html.dark [class~="bg-violet-50/75"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-950) 34%, transparent); }
+html.dark [class~="bg-white"]:not([class*="dark:bg-"]) { background-color: var(--color-slate-900); }
+html.dark [class~="bg-white/20"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-900) 20%, transparent); }
+html.dark [class~="bg-white/80"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-900) 80%, transparent); }
+html.dark [class~="bg-white/90"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-900) 90%, transparent); }
+html.dark [class~="bg-white/95"]:not([class*="dark:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-900) 95%, transparent); }
 html.dark [class~="border-amber-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #78350f 70%, transparent); }
 html.dark [class~="border-amber-200/90"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #78350f 63%, transparent); }
 html.dark [class~="border-amber-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #78350f 70%, transparent); }
@@ -137,58 +237,58 @@ html.dark [class~="border-rose-100"]:not([class*="dark:border-"]) { border-color
 html.dark [class~="border-rose-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #881337 70%, transparent); }
 html.dark [class~="border-rose-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #881337 56%, transparent); }
 html.dark [class~="border-rose-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #881337 70%, transparent); }
-html.dark [class~="border-slate-100"]:not([class*="dark:border-"]) { border-color: #1e293b; }
-html.dark [class~="border-slate-200"]:not([class*="dark:border-"]) { border-color: #1e293b; }
-html.dark [class~="border-slate-200/60"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 60%, transparent); }
-html.dark [class~="border-slate-200/70"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 70%, transparent); }
-html.dark [class~="border-slate-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 80%, transparent); }
-html.dark [class~="border-slate-200/90"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #1e293b 90%, transparent); }
-html.dark [class~="border-slate-300/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #334155 80%, transparent); }
-html.dark [class~="border-slate-400"]:not([class*="dark:border-"]) { border-color: #334155; }
-html.dark [class~="border-violet-100"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
-html.dark [class~="border-violet-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
-html.dark [class~="border-violet-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 56%, transparent); }
-html.dark [class~="border-violet-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
-html.dark [class~="divide-slate-100"]:not([class*="dark:divide-"]) > :not(:last-child) { border-color: #1e293b; }
-html.dark [class~="divide-slate-200/70"]:not([class*="dark:divide-"]) > :not(:last-child) { border-color: color-mix(in oklab, #1e293b 70%, transparent); }
+html.dark [class~="border-slate-100"]:not([class*="dark:border-"]) { border-color: var(--color-slate-800); }
+html.dark [class~="border-slate-200"]:not([class*="dark:border-"]) { border-color: var(--color-slate-800); }
+html.dark [class~="border-slate-200/60"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-slate-800) 60%, transparent); }
+html.dark [class~="border-slate-200/70"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-slate-800) 70%, transparent); }
+html.dark [class~="border-slate-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-slate-800) 80%, transparent); }
+html.dark [class~="border-slate-200/90"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-slate-800) 90%, transparent); }
+html.dark [class~="border-slate-300"]:not([class*="dark:border-"]) { border-color: var(--color-slate-700); }
+html.dark [class~="border-slate-300/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-slate-700) 80%, transparent); }
+html.dark [class~="border-slate-400"]:not([class*="dark:border-"]) { border-color: var(--color-slate-700); }
+html.dark [class~="border-violet-100"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-violet-900) 70%, transparent); }
+html.dark [class~="border-violet-200"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-violet-900) 70%, transparent); }
+html.dark [class~="border-violet-200/80"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-violet-900) 56%, transparent); }
+html.dark [class~="border-violet-300"]:not([class*="dark:border-"]) { border-color: color-mix(in oklab, var(--color-violet-900) 70%, transparent); }
+html.dark [class~="divide-slate-100"]:not([class*="dark:divide-"]) > :not(:last-child) { border-color: var(--color-slate-800); }
+html.dark [class~="divide-slate-200/70"]:not([class*="dark:divide-"]) > :not(:last-child) { border-color: color-mix(in oklab, var(--color-slate-800) 70%, transparent); }
 html.dark [class~="fill-emerald-100"]:not([class*="dark:fill-"]) { fill: #022c22; }
 html.dark [class~="fill-emerald-600"]:not([class*="dark:fill-"]) { fill: #34d399; }
 html.dark [class~="fill-rose-100"]:not([class*="dark:fill-"]) { fill: #4c0519; }
 html.dark [class~="fill-rose-600"]:not([class*="dark:fill-"]) { fill: #fb7185; }
-html.dark [class~="fill-slate-500"]:not([class*="dark:fill-"]) { fill: #94a3b8; }
-html.dark [class~="fill-violet-700"]:not([class*="dark:fill-"]) { fill: #a78bfa; }
-html.dark [class~="focus:bg-white"]:focus:not([class*="dark:focus:bg-"]) { background-color: #0f172a; }
+html.dark [class~="fill-slate-500"]:not([class*="dark:fill-"]) { fill: var(--color-slate-400); }
+html.dark [class~="fill-violet-700"]:not([class*="dark:fill-"]) { fill: var(--color-violet-400); }
+html.dark [class~="focus:bg-white"]:focus:not([class*="dark:focus:bg-"]) { background-color: var(--color-slate-900); }
 html.dark [class~="hover:bg-amber-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #78350f 45%, transparent); }
 html.dark [class~="hover:bg-emerald-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #064e3b 45%, transparent); }
 html.dark [class~="hover:bg-rose-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #881337 45%, transparent); }
 html.dark [class~="hover:bg-rose-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #4c0519 45%, transparent); }
-html.dark [class~="hover:bg-slate-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: #1e293b; }
-html.dark [class~="hover:bg-slate-200/70"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #334155 70%, transparent); }
-html.dark [class~="hover:bg-slate-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #1e293b 55%, transparent); }
-html.dark [class~="hover:bg-slate-50/60"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #1e293b 33%, transparent); }
-html.dark [class~="hover:bg-slate-50/70"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #1e293b 39%, transparent); }
-html.dark [class~="hover:bg-violet-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #4c1d95 45%, transparent); }
-html.dark [class~="hover:bg-violet-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #2e1065 45%, transparent); }
-html.dark [class~="hover:bg-violet-50/30"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, #2e1065 14%, transparent); }
-html.dark [class~="hover:border-slate-300"]:hover:not([class*="dark:hover:border-"]) { border-color: #334155; }
-html.dark [class~="hover:border-violet-200"]:hover:not([class*="dark:hover:border-"]) { border-color: color-mix(in oklab, #4c1d95 70%, transparent); }
+html.dark [class~="hover:bg-slate-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: var(--color-slate-800); }
+html.dark [class~="hover:bg-slate-200/70"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-700) 70%, transparent); }
+html.dark [class~="hover:bg-slate-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 55%, transparent); }
+html.dark [class~="hover:bg-slate-50/60"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 33%, transparent); }
+html.dark [class~="hover:bg-slate-50/70"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, var(--color-slate-800) 39%, transparent); }
+html.dark [class~="hover:bg-violet-100"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-900) 45%, transparent); }
+html.dark [class~="hover:bg-violet-50"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-950) 45%, transparent); }
+html.dark [class~="hover:bg-violet-50/30"]:hover:not([class*="dark:hover:bg-"]) { background-color: color-mix(in oklab, var(--color-violet-950) 14%, transparent); }
+html.dark [class~="hover:border-slate-300"]:hover:not([class*="dark:hover:border-"]) { border-color: var(--color-slate-700); }
+html.dark [class~="hover:border-violet-200"]:hover:not([class*="dark:hover:border-"]) { border-color: color-mix(in oklab, var(--color-violet-900) 70%, transparent); }
 html.dark [class~="hover:text-amber-800"]:hover:not([class*="dark:hover:text-"]) { color: #fcd34d; }
 html.dark [class~="hover:text-amber-950"]:hover:not([class*="dark:hover:text-"]) { color: #fcd34d; }
 html.dark [class~="hover:text-rose-600"]:hover:not([class*="dark:hover:text-"]) { color: #fb7185; }
 html.dark [class~="hover:text-rose-950"]:hover:not([class*="dark:hover:text-"]) { color: #fda4af; }
-html.dark [class~="hover:text-slate-600"]:hover:not([class*="dark:hover:text-"]) { color: #94a3b8; }
-html.dark [class~="hover:text-slate-700"]:hover:not([class*="dark:hover:text-"]) { color: #cbd5e1; }
-html.dark [class~="hover:text-slate-800"]:hover:not([class*="dark:hover:text-"]) { color: #e2e8f0; }
-html.dark [class~="hover:text-slate-900"]:hover:not([class*="dark:hover:text-"]) { color: #f1f5f9; }
-html.dark [class~="hover:text-violet-600"]:hover:not([class*="dark:hover:text-"]) { color: #a78bfa; }
-html.dark [class~="hover:text-violet-700"]:hover:not([class*="dark:hover:text-"]) { color: #a78bfa; }
-html.dark [class~="ring-slate-100"]:not([class*="dark:ring-"]) { --tw-ring-color: #1e293b; }
-html.dark [class~="ring-slate-200/60"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, #1e293b 60%, transparent); }
-html.dark [class~="ring-slate-200/70"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, #1e293b 70%, transparent); }
-html.dark [class~="ring-violet-100"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, #4c1d95 70%, transparent); }
+html.dark [class~="hover:text-slate-600"]:hover:not([class*="dark:hover:text-"]) { color: var(--color-slate-400); }
+html.dark [class~="hover:text-slate-700"]:hover:not([class*="dark:hover:text-"]) { color: var(--color-slate-300); }
+html.dark [class~="hover:text-slate-800"]:hover:not([class*="dark:hover:text-"]) { color: var(--color-slate-200); }
+html.dark [class~="hover:text-slate-900"]:hover:not([class*="dark:hover:text-"]) { color: var(--color-slate-100); }
+html.dark [class~="hover:text-violet-600"]:hover:not([class*="dark:hover:text-"]) { color: var(--color-violet-400); }
+html.dark [class~="hover:text-violet-700"]:hover:not([class*="dark:hover:text-"]) { color: var(--color-violet-400); }
+html.dark [class~="ring-slate-100"]:not([class*="dark:ring-"]) { --tw-ring-color: var(--color-slate-800); }
+html.dark [class~="ring-slate-200/60"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, var(--color-slate-800) 60%, transparent); }
+html.dark [class~="ring-slate-200/70"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, var(--color-slate-800) 70%, transparent); }
+html.dark [class~="ring-violet-100"]:not([class*="dark:ring-"]) { --tw-ring-color: color-mix(in oklab, var(--color-violet-900) 70%, transparent); }
 html.dark [class~="text-amber-700"]:not([class*="dark:text-"]) { color: #fbbf24; }
 html.dark [class~="text-amber-800"]:not([class*="dark:text-"]) { color: #fcd34d; }
-html.dark [class~="text-amber-800/80"]:not([class*="dark:text-"]) { color: color-mix(in oklab, #fcd34d 80%, transparent); }
 html.dark [class~="text-amber-900"]:not([class*="dark:text-"]) { color: #fcd34d; }
 html.dark [class~="text-amber-900/85"]:not([class*="dark:text-"]) { color: color-mix(in oklab, #fcd34d 85%, transparent); }
 html.dark [class~="text-amber-950"]:not([class*="dark:text-"]) { color: #fcd34d; }
@@ -198,19 +298,18 @@ html.dark [class~="text-emerald-700/80"]:not([class*="dark:text-"]) { color: col
 html.dark [class~="text-emerald-800"]:not([class*="dark:text-"]) { color: #6ee7b7; }
 html.dark [class~="text-rose-600"]:not([class*="dark:text-"]) { color: #fb7185; }
 html.dark [class~="text-rose-700"]:not([class*="dark:text-"]) { color: #fb7185; }
-html.dark [class~="text-rose-700/80"]:not([class*="dark:text-"]) { color: color-mix(in oklab, #fb7185 80%, transparent); }
 html.dark [class~="text-rose-800"]:not([class*="dark:text-"]) { color: #fda4af; }
 html.dark [class~="text-rose-900"]:not([class*="dark:text-"]) { color: #fda4af; }
 html.dark [class~="text-rose-950"]:not([class*="dark:text-"]) { color: #fda4af; }
-html.dark [class~="text-slate-400"]:not([class*="dark:text-"]) { color: #64748b; }
-html.dark [class~="text-slate-500"]:not([class*="dark:text-"]) { color: #94a3b8; }
-html.dark [class~="text-slate-600"]:not([class*="dark:text-"]) { color: #94a3b8; }
-html.dark [class~="text-slate-700"]:not([class*="dark:text-"]) { color: #cbd5e1; }
-html.dark [class~="text-slate-800"]:not([class*="dark:text-"]) { color: #e2e8f0; }
-html.dark [class~="text-slate-900"]:not([class*="dark:text-"]) { color: #f1f5f9; }
-html.dark [class~="text-violet-600"]:not([class*="dark:text-"]) { color: #a78bfa; }
-html.dark [class~="text-violet-700"]:not([class*="dark:text-"]) { color: #a78bfa; }
-html.dark [class~="text-violet-800"]:not([class*="dark:text-"]) { color: #c4b5fd; }
-html.dark [class~="text-violet-900"]:not([class*="dark:text-"]) { color: #c4b5fd; }
+html.dark [class~="text-slate-400"]:not([class*="dark:text-"]) { color: var(--color-slate-500); }
+html.dark [class~="text-slate-500"]:not([class*="dark:text-"]) { color: var(--color-slate-400); }
+html.dark [class~="text-slate-600"]:not([class*="dark:text-"]) { color: var(--color-slate-400); }
+html.dark [class~="text-slate-700"]:not([class*="dark:text-"]) { color: var(--color-slate-300); }
+html.dark [class~="text-slate-800"]:not([class*="dark:text-"]) { color: var(--color-slate-200); }
+html.dark [class~="text-slate-900"]:not([class*="dark:text-"]) { color: var(--color-slate-100); }
+html.dark [class~="text-violet-600"]:not([class*="dark:text-"]) { color: var(--color-violet-400); }
+html.dark [class~="text-violet-700"]:not([class*="dark:text-"]) { color: var(--color-violet-400); }
+html.dark [class~="text-violet-800"]:not([class*="dark:text-"]) { color: var(--color-violet-300); }
+html.dark [class~="text-violet-900"]:not([class*="dark:text-"]) { color: var(--color-violet-300); }
 /* ===== fim da rede de segurança ===== */
 }

@@ -6,8 +6,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 const P = {
-  slate: { 50: "#f8fafc", 100: "#f1f5f9", 200: "#e2e8f0", 300: "#cbd5e1", 400: "#94a3b8", 500: "#64748b", 600: "#475569", 700: "#334155", 800: "#1e293b", 900: "#0f172a", 950: "#020617" },
-  violet: { 300: "#c4b5fd", 400: "#a78bfa", 500: "#8b5cf6", 700: "#6d28d9", 800: "#5b21b6", 900: "#4c1d95", 950: "#2e1065" },
+  // Cinzas e destaque vêm das variáveis do tema (globals.css), então trocar a paleta muda tudo junto.
+  slate: Object.fromEntries([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map((n) => [n, `var(--color-slate-${n})`])),
+  violet: Object.fromEntries([300, 400, 500, 700, 800, 900, 950].map((n) => [n, `var(--color-violet-${n})`])),
   emerald: { 300: "#6ee7b7", 400: "#34d399", 800: "#065f46", 900: "#064e3b", 950: "#022c22" },
   rose: { 300: "#fda4af", 400: "#fb7185", 800: "#9f1239", 900: "#881337", 950: "#4c0519" },
   amber: { 200: "#fde68a", 300: "#fcd34d", 400: "#fbbf24", 800: "#92400e", 900: "#78350f", 950: "#451a03" },

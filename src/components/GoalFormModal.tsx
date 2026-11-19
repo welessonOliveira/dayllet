@@ -16,7 +16,7 @@ import { Modal } from "./Modal";
 import { useToast } from "./Toast";
 
 const PRESET_COLORS = [
-  "#7c3aed",
+  "#a67c52",
   "#2563eb",
   "#0d9488",
   "#16a34a",
@@ -55,7 +55,7 @@ export function GoalFormModal({
       name: "",
       target: "",
       targetDate: "",
-      color: "#7c3aed",
+      color: "#a67c52",
     },
   });
 
@@ -70,14 +70,14 @@ export function GoalFormModal({
         targetDate: editingGoal.targetDate
           ? toDateInput(new Date(editingGoal.targetDate))
           : "",
-        color: editingGoal.color ?? "#7c3aed",
+        color: editingGoal.color ?? "#a67c52",
       });
     } else {
       form.reset({
         name: "",
         target: "",
         targetDate: "",
-        color: "#7c3aed",
+        color: "#a67c52",
       });
     }
   }, [open, editingGoal, form]);
@@ -323,7 +323,7 @@ export function GoalFormModal({
           <input
             id="goal-color"
             type="text"
-            placeholder="#7c3aed"
+            placeholder="#a67c52"
             aria-invalid={Boolean(errors.color) || undefined}
             aria-describedby={errors.color ? "goal-color-error" : undefined}
             {...form.register("color")}
