@@ -32,6 +32,8 @@ export function ImportReviewClient({
   const [isCommitting, setIsCommitting] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [isDiscarding, setIsDiscarding] = useState(false);
+  // A revisão vai esvaziando: quem ganha categoria (ou é pulado) sai da aba "A revisar".
+  const [aba, setAba] = useState<"revisar" | "prontos" | "pulados">("revisar");
 
   useEffect(() => {
     try {
@@ -80,6 +82,13 @@ export function ImportReviewClient({
   }
 
   const { summary } = batch;
+  const linhasVisiveis = batch.rows.filter((r) =>
+    aba === "revisar"
+      ? r.decision === "IMPORT" && !r.categoryId
+      : aba === "prontos"
+        ? r.decision === "IMPORT" && Boolean(r.categoryId)
+        : r.decision === "SKIP",
+  );
   const canCommit =
     summary.toImport > 0 && summary.withoutCategory === 0 && !isCommitting;
 
@@ -270,8 +279,59 @@ export function ImportReviewClient({
         </div>
       )}
 
+      {/* Abas: a lista vai esvaziando conforme as linhas ganham categoria */}
+      {(() => {
+        const contagem = {
+          revisar: batch.rows.filter((r) => r.decision === "IMPORT" && !r.categoryId).length,
+          prontos: batch.rows.filter((r) => r.decision === "IMPORT" && r.categoryId).length,
+          pulados: batch.rows.filter((r) => r.decision === "SKIP").length,
+        };
+        const abas = [
+          { id: "revisar" as const, label: "A revisar" },
+          { id: "prontos" as const, label: "Prontos" },
+          { id: "pulados" as const, label: "Pulados" },
+        ];
+        return (
+          <div role="tablist" aria-label="Filtrar linhas da importação" className="flex flex-wrap gap-2">
+            {abas.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                role="tab"
+                aria-selected={aba === a.id}
+                onClick={() => setAba(a.id)}
+                className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 md:min-h-9 ${
+                  aba === a.id
+                    ? "bg-violet-600 text-white"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                }`}
+              >
+                {a.label}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs tabular-nums ${
+                    aba === a.id ? "bg-white/20" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                  }`}
+                >
+                  {contagem[a.id]}
+                </span>
+              </button>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Lista de linhas em revisão */}
       <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        {linhasVisiveis.length === 0 && (
+          <p className="px-5 py-10 text-center text-sm font-medium text-slate-500 dark:text-slate-400">
+            {aba === "revisar"
+              ? "Tudo categorizado! Confira em Prontos e confirme a importação."
+              : aba === "prontos"
+                ? "Nenhuma linha pronta ainda. Escolha as categorias em A revisar."
+                : "Nenhuma linha pulada."}
+          </p>
+        )}
+
         {/* Tabela Desktop */}
         <div className="hidden overflow-x-auto md:block">
           <table className="w-full border-collapse text-left text-sm">
@@ -285,7 +345,7 @@ export function ImportReviewClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {batch.rows.map((row) => {
+              {linhasVisiveis.map((row) => {
                 const isIncome = row.type === "INCOME";
                 const willImport = row.decision === "IMPORT";
                 const isBusy = updatingRowId === row.id;
@@ -414,7 +474,7 @@ export function ImportReviewClient({
 
         {/* Lista Mobile (cards empilhados com alvos >= 44px) */}
         <ul className="divide-y divide-slate-100 dark:divide-slate-800 md:hidden">
-          {batch.rows.map((row) => {
+          {linhasVisiveis.map((row) => {
             const isIncome = row.type === "INCOME";
             const willImport = row.decision === "IMPORT";
             const isBusy = updatingRowId === row.id;
