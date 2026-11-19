@@ -16,6 +16,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Tudo, menos: login, rotas do Auth.js, arquivos do Next e arquivos estáticos.
-  matcher: ["/((?!login|api/auth|_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)"],
+  // Tudo, menos: login, privacidade, termos, rotas do Auth.js, arquivos do Next e arquivos estáticos.
+  matcher: ["/((?!login|privacidade|termos|api/auth|_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)"],
 };

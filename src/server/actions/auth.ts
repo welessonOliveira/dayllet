@@ -7,6 +7,11 @@ export async function signInDemoAction(): Promise<void> {
   await signIn("demo", { redirectTo: "/" });
 }
 
+/** Entra com o Google (só funciona se o Google estiver configurado no .env). */
+export async function signInGoogleAction(): Promise<void> {
+  await signIn("google", { redirectTo: "/" });
+}
+
 /** Entra com o GitHub (só funciona se o GitHub estiver configurado no .env). */
 export async function signInGithubAction(): Promise<void> {
   await signIn("github", { redirectTo: "/" });
