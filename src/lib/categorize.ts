@@ -116,6 +116,7 @@ export const BUILTIN_KEYWORDS: { category: string; type: CategoryType; patterns:
     patterns: ["UDEMY", "ALURA", "ROCKETSEAT", "DIO", "SENAI", "SENAC", "ESCOLA", "FACULDADE", "UNIVERSIDADE", "LIVRARIA", "CURSO"],
   },
   { category: "Salário", type: "INCOME", patterns: ["SALARIO", "FOLHA", "PROVENTOS", "VENCIMENTOS"] },
+  { category: "Reembolsos", type: "INCOME", patterns: ["REEMBOLSO", "DEVOLUCAO", "CASHBACK"] },
 ];
 
 /** Regras do dicionário pras categorias que o usuário tem (procuradas pelo nome, sem acento). */

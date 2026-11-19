@@ -322,6 +322,11 @@ export function ImportReviewClient({
                             Possível duplicata
                           </span>
                         )}
+                        {row.note && (
+                          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                            {row.note}
+                          </span>
+                        )}
                         {isSuggested && (
                           <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">
                             Sugerida
@@ -443,6 +448,11 @@ export function ImportReviewClient({
                       {row.possibleDuplicate && (
                         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
                           Possível duplicata
+                        </span>
+                      )}
+                      {row.note && (
+                        <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                          {row.note}
                         </span>
                       )}
                       {isSuggested && (

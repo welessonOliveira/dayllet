@@ -243,7 +243,7 @@ describe("usuário novo e conta demo", () => {
   it("setupNewUser cria categorias padrão e conta padrão, sem duplicar", async () => {
     await setupNewUser(db, ana.userId);
     await setupNewUser(db, ana.userId);
-    expect(await listCategories(ana)).toHaveLength(9);
+    expect(await listCategories(ana)).toHaveLength(11);
     const wallets = await listWallets(ana);
     expect(wallets).toHaveLength(1);
     expect(wallets[0].isDefault).toBe(true);

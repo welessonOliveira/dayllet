@@ -142,9 +142,12 @@ export async function createImport(
       categoryId: sugestao?.categoryId ?? null,
       duplicateOfId,
       possibleDuplicate,
-      decision: duplicateOfId || possibleDuplicate ? ("SKIP" as const) : ("IMPORT" as const),
+      decision: (duplicateOfId || possibleDuplicate ? "SKIP" : "IMPORT") as "IMPORT" | "SKIP",
+      note: null as string | null,
     };
   });
+
+  marcarEstornos(rows);
 
   const batch = await ctx.db.$transaction(async (tx) => {
     const b = await tx.importBatch.create({
@@ -160,6 +163,43 @@ export async function createImport(
     return b;
   });
   return { batchId: batch.id, summary: summarize(rows), errors: parsed.errors };
+}
+
+const ESTORNO = /\b(ESTORN\w*|DEVOLU\w*|REEMBOLS\w*|CHARGEBACK)\b/;
+
+/** "2026-11-13" -> "13/11". */
+function diaMes(d: Date): string {
+  const [, m, dia] = toDateInput(d).split("-");
+  return `${dia}/${m}`;
+}
+
+/**
+ * Estorno (entrada "Compra estornada - Uber") que tem a compra original no mesmo arquivo
+ * (saída do mesmo valor e do mesmo estabelecimento, antes dele): as duas se anulam e ficam
+ * de fora, com um aviso. Estorno sem a compra no arquivo entra normal (sugestão: "Reembolsos").
+ * Muda as linhas no lugar.
+ */
+export function marcarEstornos(
+  rows: { date: Date; amountCents: number; type: "INCOME" | "EXPENSE"; description: string; decision: "IMPORT" | "SKIP"; note: string | null }[],
+): void {
+  const usadas = new Set<number>();
+  for (const r of rows) {
+    if (r.type !== "INCOME" || !ESTORNO.test(normalizeDescription(r.description))) continue;
+    const chave = ruleKey(r.description);
+    let melhor = -1;
+    rows.forEach((o, j) => {
+      if (usadas.has(j) || o.type !== "EXPENSE" || o.amountCents !== r.amountCents || o.date > r.date) return;
+      if (chave && ruleKey(o.description) !== chave) return;
+      if (melhor < 0 || o.date > rows[melhor].date) melhor = j; // a compra mais recente antes do estorno
+    });
+    if (melhor < 0) continue;
+    usadas.add(melhor);
+    const compra = rows[melhor];
+    compra.decision = "SKIP";
+    compra.note = `Estornada em ${diaMes(r.date)}: as duas ficam de fora`;
+    r.decision = "SKIP";
+    r.note = `Estorno da compra de ${diaMes(compra.date)}: as duas ficam de fora`;
+  }
 }
 
 /** Importação com as linhas (em ordem) e o resumo. */

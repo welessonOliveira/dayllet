@@ -186,6 +186,24 @@ describe("marcou um, marca os parecidos", () => {
     expect((await suggestCategoryFor(ana, "Pix enviado - Maria Souza", "EXPENSE"))?.categoryId).toBe(transporte);
   });
 
+  it("estorno com a compra no arquivo: as duas ficam de fora, com aviso; sem a compra, entra normal", async () => {
+    const csv = [
+      'data,hora,tipo,"origem / destino",valor,"forma de pagamento"',
+      '2026-11-10,10:00,"Compra realizada",Uber,"−R$ 15,00","Com saldo"',
+      '2026-11-10,11:00,"Compra realizada",Uber,"−R$ 15,00","Com saldo"',
+      '2026-11-11,09:00,"Compra estornada",Uber,"R$ 15,00",',
+      '2026-11-12,09:00,"Compra estornada",Netflix,"R$ 39,90",',
+    ].join("\n");
+    const { batchId } = await createImport(ana, { walletId: banco, fileName: "estorno.csv", bytes: bytes(csv) });
+    const rows = (await getImport(ana, batchId))!.rows;
+    expect(rows.map((r) => [r.decision, r.note])).toEqual([
+      ["SKIP", "Estornada em 11/11: as duas ficam de fora"], // só UMA das duas compras iguais é anulada
+      ["IMPORT", null],
+      ["SKIP", "Estorno da compra de 10/11: as duas ficam de fora"],
+      ["IMPORT", null],
+    ]);
+  });
+
   it("não mexe em importação de outro usuário (IDOR)", async () => {
     const { batchId } = await createImport(ana, { walletId: banco, fileName: "nov.ofx", bytes: bytes(OFX()) });
     const [linha] = (await getImport(ana, batchId))!.rows;

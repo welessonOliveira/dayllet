@@ -298,6 +298,8 @@ model ImportRow {
   categoryId          String?
   /// true quando o usuário escolheu a categoria desta linha na mão (a propagação não mexe nela)
   categoryChosen      Boolean      @default(false)
+  /// Aviso curto pra revisão (ex.: "Estorno da compra de 13/11: as duas ficam de fora").
+  note                String?
   /// Já existe no extrato da conta? (mesmo externalId = certeza; parecido = possível)
   duplicateOfId       String?
   possibleDuplicate   Boolean      @default(false)
